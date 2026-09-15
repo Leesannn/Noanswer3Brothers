@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p>다음 {{ records|length }}건의 평판 기록을 숨김 처리합니다. 기록 자체는 삭제되지 않고, 신청자 화면에서만 제외됩니다.</p>
+<ul>
+  {% for record in records %}<li>{{ record }}{% if record.comment %} — {{ record.comment }}{% endif %}</li>{% endfor %}
+</ul>
+<form method="post">
+  {% csrf_token %}
+  {% for record in records %}<input type="hidden" name="{{ action_checkbox_name }}" value="{{ record.pk }}">{% endfor %}
+  <input type="hidden" name="action" value="hide_with_reason">
+  {{ form.as_p }}
+  <input type="submit" name="apply" value="숨김 처리">
+</form>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'analytics/base.html' %}
+{% block title %}신청자 관리 | {{ posting.manager.institution_name }}{% endblock %}
+{% block content %}
+<div class="form-shell mx-auto">
+  <div class="mb-2"><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">관리 링크로 접속됨</span></div>
+  <h1 class="h4 mb-1">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 {{ posting.headcount }}명</h1>
+  <p class="text-secondary mb-4">신청자 {{ rows|length }}명 · {{ posting.work_date|date:'n/j(D)' }} {{ posting.start_time|time:'H:i' }}–{{ posting.end_time|time:'H:i' }}</p>
+
+  {% if rows %}
+  <div class="card border-0 shadow-sm">
+    {% for row in rows %}
+    {% with application=row.application summary=row.summary %}
+    <div class="applicant-row">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <div class="fw-bold mb-1">{{ application.phone_masked }} <span class="text-secondary fw-normal small">· {{ application.applied_at|date:'n/j H:i' }} 신청 · {% if application.certification_verified %}자격증 확인됨{% else %}자격증 미확인{% endif %}</span></div>
+          {% if summary.is_new %}
+          <span class="new-badge">신규 활동자</span> <span class="text-secondary small">수행 이력 {{ summary.total }}건 · 표본이 적어 비율을 표시하지 않습니다</span>
+          {% else %}
+          <div class="d-flex flex-wrap gap-2">
+            <span class="rep-pill">총 수행 <b>{{ summary.total }}건</b> 중 노쇼 <b class="{% if summary.no_show %}warn{% endif %}">{{ summary.no_show }}건</b></span>
+            <span class="rep-pill">컴플레인 <b class="{% if summary.complaint %}warn{% endif %}">{{ summary.complaint }}건</b></span>
+            <span class="rep-pill">긍정 평가 <b>{{ summary.positive }}건</b></span>
+            {% if summary.old_count %}<span class="rep-pill text-secondary">1년 이상 지난 기록 {{ summary.old_count }}건</span>{% endif %}
+            {% if summary.mid_count %}<span class="rep-pill text-secondary">{{ summary.mid_count }}건은 6개월~1년 전 기록</span>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <button class="btn-outline" type="button" data-bs-toggle="collapse" data-bs-target="#eval-{{ application.pk }}">평가 등록</button>
+      </div>
+      <div class="collapse" id="eval-{{ application.pk }}">
+        <form method="post" action="{% url 'substitutes:application_evaluate' posting.pk token application.pk %}" class="eval-box">
+          {% include 'substitutes/_form_fields.html' with form=eval_form %}
+          <div class="d-flex justify-content-end gap-2 mt-2">
+            <button class="btn-small" type="submit">평가 저장</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">아직 신청자가 없습니다.</div>
+  {% endif %}
+</div>
+{% endblock %}

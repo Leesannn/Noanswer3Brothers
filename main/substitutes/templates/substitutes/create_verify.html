@@ -1,0 +1,17 @@
+{% extends 'analytics/base.html' %}
+{% block title %}담당자 인증 | 단기 대타 구하기{% endblock %}
+{% block content %}
+<div class="recommend-shell form-shell">
+  <h1 class="text-center mb-1">대타 공고 등록</h1>
+  <p class="text-secondary text-center mb-4">담당자 인증 후 공고 정보를 입력하면 바로 게시됩니다</p>
+  <nav class="recommend-steps" aria-label="공고 등록 진행 단계">
+    <span class="is-active"><b>1</b> 담당자 인증</span>
+    <i></i>
+    <span><b>2</b> 공고 정보 입력</span>
+  </nav>
+  <form method="post" class="recommend-form" novalidate>
+    {% include 'substitutes/_form_fields.html' %}
+    <div class="form-actions"><button class="primary-action" type="submit">인증하고 계속하기</button></div>
+  </form>
+</div>
+{% endblock %}

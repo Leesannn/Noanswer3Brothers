@@ -1,0 +1,77 @@
+{% extends 'analytics/base.html' %}
+{% block title %}지도자 맞춤 추천{% endblock %}
+{% block content %}
+<div class="recommend-shell recommend-start">
+  {% include 'recommendations/_steps.html' with current=1 %}
+  <section class="home-hero">
+    <div class="home-hero-copy">
+      <span class="service-pill"><i></i> 로그인 없이 1분 만에 확인</span>
+      <h1>스포츠 지도자의 다음 기회,<br><em>데이터로 선명하게.</em></h1>
+      <p>내 자격과 관심 종목을 알려주면 실제 운영 프로그램과 신청 데이터를 분석해 활동을 살펴볼 기관과 자격 취득 방향을 안내합니다.</p>
+      <div class="hero-actions">
+        <a class="hero-primary" href="#recommend-paths">맞춤 추천 시작하기 <span>→</span></a>
+        <a class="hero-secondary" href="{% url 'analytics:dashboard' %}">데이터 현황 보기</a>
+      </div>
+      <ul class="trust-list" aria-label="서비스 특징">
+        <li><span>✓</span> 개인정보 입력 없음</li>
+        <li><span>✓</span> 설명 가능한 점수</li>
+        <li><span>✓</span> 실제 보유 데이터 기반</li>
+      </ul>
+    </div>
+    <div class="hero-visual" aria-label="추천 결과 예시">
+      <div class="visual-glow"></div>
+      <div class="preview-card preview-card-main">
+        <div class="preview-card-head"><span class="preview-rank">추천 1위</span><span class="preview-score">87점</span></div>
+        <div class="preview-place"><span class="preview-logo">S</span><div><small>서울 · 수영</small><strong>활동 기회가 높은 기관</strong></div></div>
+        <div class="preview-bars"><span style="--value:92%"></span><span style="--value:76%"></span><span style="--value:84%"></span></div>
+        <div class="preview-tags"><span>종목 일치</span><span>지역 일치</span><span>수요 높음</span></div>
+      </div>
+      <div class="preview-card preview-card-side"><small>분석 데이터</small><strong>{{ home_metrics.program_count|default:0 }}개</strong><span>운영 가능 프로그램</span></div>
+      <div class="floating-dot dot-one"></div><div class="floating-dot dot-two"></div>
+    </div>
+  </section>
+
+  <section class="home-metrics" aria-label="추천 데이터 현황">
+    <div><strong>{{ home_metrics.program_count|default:0 }}</strong><span>정제된 운영 프로그램</span></div>
+    <div><strong>{{ home_metrics.institution_count|default:0 }}</strong><span>분석 가능 기관</span></div>
+    <div><strong>{{ home_metrics.sport_count|default:0 }}</strong><span>추천 가능 종목</span></div>
+    <p><span></span> 최신 정제 데이터 연결 완료</p>
+  </section>
+
+  <section class="path-section" id="recommend-paths">
+    <div class="section-heading">
+      <span class="eyebrow">PERSONALIZED PATH</span>
+      <h2>현재 스포츠 지도자 자격증을 가지고 있나요?</h2>
+      <p>한 가지만 선택하면 나에게 맞는 질문으로 바로 이어집니다.</p>
+    </div>
+    <div class="path-grid">
+    <a class="path-card" href="{% url 'analytics:licensed_recommendation_form' %}">
+      <div class="path-card-top"><span class="path-icon" aria-hidden="true">✓</span><span class="path-number">01</span></div>
+      <small>FOR LICENSED COACH</small>
+      <h2>자격증이 있어요</h2>
+      <p>내 종목과 희망 지역을 바탕으로 활동 기회가 높을 가능성이 있는 기관을 찾습니다.</p>
+      <ul><li>종목·지역 적합도 비교</li><li>최근 신청률과 대기 수요 확인</li></ul>
+      <strong>기관 추천 시작 <span>→</span></strong>
+    </a>
+    <a class="path-card path-card-alt" href="{% url 'analytics:unlicensed_recommendation_form' %}">
+      <div class="path-card-top"><span class="path-icon" aria-hidden="true">+</span><span class="path-number">02</span></div>
+      <small>FOR FUTURE COACH</small>
+      <h2>아직 자격증이 없어요</h2>
+      <p>관심 종목과 지역 수요를 바탕으로 취득을 고려할 수 있는 자격 방향을 찾습니다.</p>
+      <ul><li>관심 종목별 자격 정보</li><li>수요 대비 프로그램 공급 분석</li></ul>
+      <strong>자격 방향 추천 시작 <span>→</span></strong>
+    </a>
+    </div>
+  </section>
+
+  <section class="how-section">
+    <div class="section-heading compact"><span class="eyebrow">HOW IT WORKS</span><h2>복잡한 탐색은 줄이고, 근거는 투명하게</h2></div>
+    <div class="how-grid">
+      <article><b>1</b><div><h3>조건 선택</h3><p>종목과 시·도 수준의 희망 지역만 입력합니다.</p></div></article>
+      <article><b>2</b><div><h3>수요 데이터 분석</h3><p>프로그램 운영 현황과 최근 신청률을 비교합니다.</p></div></article>
+      <article><b>3</b><div><h3>추천 근거 확인</h3><p>점수 구성과 추천 이유를 결과마다 확인합니다.</p></div></article>
+    </div>
+  </section>
+  <div class="privacy-banner"><span class="privacy-shield">✓</span><div><strong>개인정보 없이 안전하게</strong><p>이름·전화번호·이메일·상세 주소는 받지 않습니다. 선택한 조건은 추천 결과 제공에만 사용합니다.</p></div></div>
+</div>
+{% endblock %}

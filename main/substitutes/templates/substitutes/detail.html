@@ -1,0 +1,35 @@
+{% extends 'analytics/base.html' %}
+{% block title %}{{ posting.manager.institution_name }} 대타 공고 | 스포츠 커리어 나침반{% endblock %}
+{% block content %}
+<div class="form-shell mx-auto">
+  <a href="{% url 'substitutes:posting_list' %}" class="back-link">← 목록으로</a>
+  <div class="mb-2"><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">{{ posting.created_at|date:'Y-m-d' }} 등록</span></div>
+  <h1 class="h3 mb-4">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 {{ posting.headcount }}명</h1>
+
+  <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+    <div class="fact-grid mb-4">
+      <div><span>종목</span><strong>{{ posting.sport.name }}</strong></div>
+      <div><span>일시</span><strong>{{ posting.work_date|date:'n/j(D)' }} {{ posting.start_time|time:'H:i' }}–{{ posting.end_time|time:'H:i' }}</strong></div>
+      <div><span>장소</span><strong>{{ posting.address }}</strong></div>
+      <div><span>시급</span><strong>{{ posting.pay_amount|floatformat:'0g' }}원 {{ posting.get_pay_unit_display }}</strong></div>
+      <div><span>모집인원</span><strong>{{ posting.headcount }}명</strong></div>
+      <div><span>필요 자격증</span><strong>{{ posting.required_certifications|join:', '|default:'제한 없음' }}</strong></div>
+    </div>
+    {% if posting.description %}
+    <div class="border-top pt-3"><h2 class="h6 mb-2">상세 요청사항</h2><p class="text-secondary mb-0" style="white-space:pre-line">{{ posting.description }}</p></div>
+    {% endif %}
+  </div></div>
+
+  <div class="notice mb-4">
+    <strong>매칭 중개 서비스 안내</strong>
+    <p class="mb-0">스포츠 커리어 나침반은 센터와 강사를 연결하는 매칭 중개 서비스이며, 채용의 당사자가 아닙니다. 근무 조건 협의와 계약은 센터와 강사 간에 직접 체결됩니다.</p>
+  </div>
+
+  {% if posting.status == 'recruiting' %}
+  <a href="{% url 'substitutes:application_apply' posting.pk %}" class="primary-action">PASS 인증으로 신청하기</a>
+  <p class="text-center text-secondary small mt-2">회원가입 없이 본인인증만으로 신청됩니다</p>
+  {% else %}
+  <div class="empty-state">이미 마감되었거나 완료된 공고입니다.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+# Local Python virtual environment
+/app/
+
+# Local databases and migration backups
+/main/db.sqlite3
+/main/db.sqlite3.*
+/main/*.json
+
+# Generated exports and Office temporary files
+/main/exports/
+~$*
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store

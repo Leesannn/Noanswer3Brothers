@@ -1,0 +1,66 @@
+{% extends 'analytics/base.html' %}
+{% block title %}{{ post.title }} | 커뮤니티{% endblock %}
+{% block content %}
+<div class="form-shell mx-auto" style="max-width:760px">
+  <a href="{% url 'community:post_list' %}" class="back-link">← 목록으로</a>
+
+  <div class="mb-2"><span class="badge text-bg-light border">{{ post.get_category_display }}</span></div>
+  <h1 class="h4 mb-2">{{ post.title }}</h1>
+  <div class="d-flex justify-content-between text-secondary small mb-3 pb-3 border-bottom">
+    <span>{{ post.nickname }}</span>
+    <span>{{ post.created_at|date:'Y-m-d H:i' }} · 조회 {{ post.view_count }}</span>
+  </div>
+
+  <p class="mb-4" style="white-space:pre-line">{{ post.content }}</p>
+
+  <div class="d-flex justify-content-end gap-2 mb-4">
+    <a class="btn btn-sm btn-outline-secondary" href="#" data-bs-toggle="collapse" data-bs-target="#edit-hint">수정</a>
+    <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="collapse" data-bs-target="#delete-confirm">삭제</button>
+  </div>
+
+  <div class="collapse mb-4" id="edit-hint">
+    <div class="alert alert-secondary">글 수정은 <a href="{% url 'community:post_edit' post.pk %}">수정 페이지</a>에서 작성 시 입력한 비밀번호를 확인한 뒤 진행할 수 있습니다.</div>
+  </div>
+
+  <div class="collapse mb-4" id="delete-confirm">
+    <form method="post" action="{% url 'community:post_delete' post.pk %}" class="card border-0 shadow-sm">
+      <div class="card-body d-flex gap-2 align-items-start flex-wrap">
+        {% csrf_token %}
+        <input type="password" name="password" class="form-control" style="max-width:220px" placeholder="비밀번호" required>
+        <button class="btn btn-danger" type="submit">게시글 삭제</button>
+      </div>
+    </form>
+  </div>
+
+  <h2 class="h6 mb-3">댓글 {{ comments.count }}개</h2>
+  <div class="card border-0 shadow-sm mb-4">
+    {% for comment in comments %}
+    <div class="p-3 border-bottom">
+      <div class="d-flex justify-content-between align-items-start gap-2">
+        <div>
+          <div class="fw-bold small">{{ comment.nickname }} <span class="text-secondary fw-normal">· {{ comment.created_at|date:'Y-m-d H:i' }}</span></div>
+          <div style="white-space:pre-line">{{ comment.content }}</div>
+        </div>
+        <button class="btn btn-sm btn-link text-danger p-0" type="button" data-bs-toggle="collapse" data-bs-target="#comment-delete-{{ comment.pk }}">삭제</button>
+      </div>
+      <div class="collapse mt-2" id="comment-delete-{{ comment.pk }}">
+        <form method="post" action="{% url 'community:comment_delete' post.pk comment.pk %}" class="d-flex gap-2">
+          {% csrf_token %}
+          <input type="password" name="password" class="form-control form-control-sm" style="max-width:180px" placeholder="비밀번호" required>
+          <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="p-4 text-center text-secondary">아직 댓글이 없습니다.</div>
+    {% endfor %}
+  </div>
+
+  <div class="card border-0 shadow-sm"><div class="card-body">
+    <form method="post" novalidate>
+      {% include 'community/_form_fields.html' with form=comment_form %}
+      <button class="btn btn-primary" type="submit">댓글 등록</button>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

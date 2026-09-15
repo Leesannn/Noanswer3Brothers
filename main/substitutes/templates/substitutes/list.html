@@ -1,0 +1,42 @@
+{% extends 'analytics/base.html' %}
+{% block title %}단기 대타 구하기 | 스포츠 커리어 나침반{% endblock %}
+{% block content %}
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-end gap-3">
+  <div><h1 class="h3 mb-1">단기 대타 구하기</h1><p class="text-secondary mb-0">센터의 단기 대타 공고를 확인하고, PASS 본인인증만으로 바로 신청하세요.</p></div>
+  <a class="btn btn-primary" href="{% url 'substitutes:posting_create' %}">센터로 공고 등록하기</a>
+</div>
+
+<form method="get" class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3"><label class="form-label">종목</label><select name="sport" class="form-select"><option value="">전체</option>{% for sport in sport_options %}<option value="{{ sport.normalized_name }}" {% if current.sport == sport.normalized_name %}selected{% endif %}>{{ sport.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><label class="form-label">지역</label><select name="region" class="form-select"><option value="">전체</option>{% for key, label in region_options %}<option value="{{ key }}" {% if current.region == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><label class="form-label">날짜</label><input type="date" name="date" class="form-control" value="{{ current.date }}"></div>
+    <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary flex-fill">검색</button><a class="btn btn-outline-secondary" href="{% url 'substitutes:posting_list' %}">초기화</a></div>
+  </div>
+</div></form>
+
+{% if page_obj %}
+<div class="d-flex flex-column gap-3">
+  {% for posting in page_obj %}
+  <a class="text-decoration-none text-reset" href="{% url 'substitutes:posting_detail' posting.pk %}">
+    <div class="card border-0 shadow-sm"><div class="card-body d-flex flex-wrap align-items-center gap-3">
+      <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary fw-bold text-center" style="width:88px;height:60px">{{ posting.sport.name }}</div>
+      <div class="flex-grow-1">
+        <div class="mb-1"><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">{{ posting.created_at|date:'Y-m-d' }} 등록</span></div>
+        <h2 class="h5 mb-2">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 {{ posting.headcount }}명</h2>
+        <div class="d-flex flex-wrap gap-3 text-secondary small">
+          <span>{{ posting.work_date|date:'n/j(D)' }} {{ posting.start_time|time:'H:i' }}-{{ posting.end_time|time:'H:i' }}</span>
+          <span>{{ posting.region|default:posting.address }}</span>
+          <span class="text-primary fw-bold">{{ posting.pay_amount|floatformat:'0g' }}원 {{ posting.get_pay_unit_display }}</span>
+          <span>{{ posting.headcount }}명 모집</span>
+        </div>
+      </div>
+    </div></div>
+  </a>
+  {% endfor %}
+</div>
+{% include 'analytics/_pagination.html' %}
+{% else %}
+<div class="empty-state">조건에 맞는 대타 공고가 없습니다.</div>
+{% endif %}
+{% endblock %}

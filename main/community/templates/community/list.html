@@ -1,0 +1,47 @@
+{% extends 'analytics/base.html' %}
+{% block title %}커뮤니티 | 스포츠 커리어 나침반{% endblock %}
+{% block content %}
+<div class="mb-4 d-flex flex-wrap justify-content-between align-items-end gap-3">
+  <div><h1 class="h3 mb-1">커뮤니티</h1><p class="text-secondary mb-0">시험정보·기출문제·꿀팁을 익명으로 자유롭게 공유하는 공간입니다.</p></div>
+  <a class="btn btn-primary" href="{% url 'community:post_create' %}">글쓰기</a>
+</div>
+
+<div class="mb-3 d-flex flex-wrap gap-2">
+  <a class="btn btn-sm {% if not current.category %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'community:post_list' %}">전체</a>
+  {% for value, label in category_choices %}
+  <a class="btn btn-sm {% if current.category == value %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?category={{ value }}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<form method="get" class="mb-3 d-flex gap-2">
+  {% if current.category %}<input type="hidden" name="category" value="{{ current.category }}">{% endif %}
+  <input type="text" name="q" class="form-control" placeholder="제목·내용 검색" value="{{ current.q }}">
+  <button class="btn btn-outline-secondary text-nowrap">검색</button>
+</form>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th style="width:110px">게시판</th><th>제목</th><th style="width:110px">닉네임</th><th class="text-end" style="width:90px">조회</th><th class="text-end" style="width:130px">작성일</th></tr></thead>
+      <tbody>
+        {% for post in page_obj %}
+        <tr>
+          <td><span class="badge text-bg-light border">{{ post.get_category_display }}</span></td>
+          <td>
+            {% if post.is_notice %}<span class="badge text-bg-warning me-1">공지</span>{% endif %}
+            <a class="text-decoration-none" href="{% url 'community:post_detail' post.pk %}">{{ post.title }}</a>
+            {% if post.comments.count %}<span class="text-secondary small">[{{ post.comments.count }}]</span>{% endif %}
+          </td>
+          <td>{{ post.nickname }}</td>
+          <td class="text-end">{{ post.view_count }}</td>
+          <td class="text-end text-secondary small">{{ post.created_at|date:'Y-m-d' }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-secondary py-4">등록된 글이 없습니다. 첫 글을 남겨보세요.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'analytics/_pagination.html' %}
+{% endblock %}

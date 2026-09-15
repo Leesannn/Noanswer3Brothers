@@ -1,0 +1,20 @@
+{% extends 'analytics/base.html' %}
+{% block title %}신청 완료 | 스포츠 커리어 나침반{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center">
+  <div class="card border-0 shadow-sm text-center" style="max-width:440px;width:100%">
+    <div class="card-body p-4">
+      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success" style="width:64px;height:64px;font-size:1.6rem">✓</div>
+      <h1 class="h5 mb-2">신청이 완료되었습니다</h1>
+      <p class="text-secondary">PASS 본인인증과 자격증 확인이 완료되어 센터에 신청 내역이 전달되었습니다.</p>
+      <div class="text-start bg-light rounded-3 p-3 my-3 small">
+        <div class="d-flex justify-content-between py-1"><span class="text-secondary">공고</span><strong>{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타</strong></div>
+        <div class="d-flex justify-content-between py-1"><span class="text-secondary">일시</span><strong>{{ posting.work_date|date:'n/j(D)' }} {{ posting.start_time|time:'H:i' }}–{{ posting.end_time|time:'H:i' }}</strong></div>
+        <div class="d-flex justify-content-between py-1"><span class="text-secondary">인증된 연락처</span><strong>{{ application.phone_masked }}</strong></div>
+      </div>
+      <a href="{% url 'substitutes:posting_list' %}" class="primary-action">다른 공고 더 보기</a>
+      <div class="notice mt-3 text-start"><p class="mb-0 small">본 서비스는 센터와 강사를 연결하는 매칭 중개 서비스입니다. 근무 확정 여부와 계약은 센터가 직접 연락하여 진행합니다.</p></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
