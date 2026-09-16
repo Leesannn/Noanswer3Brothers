@@ -14,3 +14,10 @@ __pycache__/
 *.sqlite-*
 *.sqlite3
 *.sqlite3-*
+*.sqlite3.gz
+
+# 현재 Django 서비스가 실제 사용하는 배포용 DB만 Git에 포함한다.
+!/sports_service_202607.sqlite3
+
+# Collected static output
+staticfiles/

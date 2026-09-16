@@ -1,0 +1,17 @@
+<section class="service-paths" id="service-paths" aria-labelledby="paths-title">
+  <div class="path-orbit path-orbit-one" aria-hidden="true"></div><div class="path-orbit path-orbit-two" aria-hidden="true"></div>
+  <header class="service-paths-heading">
+    <span>02 / CHOOSE YOUR ROUTE</span><h2 id="paths-title">다음 경로를<br>선택하세요.</h2><p>지금 가진 경험에서 시작해 필요한 정보만 조합합니다.</p>
+  </header>
+  <div class="service-path-grid">
+    <a class="service-path-card" data-transition-link data-target="qualification" href="{% url 'recommendations:unlicensed_recommendation_form' %}">
+      <span class="service-path-number">01</span><div><small>QUALIFICATION RECIPE</small><h3>자격증<br>레시피</h3><p>아직 자격증이 없다면 관심 종목과 지역 데이터를 조합해 다음 자격 방향을 찾아보세요.</p></div><strong>자격증 레시피 시작 <i aria-hidden="true">↗</i></strong>
+    </a>
+    <a class="service-path-card" data-transition-link data-target="opportunity" href="{% url 'recommendations:licensed_recommendation_form' %}">
+      <span class="service-path-number">02</span><div><small>OPPORTUNITY RECIPE</small><h3>활동 기회<br>레시피</h3><p>자격증이 있다면 종목과 지역에 맞는 기관과 프로그램 기회를 탐색해보세요.</p></div><strong>활동 기회 레시피 시작 <i aria-hidden="true">↗</i></strong>
+    </a>
+  </div>
+  <div class="service-data-strip" aria-label="추천 데이터 현황">
+    <div><strong>{{ home_metrics.program_count|default:0 }}</strong><span>운영 프로그램</span></div><div><strong>{{ home_metrics.institution_count|default:0 }}</strong><span>분석 가능 기관</span></div><div><strong>{{ home_metrics.sport_count|default:0 }}</strong><span>추천 가능 종목</span></div><p>일부 정원 및 신청 현황은 서비스 기능 시연을 위한 합성 데이터입니다.</p>
+  </div>
+</section>

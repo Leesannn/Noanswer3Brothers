@@ -4,8 +4,8 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from app.models import CanonicalSport
-from app.services.normalizers import normalize_region, normalize_sport
+from analytics.models import CanonicalSport
+from analytics.services.normalizers import normalize_region, normalize_sport
 from substitutes.models import Application, CenterContact, PhoneIdentity, Posting, ReputationRecord
 from substitutes.services.phone import hash_phone, mask_phone
 

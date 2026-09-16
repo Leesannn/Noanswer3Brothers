@@ -1,8 +1,0 @@
-{% extends 'analytics/base.html' %}
-{% block title %}수요·공급 분석 | 스포츠 데이터 분석{% endblock %}
-{% block content %}
-<div class="mb-4"><h1 class="h3 mb-1">기초 수요·공급 분석</h1><p class="text-secondary">규칙 기반 진단이며 예측이 아닙니다. 각 판단은 현재 데이터의 근거 수치와 함께 표시합니다.</p></div>
-{% include 'analytics/_filters.html' %}
-<div class="alert alert-info">판단 기준: 지도자 공급 중앙값 {{ thresholds.instructor_median|default:'산정 불가' }}, 프로그램 수 중앙값 {{ thresholds.program_median|default:'산정 불가' }}, 높은 신청률 {{ thresholds.rate_high }}% 이상, 낮은 신청률 {{ thresholds.rate_low }}% 미만, 높은 마감 비율 {{ thresholds.full_rate_high }}% 이상</div>
-<div class="row g-3">{% for row in page_obj %}<div class="col-xl-4 col-md-6"><article class="card border-0 shadow-sm h-100"><div class="card-body"><div class="d-flex justify-content-between"><h2 class="h5">{{ row.sport }}</h2><span class="diagnosis">{{ row.diagnosis }}</span></div><dl class="evidence"><div><dt>관련 자격 취득</dt><dd>{{ row.instructors|floatformat:'0g' }}건</dd></div><div><dt>운영 프로그램</dt><dd>{{ row.programs|floatformat:'0g' }}개</dd></div><div><dt>전체 정원 / 신청</dt><dd>{{ row.capacity|floatformat:'0g' }} / {{ row.applicants|floatformat:'0g' }}</dd></div><div><dt>평균 신청률</dt><dd>{% if row.rate is not None %}{{ row.rate|floatformat:1 }}%{% else %}데이터 부족{% endif %}</dd></div><div><dt>마감 비율</dt><dd>{% if row.full_rate is not None %}{{ row.full_rate|floatformat:1 }}%{% else %}데이터 부족{% endif %}</dd></div></dl></div></article></div>{% empty %}<div class="col-12"><div class="empty-state">분석할 데이터가 없습니다.</div></div>{% endfor %}</div><div class="mt-4">{% include 'analytics/_pagination.html' %}</div>
-{% endblock %}

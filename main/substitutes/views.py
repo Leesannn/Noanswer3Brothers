@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from app.services.normalizers import normalize_region
+from analytics.services.normalizers import normalize_region
 
 from . import selectors
 from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingForm

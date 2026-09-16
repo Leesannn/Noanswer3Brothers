@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "low_information_terms": [
+    "체육", "운동", "교실", "강좌", "프로그램", "수업", "강습", "레슨", "이용",
+    "초급", "중급", "고급", "기초", "입문", "성인", "어린이", "유아", "청소년", "회원"
+  ],
+  "synonyms": [
+    {"terms": ["수영장", "swimming"], "targets": ["수영"], "score": 97},
+    {"terms": ["풋살", "futsal"], "targets": ["축구"], "score": 96},
+    {"terms": ["헬스장", "헬스", "피트니스", "fitness"], "targets": ["보디빌딩"], "score": 96},
+    {"terms": ["스케이트", "피겨스케이팅", "스피드스케이팅", "피겨"], "targets": ["빙상"], "score": 94},
+    {"terms": ["스피닝", "스피닝바이크", "실내자전거"], "targets": ["사이클", "자전거"], "score": 93},
+    {"terms": ["올팍당구"], "targets": ["당구"], "score": 96}
+  ],
+  "parent_mappings": [
+    {"terms": ["아쿠아로빅", "아쿠아피트니스", "아쿠아"], "targets": ["수영"], "score": 91},
+    {"terms": ["필라테스", "요가"], "targets": ["생활체조", "체조"], "score": 89},
+    {"terms": ["라인댄스", "다이어트댄스", "벨리댄스", "줌바"], "targets": ["댄스스포츠", "체조"], "score": 86},
+    {"terms": ["음악줄넘기"], "targets": ["줄넘기"], "score": 90},
+    {"terms": ["파크골프"], "targets": ["파크골프", "골프"], "score": 91}
+  ],
+  "context_rules": [
+    {"terms": ["수영장"], "fields": ["facility_industry", "institution_type"], "targets": ["수영"], "score": 74},
+    {"terms": ["테니스장"], "fields": ["facility_industry", "institution_type"], "targets": ["테니스"], "score": 74},
+    {"terms": ["골프연습장"], "fields": ["facility_industry", "institution_type"], "targets": ["골프"], "score": 74},
+    {"terms": ["축구장"], "fields": ["facility_industry", "institution_type"], "targets": ["축구"], "score": 74},
+    {"terms": ["야구장"], "fields": ["facility_industry", "institution_type"], "targets": ["야구"], "score": 74},
+    {"terms": ["빙상장"], "fields": ["facility_industry", "institution_type"], "targets": ["빙상"], "score": 74},
+    {"terms": ["체력단련장"], "fields": ["facility_industry", "institution_type"], "targets": ["보디빌딩"], "score": 72}
+  ]
+}

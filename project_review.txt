@@ -1,0 +1,338 @@
+================================================================================
+ 프로젝트 구조·코드 패턴 검토 결과
+ 검토 범위: 1) 폴더 구조와 기능의 일치 여부  2) 파이썬/Django 코드 패턴의 최신성
+ 검토일: 2026-09-15
+================================================================================
+※ 표기 기준: [심각] 반드시 확인/수정 권장  [권장] 개선하면 좋음  [참고] 알아두면 좋은 정보
+
+================================================================================
+[1] 폴더 구조 ↔ 기능 매칭 검토
+================================================================================
+
+--------------------------------------------------------------------------------
+1-1. [완료 — 2026-09-15 개선안 (A) 적용] "app" 앱에 섞여 있던 통계 분석/추천
+     서비스를 analytics 앱 + recommendations 앱으로 분리함
+--------------------------------------------------------------------------------
+적용 내용:
+  - main/app/ → main/analytics/ 로 디렉터리·패키지명 변경.
+    단, 기존 마이그레이션(app/migrations/0001~0006)과 db.sqlite3에 이미
+    만들어진 테이블(app_institution, app_program 등)·ContentType 값을 그대로
+    유지하기 위해 AppConfig에서 name='analytics', label='app' 으로
+    분리 지정함 (analytics/apps.py). 즉 "코드상 패키지명"만 analytics로
+    바뀌었고, DB app_label은 기존과 동일한 'app'을 유지하므로 기존
+    db.sqlite3을 그대로 써도 마이그레이션 충돌이 없음
+    (python manage.py migrate --plan 으로 "No planned migration
+    operations" 확인, makemigrations --check --dry-run 으로 "No changes
+    detected" 확인, python manage.py test 64개 테스트 전부 통과 확인).
+  - 새 Django 앱 main/recommendations/ 를 만들어 추천 관련 코드를 전부 이동:
+      views.py   : recommendation_start 등 추천 관련 뷰 6개 + _region_label
+      forms.py   : LicensedRecommendationForm, UnlicensedRecommendationForm 등
+      services.py: 옛 app/services/recommendations.py 전체 (점수 계산 로직)
+      urls.py    : app_name='recommendations' (경로 자체는 변경 없음,
+                   기존과 동일하게 /recommendations/... 로 접근 가능)
+      templates/recommendations/, static/recommendations/ : 템플릿과
+        motion-landing.*, recommendation-ui.* 정적 파일을 analytics
+        네임스페이스에서 recommendations 네임스페이스로 이동
+      tests.py   : 옛 app/tests/test_recommendations.py
+  - main/main/settings.py INSTALLED_APPS에 'analytics', 'recommendations'
+    추가, TEMPLATES DIRS·STATICFILES_DIRS 경로 갱신.
+  - main/main/urls.py 에 path('recommendations/', include('recommendations.urls'))
+    추가, 나머지 경로는 include('analytics.urls')로 갱신.
+  - substitutes 앱 등 외부에서 하던 `from app.models import ...` 형태의 참조를
+    전부 `from analytics.models import ...` 로 갱신 (총 20여 개 파일).
+  - README.md의 app/... 경로 안내도 analytics/...로 갱신.
+  - 실제 URL 경로(/recommendations/, /dashboard/ 등)와 화면 동작은 이전과
+    동일하며, 로컬 db.sqlite3로 개발 서버를 띄워 주요 페이지와 정적 파일
+    (recommendation-ui.css 등)이 정상 응답(200)하는 것까지 확인함.
+
+  참고: 이번 변경으로 "패키지 이름"은 도메인에 맞게 정리되었지만, DB
+  테이블 이름과 Django 내부 app_label은 여전히 'app'으로 남아 있습니다
+  (예: 테이블명은 app_institution 그대로). 이를 완전히 'analytics'로
+  맞추려면 실제 DB 마이그레이션(테이블 rename)이 필요한 별도의 더 위험한
+  작업이므로, 이번에는 코드 구조 정리에 집중하고 DB 레벨 변경은 하지
+  않았습니다. 필요하시면 별도로 논의 후 진행하겠습니다.
+
+--------------------------------------------------------------------------------
+1-1-원본. (개선 전 검토 내용 — 기록용)
+--------------------------------------------------------------------------------
+근거:
+  - main/app/urls.py 의 app_name 은 'analytics' 하나뿐인데,
+    실제로는 대시보드·업로드·통계(성격: 분석/analytics)와
+    지도자 맞춤 추천(성격: recommendations)이라는 별개 기능이 같은 앱·같은
+    urls.py·같은 views.py(502줄)에 전부 들어 있음.
+  - templates 는 analytics/ 와 recommendations/ 두 폴더로 이미 나뉘어 있어
+    "논리적으로는 두 기능"이라는 설계 의도가 드러나는데, 앱 자체는 분리되지
+    않았습니다.
+  - 결정적으로, recommendations/ 템플릿들이 정적 파일은 여전히
+    'analytics/' 네임스페이스를 그대로 참조합니다.
+      main/app/templates/recommendations/start.html:6
+        {% static 'analytics/motion-landing.css' %}
+      main/app/templates/recommendations/licensed_form.html:6,24
+        {% static 'analytics/recommendation-ui.css' %}, 'analytics/recommendation-ui.js'
+      main/app/templates/recommendations/institution_results.html:6
+      main/app/templates/recommendations/qualification_detail.html:6
+      main/app/templates/recommendations/qualification_results.html:6
+      main/app/templates/recommendations/unlicensed_form.html:6,24
+    → "추천" 기능 파일(motion-landing.*, recommendation-ui.*)이 물리적으로는
+      main/app/static/analytics/ 아래에 저장돼 있습니다. 폴더명(analytics)과
+      실제 담긴 내용(recommendations 전용 UI)이 일치하지 않는 상태입니다.
+      사용자가 "구조가 기능과 안 맞는다"고 느낀 지점이 바로 여기로 보입니다.
+
+영향:
+  - 새로 합류하는 개발자가 "analytics" 폴더를 열었을 때 추천 기능 코드가
+    섞여 있어 혼란을 줄 수 있음.
+  - 추천 기능이 커질수록(현재도 폼 2종+결과 2종+상세 1종+파셜 2종으로 이미
+    적지 않음) 유지보수 시 어디까지가 analytics이고 어디부터가
+    recommendations인지 구분이 어려워짐.
+
+개선 제안(택1):
+  (A) Django 앱 자체를 분리: app → analytics 앱 + recommendations 앱
+      (models.py의 공유 모델은 analytics에 두고 recommendations가 import)
+  (B) 앱은 유지하되 정적 파일만 이동: static/analytics/recommendation-ui.*
+      → static/recommendations/recommendation-ui.* 로 옮기고 템플릿의
+      {% static %} 경로를 일괄 수정 (가장 비용이 적은 방법)
+
+--------------------------------------------------------------------------------
+1-2. [참고] 저장소 루트와 Django 프로젝트 루트 이름이 중첩됨 (no/main/main/...)
+--------------------------------------------------------------------------------
+  - 레포 루트: no/
+  - Django 프로젝트 루트(manage.py 위치): no/main/
+  - Django 설정 패키지: no/main/main/settings.py
+  → "main" 이 두 번 중첩되어 있어 경로만 보고는 계층을 파악하기 어렵습니다.
+    django-admin startproject main 실행 결과 그대로라 동작에는 문제가 없지만,
+    레포 이름(no)도 프로젝트 성격을 드러내지 않아 신규 참여자 기준에서
+    "지금 보는 파일이 프로젝트 설정인지, 앱인지" 헷갈릴 소지가 있습니다.
+    시간 될 때 레포 루트 이름을 프로젝트 성격에 맞게 바꾸는 것을 권장합니다
+    (예: sports-career-compass 등, README 문구 참고).
+
+--------------------------------------------------------------------------------
+1-3. [심각] 루트 .gitignore의 "/app/" 규칙이 죽은 규칙일 가능성
+--------------------------------------------------------------------------------
+근거: .gitignore (레포 루트) 4번째 줄
+  # Local Python virtual environment
+  /app/
+  실제 소스 코드 앱은 no/main/app/ 에 있고, .gitignore의 "/app/"은
+  gitignore 규칙상 "레포 루트 기준 최상위 app/ 폴더"만 가리켜 main/app/과는
+  매칭되지 않습니다(실제로 main/app/ 하위 파일들이 git 추적되고 있는 것으로
+  확인됨). 즉 지금은 다행히 아무것도 무시하지 않는 죽은 규칙입니다.
+  다만 주석("Local Python virtual environment")과 실제 패턴("/app/")이
+  의미상 맞지 않아, 누군가 이 규칙을 "고치려다가" 실수로 main/app/ 전체를
+  무시하게 만들 위험이 있습니다. 의도가 불명확하므로 제거하거나 주석을
+  정확히 고쳐두는 것을 권장합니다.
+
+--------------------------------------------------------------------------------
+1-4. [참고] 정체를 알 수 없는 루트 파일
+--------------------------------------------------------------------------------
+  - no/이응.txt : 파일명이 프로젝트 성격과 무관하고(테스트/오타 흔적으로
+    추정) 용도를 알 수 없는 상태로 레포 최상위에 존재합니다. 필요 없다면
+    삭제, 필요하다면 적절한 폴더로 이동 및 이름 변경을 권장합니다.
+
+--------------------------------------------------------------------------------
+1-5. [참고] 잘 맞는 부분 (구조가 기능과 일치하는 사례)
+--------------------------------------------------------------------------------
+  - community, substitutes 는 각각 models/views/forms/urls/services/
+    templates/migrations 를 온전히 갖춘 독립 앱으로, 기능 경계와 폴더 경계가
+    정확히 일치합니다. INSTALLED_APPS 순서(app→substitutes→community)와
+    실제 의존 방향(substitutes, substitutes.forms 가 app.models,
+    app.services.normalizers 를 import)도 일치하며 순환 의존이 없습니다.
+  - app/services/, app/selectors.py 로 "쓰기/도메인 로직(services)"과
+    "읽기 전용 조회(selectors)"를 분리한 구조는 Django 진영에서 널리 쓰이는
+    현대적인 계층화 패턴(services/selectors 스타일)과 일치합니다.
+  - data/, exports/ 를 소스 코드와 분리해 둔 것도 합리적이며, exports/ 는
+    루트 .gitignore에서 이미 추적 제외 처리되어 있습니다.
+
+================================================================================
+[2] 파이썬/Django 코드 패턴의 최신성 검토
+================================================================================
+
+--------------------------------------------------------------------------------
+2-1. 이미 잘 적용된 최신 패턴 (유지 권장)
+--------------------------------------------------------------------------------
+  - models.TextChoices 기반 choices 정의 (Program.MatchGrade,
+    UploadBatch.Status, Post.Category 등) — Django 3.0+ 권장 방식.
+  - dataclass 사용: app/services/recommendations.py의 RecommendationResult,
+    substitutes/services/pass_auth.py의 PassIdentity.
+  - Django signing 프레임워크로 무상태(stateless) 서명 토큰 구현
+    (substitutes/services/tokens.py) — 별도 DB 세션 없이 안전하게 URL
+    기반 접근 제어를 구현한 좋은 예.
+  - 비밀번호는 커스텀 해시가 아니라 django.contrib.auth.hashers의
+    make_password/check_password 사용 (community/forms.py) — 게시판
+    비밀번호를 표준 검증된 해시 함수로 처리한 안전한 선택.
+  - ORM 최적화 흔적: select_related (app/selectors.py의 apply_filters),
+    values()+annotate() 집계, F()/ExpressionWrapper로 DB 레벨 연산
+    (app/views.py의 application_status), iterator(chunk_size=5000)로
+    대량 데이터 스트리밍 처리 (app/services/recommendations.py:120) —
+    N+1 문제와 메모리 사용량을 신경 쓴 흔적이 뚜렷합니다.
+  - 외부 요청(requests) 처리 시 timeout 명시, User-Agent 고지,
+    예외를 커스텀 예외로 래핑 (app/services/kspo_client.py) — 외부 API
+    연동의 모범 사례에 해당합니다.
+  - 게시판 개인정보 처리: 전화번호 원문을 저장하지 않고 HMAC-SHA256 해시만
+    보관 (substitutes/services/phone.py) — 최소 수집 원칙에 부합.
+
+--------------------------------------------------------------------------------
+2-2. [권장] 타입 힌트가 프로젝트 전체에 전혀 없음
+--------------------------------------------------------------------------------
+  - 전체 .py 파일에서 함수/메서드 시그니처에 타입 힌트(`-> `, `: str` 등)를
+    사용한 곳이 0건으로 확인됩니다(grep 검사 결과).
+  - README에서 Python 3.13을 권장 버전으로 명시하고 있는데, 3.13은
+    PEP 604(`str | None`), 제네릭 등 최신 타입 문법을 완전히 지원합니다.
+  - 특히 아래처럼 재사용 빈도가 높고 계약(입출력 타입)이 중요한 함수들부터
+    타입 힌트를 붙이면 유지보수성이 크게 좋아집니다.
+      app/services/recommendations.py: recommend_institutions(),
+        recommend_qualification_directions(), score_region() 등
+      app/selectors.py: apply_filters(), filter_options()
+      app/services/normalizers.py: normalize_sport(), normalize_region()
+  - mypy/pyright 같은 정적 검사 도구를 함께 도입하면 리팩터링 시 회귀를
+    조기에 잡을 수 있습니다(현재 lint/type-check 설정 파일 없음 확인).
+
+--------------------------------------------------------------------------------
+2-3. [심각] 보안 관련 설정이 개발용 기본값 그대로 하드코딩됨
+--------------------------------------------------------------------------------
+근거: main/main/settings.py
+  26행  SECRET_KEY = 'django-insecure-y0i9wg+(ix0fd4bkmx&d7-mm2az=)f68fb2oc&n&1q$_70*ym6'
+  29행  DEBUG = True
+  31행  ALLOWED_HOSTS = []
+  150행 KAKAO_MAP_APP_KEY = os.environ.get('KAKAO_MAP_APP_KEY', '')
+
+  - SECRET_KEY가 저장소에 평문으로 커밋되어 있고, DEBUG=True가 고정값이며,
+    ALLOWED_HOSTS도 비어 있어 배포 환경을 가정하지 않은 "튜토리얼 기본값"
+    그대로입니다. 반면 KAKAO_MAP_APP_KEY만 환경 변수로 분리되어 있어
+    설정 방식의 기준이 일관적이지 않습니다.
+  - 최신 Django(12-factor 앱) 관행: SECRET_KEY/DEBUG/ALLOWED_HOSTS도
+    os.environ.get() 또는 django-environ/python-decouple 등으로 분리하고,
+    .env(커밋 제외)로 로컬값을 관리하는 방식을 권장합니다.
+  - 현재는 데모/MVP 단계라 당장 문제는 아니지만, 실제 배포 전에는 반드시
+    분리해야 합니다.
+
+--------------------------------------------------------------------------------
+2-4. [권장] 배포 관련 보안 설정 항목이 아예 없음
+--------------------------------------------------------------------------------
+  - main/main/settings.py 전체를 확인한 결과 LOGGING, SECURE_*,
+    CSRF_COOKIE_*, SESSION_COOKIE_* 관련 설정이 하나도 없습니다.
+  - 지금은 로컬 개발 단계라 없어도 동작하지만, `python manage.py check
+    --deploy` 를 실행하면 다수의 경고가 뜰 것으로 예상됩니다. 배포 전
+    체크리스트로 SECURE_HSTS_SECONDS, SESSION_COOKIE_SECURE,
+    CSRF_COOKIE_SECURE, SECURE_SSL_REDIRECT 등을 검토하는 것을 권장합니다.
+
+--------------------------------------------------------------------------------
+2-5. [참고] STATICFILES_STORAGE 대신 최신 STORAGES 설정 미적용
+--------------------------------------------------------------------------------
+  - Django 4.2부터 정적/미디어 파일 저장소 설정은 STORAGES 딕셔너리로
+    통합되었습니다. 현재는 STATIC_ROOT/STATICFILES_DIRS만 지정되어 있고
+    STORAGES 설정 자체가 없어 기본값(FileSystemStorage)을 그대로 씁니다.
+    지금 구성(로컬 SQLite, 정적 파일 로컬 서빙)에서는 문제 없지만,
+    WhiteNoise 등으로 정적 파일 서빙을 개선하려면 이 지점에서 최신 방식으로
+    설정하면 됩니다.
+
+--------------------------------------------------------------------------------
+2-6. [참고] 함수 기반 뷰(FBV)만 사용 — 반복되는 CRUD 보일러플레이트
+--------------------------------------------------------------------------------
+  - community/views.py, substitutes/views.py, app/views.py 전부 함수형
+    뷰이며, "request.method == 'POST' → form 검증 → 저장/리다이렉트" 패턴이
+    앱마다 거의 동일하게 반복됩니다(예: community의 post_create/post_edit,
+    substitutes의 posting_create 등).
+  - FBV 자체는 Django 공식 문서에서도 여전히 정당한 선택지이므로 "틀린
+    패턴"은 아닙니다. 다만 community 앱처럼 표준적인 CRUD(목록/상세/생성/
+    수정/삭제)가 뚜렷한 경우, CreateView/UpdateView/DeleteView 같은
+    제네릭 클래스 기반 뷰나 공통 믹스인으로 추출하면 중복 코드를 줄일 수
+    있습니다. 다만 substitutes처럼 폼 흐름이 도메인 로직(PASS 인증, 토큰
+    검증)과 강하게 얽힌 경우는 지금처럼 FBV를 유지하는 편이 오히려
+    가독성이 좋습니다 — 앱별로 선택적으로 적용을 고려하십시오.
+
+--------------------------------------------------------------------------------
+2-7. [참고] 패키징/린트 도구 체계 부재
+--------------------------------------------------------------------------------
+  - requirements.txt 하나로만 의존성을 관리하며 pyproject.toml, lock 파일
+    (uv.lock/poetry.lock), lint 설정(ruff/flake8), pre-commit 설정,
+    CI 워크플로(.github/workflows)가 모두 없습니다.
+  - 현재 방식(requirements.txt + 버전 고정 `==`)도 실무에서 흔히 쓰이는
+    유효한 방식이라 당장 문제는 아니지만, 최신 파이썬 생태계 기준으로는
+    pyproject.toml 기반 관리 + ruff(lint/format) + CI에서
+    `python manage.py test` 자동 실행 정도를 도입하면 유지보수성이
+    한 단계 올라갑니다.
+
+--------------------------------------------------------------------------------
+2-8. [참고] 테스트는 표준적이나 픽스처가 수작업
+--------------------------------------------------------------------------------
+  - app/tests/*.py는 Django의 기본 TestCase를 올바르게 사용하고
+    (self.client, reverse(), assertEqual 등) 있어 패턴 자체는 정상입니다.
+  - 다만 테스트마다 Institution/Program 등을 필드 하나하나 나열해 생성하고
+    있어(app/tests/test_views.py:9-12) 모델이 늘어날수록 준비 코드가
+    길어집니다. factory_boy 같은 팩토리 라이브러리 도입을 고려할 만합니다.
+    (필수 사항은 아니며, 현재 테스트 규모에서는 문제되지 않습니다.)
+
+================================================================================
+[3] MVC(Django MVT) 패턴 적용 여부 검토
+================================================================================
+※ Django는 정확히는 MVT(Model-View-Template) 구조이며, 대응 관계는
+   Model=Model, View(관례상 "컨트롤러" 역할)=views.py, Template=View(화면)
+   입니다. 아래는 이 대응 기준으로 "역할이 섞이지 않았는지"를 본 결과입니다.
+
+3-1. Model 계층 — 양호
+  - models.py에 필드 검증(UniqueConstraint, Index), 표시용 프로퍼티
+    (ApplicationStatus.application_rate/demand_status), Meta 옵션이 모델
+    안에 잘 정리되어 있어 "데이터와 그에 딸린 규칙"이 Model 밖으로 새어
+    나가지 않았습니다.
+
+3-2. View 계층 — 대체로 양호하나 일부 경계가 흐릿함
+  - 좋은 예: community/views.py, substitutes/views.py는 "요청을 받아
+    폼/서비스를 호출하고 응답을 돌려준다"는 View 본연의 역할만 수행하고,
+    실제 도메인 로직(전화번호 해시, PASS 인증, 평판 처리)은
+    substitutes/services/*.py로 위임되어 있습니다 — MVT 경계가 깔끔합니다.
+  - 경계가 흐릿한 예 (analytics/views.py):
+      _attach_synthetic_insights() 함수(analytics/views.py 44행대)가
+      "최근 6개월 평균 신청률이 90% 이상이면 증설 검토, 50% 이상이면
+      유지·관찰, 그 미만이면 개선 검토"라는 임계값 판단(도메인 규칙)을
+      View 안에 직접 하드코딩하고 있습니다. 이런 판단 기준은 원래
+      analytics/services/analytics.py 같은 서비스 계층에 있어야 View가
+      "결과를 어떻게 보여줄지"에만 집중할 수 있습니다. 실제로
+      analytics/services/analytics.py에는 이미 유사한 성격의
+      demand_status() 함수가 있어, 일관성 있게 그쪽으로 합치는 것이
+      자연스럽습니다.
+      → 지금 당장 문제를 일으키진 않지만, 이 판단 기준(90%/50% 등)이
+        바뀔 때 views.py를 열어야 한다는 점에서 서비스 계층 분리 원칙과
+        어긋납니다. [권장]
+  - 그 외 program_status(), application_status() 등은 통계 집계를
+    View 안에서 직접 ORM으로 수행하는데, 이 정도의 "화면 하나에 종속된
+    1회성 집계"는 View에 있어도 무방한 수준으로 판단됩니다(재사용되지
+    않고, selectors.py의 필터링 결과를 그대로 가공만 하는 수준).
+
+3-3. Template 계층 — 양호
+  - 템플릿에는 {% if %}/{% for %} 수준의 표시 로직만 있고, 점수 계산이나
+    판정 같은 비즈니스 로직이 템플릿에 들어간 사례는 발견되지 않았습니다.
+  - base.html 하나를 여러 앱(analytics, recommendations)이 공유하는 구조도
+    MVT에서 흔히 쓰는 정상적인 패턴입니다.
+
+3-4. 종합 평가
+  - 전체적으로 Model-View-Template 3계층 분리와, 그 밑에 services/
+    selectors라는 4번째 계층(Django 진영에서 흔한 "Fat model 대신 서비스
+    계층" 스타일)까지 잘 갖춰져 있어 MVC/MVT 패턴은 "잘 적용된 편"입니다.
+  - 유일한 흠은 3-2에서 지적한 analytics/views.py의 _attach_synthetic_insights
+    처럼 일부 도메인 판단 로직이 View에 남아있는 것 정도이며, 구조를
+    무너뜨릴 정도는 아닙니다.
+
+================================================================================
+[4] 우선순위 정리 (체크리스트)
+================================================================================
+[완료]
+  [x] 1-1: app 앱을 analytics(통계) + recommendations(추천) 앱으로 분리
+      (2026-09-15 적용, python manage.py test 64건 전부 통과)
+
+[심각/먼저 확인]
+  [ ] 1-3: 루트 .gitignore의 "/app/" 규칙 의도 확인 후 정리
+      (analytics로 이름이 바뀐 지금은 더더욱 죽은 규칙에 가까움)
+  [ ] 2-3: SECRET_KEY/DEBUG/ALLOWED_HOSTS 환경변수 분리 (배포 전 필수)
+
+[권장/여유 될 때]
+  [ ] 3-2: analytics/views.py의 _attach_synthetic_insights 임계값 판단을
+      analytics/services/analytics.py로 이동
+  [ ] 2-2: 핵심 서비스/셀렉터 함수부터 타입 힌트 도입
+  [ ] 2-4: python manage.py check --deploy로 배포 전 보안 점검
+
+[참고/선택]
+  [ ] 1-2, 1-4: 저장소 루트 네이밍 정리, 정체불명 파일(이응.txt) 정리
+  [ ] 2-5~2-8: STORAGES 설정, CBV 전환, 패키징 도구, 테스트 팩토리 도입
+
+================================================================================
+문서 끝
+================================================================================

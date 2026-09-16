@@ -1,0 +1,257 @@
+================================================================================
+ 프로젝트 구조 분석 문서 (학습용)
+ 프로젝트명: 스포츠 데이터 분석 MVP (Django)
+ 생성일: 2026-09-15
+================================================================================
+
+[1] 프로젝트 개요
+--------------------------------------------------------------------------------
+- 프레임워크: Django 6.1.1 (Python 3.13 권장)
+- 목적: 스포츠지도자 자격 취득 현황, 기관·운영 프로그램 현황, 신청 현황
+  데이터를 업로드/분석하고, 사용자에게 맞춤형 기관·자격 추천을 제공하는
+  데이터 분석 MVP.
+- 부가 기능: 지역 커뮤니티 게시판(community), 단기 대타 구인구직
+  게시판(substitutes)
+- DB: SQLite (db.sqlite3), ORM: Django ORM
+- 데이터 처리: pandas, openpyxl (CSV/XLSX 업로드), requests + BeautifulSoup
+  (KSPO 외부 사이트 크롤링)
+- 기본 언어/시간대: ko-kr / Asia/Seoul
+
+--------------------------------------------------------------------------------
+[2] 최상위 디렉터리 구조
+--------------------------------------------------------------------------------
+no/                                 (레포지토리 루트)
+├── .gitignore
+└── main/                           ← Django 프로젝트 루트 (실제 실행 위치)
+    ├── manage.py                   Django 관리 커맨드 진입점
+    ├── requirements.txt            의존 패키지 (Django, pandas, openpyxl, requests, bs4)
+    ├── README.md                   설치/실행/데이터 적재 절차 문서
+    ├── db.sqlite3                  SQLite 데이터베이스 파일
+    ├── .gitignore
+    │
+    ├── main/                       ← 프로젝트 설정 패키지 (사이트 전역 설정)
+    │   ├── settings.py             INSTALLED_APPS, DB, 정적/미디어, 카카오맵 키 등
+    │   ├── urls.py                 최상위 URL 라우팅 (admin/substitutes/community/app)
+    │   ├── asgi.py / wsgi.py       배포용 진입점
+    │   └── __init__.py
+    │
+    ├── app/                        ← 핵심 앱: 분석(analytics) + 추천(recommendations)
+    │   ├── models.py               핵심 도메인 모델 (아래 [3-1] 참고)
+    │   ├── views.py                대시보드/업로드/추천 등 뷰 함수 (아래 [4] 참고)
+    │   ├── urls.py                 app_name='analytics'
+    │   ├── forms.py                업로드/추천 폼
+    │   ├── admin.py                Django 관리자 등록
+    │   ├── selectors.py            조회 전용 쿼리 헬퍼
+    │   ├── services/                비즈니스 로직 계층 (아래 [5] 참고)
+    │   ├── management/commands/     커스텀 관리 명령어 (아래 [6] 참고)
+    │   ├── migrations/              DB 마이그레이션 (0001~0006)
+    │   ├── static/analytics/        CSS/JS/favicon
+    │   ├── templates/
+    │   │   ├── analytics/           대시보드·업로드·통계 화면 템플릿
+    │   │   └── recommendations/     추천 서비스 화면 템플릿 (partials 포함)
+    │   ├── tests/                   단위/통합 테스트 (아래 [7] 참고)
+    │   ├── program_cleanup_rules.json   프로그램 정리 규칙
+    │   └── sport_matching_rules.json    종목 매칭 규칙 (동의어/상위매핑/문맥규칙)
+    │
+    ├── community/                  ← 부가 앱: 커뮤니티 게시판
+    │   ├── models.py                Post, Comment (아래 [3-2] 참고)
+    │   ├── views.py                 CRUD 뷰 (아래 [4] 참고)
+    │   ├── urls.py                  app_name='community'
+    │   ├── forms.py / admin.py / selectors.py
+    │   ├── management/commands/generate_community_demo_data.py
+    │   ├── migrations/
+    │   └── templates/community/
+    │
+    ├── substitutes/                ← 부가 앱: 단기 대타 구인구직
+    │   ├── models.py                PhoneIdentity, CenterContact, Posting,
+    │   │                             Application, ReputationRecord (아래 [3-3])
+    │   ├── views.py                 공고/지원/평가 뷰 (아래 [4] 참고)
+    │   ├── urls.py                  app_name='substitutes'
+    │   ├── services/                 PASS 인증, 전화번호 해시, 토큰, 자격 인증
+    │   ├── forms.py / admin.py / selectors.py
+    │   ├── management/commands/generate_substitute_demo_data.py
+    │   ├── migrations/
+    │   └── templates/substitutes/
+    │
+    ├── data/                       원본 CSV/TXT 원천 데이터
+    │   ├── kspo_disqualification.txt
+    │   ├── kspo_license_eligibility_paths.csv
+    │   └── kspo_license_grades.csv
+    │
+    └── exports/                    가공 결과 CSV 내보내기 (cleaned_programs_*.csv)
+
+--------------------------------------------------------------------------------
+[3] 도메인 모델 (models.py) 요약
+--------------------------------------------------------------------------------
+
+[3-1] app (analytics/recommendations) 앱
+  - UploadBatch          : CSV/XLSX 업로드 이력 (미리보기→검증→저장/실패 상태 관리)
+  - Institution          : 기관 정보 (이름/지역 정규화, 유일 제약)
+  - CanonicalSport       : 자격 종목 taxonomy 기준값 (프로그램 매칭의 기준)
+  - Program              : 기관별 운영 프로그램 원본 + 종목 매칭 결과(match_grade 등)
+  - ProgramCleanup       : Program을 건드리지 않고 1:1로 만드는 "정리 결과"
+                           (운영중/종료/미확인, 사용 가능 여부, 제외 사유)
+  - QualificationAggregate: 연도·지역·종목·등급별 자격 취득 집계
+  - ApplicationStatus    : 프로그램별 신청 현황 (신청률/수요상태 계산 프로퍼티,
+                           is_synthetic으로 합성 데이터 여부 구분)
+  - ExamSchedule / ExamScheduleFetchStatus : KSPO 연간일정계획 캐시 + 갱신 상태
+
+[3-2] community 앱
+  - Post    : 게시글 (카테고리: 자유/시험정보/자료실/Q&A, 닉네임+비밀번호 해시 인증)
+  - Comment : 댓글 (게시글 FK, 닉네임+비밀번호 해시)
+
+[3-3] substitutes 앱
+  - PhoneIdentity   : PASS 인증 전화번호의 해시 기반 신원 (원문 번호 미저장)
+  - CenterContact   : 휴대폰 인증을 마친 센터 담당자 (공고 등록 주체)
+  - Posting         : 단기 대타 공고 (종목/일시/지역/급여/모집인원/상태)
+  - Application     : 공고에 대한 지원 (전화번호 신원 기준 중복 지원 방지)
+  - ReputationRecord: 대타 완료 후 평판 기록 (노쇼/컴플레인/긍정태그,
+                      삭제 대신 is_hidden 처리로 감사 추적 보존)
+
+--------------------------------------------------------------------------------
+[4] URL 라우팅 / 화면 흐름
+--------------------------------------------------------------------------------
+main/urls.py (최상위)
+  /admin/            → Django 관리자
+  /substitutes/...   → substitutes.urls
+  /community/...     → community.urls
+  /(기타 전체)...     → app.urls   (app_name='analytics')
+
+app.urls (analytics) 주요 경로
+  /                              → recommendations 시작 화면으로 리다이렉트
+  /dashboard/                    → dashboard(): 전체 통계 요약
+  /recommendations/              → recommendation_start(): 자격 보유/미보유 분기 선택
+  /recommendations/licensed/(+results/)      → 자격 보유자 기관 추천 폼/결과
+  /recommendations/unlicensed/(+results/)    → 자격 미보유자 자격 방향 추천 폼/결과
+  /recommendations/qualifications/<pk>/      → 추천 자격 상세
+  /upload/, /upload/<id>/mapping/, /upload/<id>/errors.csv → 데이터 업로드 3단계
+  /instructors/, /exam-info/, /programs/, /current-programs/,
+  /institutions/<pk>/, /applications/, /demand-supply/     → 각종 통계/조회 화면
+
+community.urls
+  /               → post_list      (게시글 목록)
+  /posts/new/     → post_create
+  /posts/<pk>/    → post_detail
+  /posts/<pk>/edit/, /delete/            → post_edit / post_delete
+  /posts/<pk>/comments/<id>/delete/      → comment_delete
+
+substitutes.urls
+  /                                       → posting_list (공고 목록)
+  /postings/new/                          → posting_create
+  /postings/<pk>/                         → posting_detail
+  /postings/<pk>/apply/                   → application_apply
+  /postings/<pk>/manage/<token>/          → applicant_manage (담당자 전용, 토큰 인증)
+  /postings/<pk>/manage/<token>/applications/<id>/evaluate/ → application_evaluate
+
+--------------------------------------------------------------------------------
+[5] 서비스(비즈니스 로직) 계층 — app/services/
+--------------------------------------------------------------------------------
+  analytics.py       대시보드 통계 계산: application_rate, demand_status,
+                      summary(), sport_analysis()
+  recommendations.py 추천 엔진 핵심 로직:
+                      - recommend_institutions(): 기관 추천 (종목40/지역25/
+                        대상10/신청률15/대기자10점 배점)
+                      - recommend_qualification_directions(): 자격 방향 추천
+                        (관심종목35/지역20/신청률20/공급부족도15/대상10점)
+                      - qualification_direction_detail(): 추천 자격 상세 근거
+  program_catalog.py / program_cleanup.py  Program → ProgramCleanup 정리 로직
+  sport_matching.py  Program ↔ CanonicalSport 자동 매칭 (rules json 기반)
+  normalizers.py     이름/지역/종목 문자열 정규화 유틸
+  importers.py        업로드된 CSV/XLSX 파싱·검증
+  kspo_client.py / kspo_grades.py / kspo_license.py / kspo_schedule.py
+                      KSPO(국민체육진흥공단) 외부 사이트 크롤링/연동
+                      (자격 등급, 연간일정계획 등)
+  license_info.py     자격 관련 부가 정보 조회
+
+substitutes/services/
+  pass_auth.py   PASS 본인인증 연동
+  phone.py       전화번호 해시/마스킹
+  tokens.py      담당자 관리 페이지용 토큰 발급/검증
+  certification.py  자격 인증 로직
+
+--------------------------------------------------------------------------------
+[6] 커스텀 관리 명령어 (management/commands/)
+--------------------------------------------------------------------------------
+app 앱
+  import_sports_file.py       CSV/XLSX(qualification/program/application) 적재
+  match_program_sports.py     Program ↔ CanonicalSport 재매칭 실행
+  clean_program_data.py       ProgramCleanup 생성/갱신 (기준일 지정 가능)
+  export_cleaned_programs.py  정리 결과 CSV 내보내기
+  generate_demo_data.py       합성 신청 현황 데이터 생성 (시드 2026, --refresh)
+  crawl_license_info.py       KSPO 자격 정보 크롤링
+  refresh_exam_schedule.py    KSPO 연간일정계획 캐시 갱신
+
+community 앱
+  generate_community_demo_data.py  게시판 데모 데이터 생성
+
+substitutes 앱
+  generate_substitute_demo_data.py  대타 공고 데모 데이터 생성
+
+데이터 적재 표준 순서 (README 기준):
+  migrate → import_sports_file(qualification) → import_sports_file(program)
+  → match_program_sports → clean_program_data → generate_demo_data → runserver
+
+--------------------------------------------------------------------------------
+[7] 테스트 (app/tests/)
+--------------------------------------------------------------------------------
+  test_demo_data.py         합성 데이터 생성 검증
+  test_kspo_crawler.py      KSPO 크롤러 검증
+  test_program_cleanup.py   ProgramCleanup 로직 검증
+  test_recommendations.py   추천 알고리즘 검증
+  test_services.py          analytics 등 서비스 계층 검증
+  test_sport_matching.py    종목 매칭 규칙 검증
+  test_views.py             뷰/응답 검증
+  실행: python manage.py test
+
+--------------------------------------------------------------------------------
+[8] 프런트엔드 자산
+--------------------------------------------------------------------------------
+  app/static/analytics/
+    app.css                    기본 스타일
+    motion-landing.css/js      추천 시작 화면 모션 랜딩 효과
+    recommendation-ui.css/js   추천 폼/결과 UI 상호작용
+    favicon.svg
+
+  templates 구조
+    analytics/          대시보드·업로드·통계류 화면 (base.html이 공통 레이아웃)
+    recommendations/    추천 서비스 화면 (partials/ 하위에 hero_motion,
+                         service_paths 등 재사용 조각 템플릿)
+    community/, substitutes/  각 앱 전용 화면 (목록/상세/작성/수정 패턴 반복)
+
+--------------------------------------------------------------------------------
+[9] 설정 요점 (main/settings.py)
+--------------------------------------------------------------------------------
+  INSTALLED_APPS: admin/auth/contenttypes/sessions/messages/staticfiles
+                  + app, substitutes, community
+  TEMPLATES DIRS: BASE_DIR/app/templates (+ APP_DIRS=True로 각 앱 templates/도 인식)
+  DATABASES: sqlite3 (db.sqlite3)
+  STATIC_URL='/static/' (선행 슬래시 필수 — 하위 경로 404 방지 주석 존재)
+  MEDIA_URL='media/', 업로드 파일은 미리보기 중에만 임시 보관
+  KAKAO_MAP_APP_KEY: 기관 상세 지도 표시용 (환경변수 주입 권장)
+  PROGRAM_CLEANUP_REFERENCE_DATE='2026-07-31' (clean_program_data 기준일 기본값)
+  LANGUAGE_CODE='ko-kr', TIME_ZONE='Asia/Seoul'
+  MAILERS: 콘솔 이메일 백엔드 (개발용)
+
+--------------------------------------------------------------------------------
+[10] 데이터 흐름 요약 (핵심 파이프라인)
+--------------------------------------------------------------------------------
+  1) 원본 CSV/XLSX (data/) 업로드
+        → UploadBatch (미리보기/검증)
+        → Institution / Program / QualificationAggregate 저장
+  2) match_program_sports 실행
+        → sport_matching.py가 sport_matching_rules.json 규칙으로
+          Program.matched_sport(CanonicalSport) 자동 매칭
+  3) clean_program_data 실행
+        → program_cleanup.py가 program_cleanup_rules.json 기준으로
+          ProgramCleanup(운영상태/사용가능여부/제외사유) 생성
+  4) generate_demo_data 실행
+        → ApplicationStatus 합성 신청 현황 생성 (is_synthetic=True)
+  5) 사용자가 /recommendations/ 접근
+        → recommendations.py의 점수 로직으로 Institution 또는
+          CanonicalSport(자격 방향) 추천, 세션에 최소 입력값만 저장
+  6) 대시보드/통계 화면(dashboard, programs, demand_supply 등)에서
+        analytics.py의 summary()/sport_analysis()로 집계 시각화
+
+================================================================================
+ 문서 끝
+================================================================================

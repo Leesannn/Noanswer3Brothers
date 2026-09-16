@@ -1,0 +1,56 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+{% block title %}자격 취득 방향 추천{% endblock %}
+{% block body_class %}recommendation-page{% endblock %}
+{% block main_class %}recommendation-main{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block content %}
+<div class="recommend-shell result-shell">
+  {% include 'recommendations/_steps.html' with current=3 %}
+  <header class="result-heading">
+    <div>
+      <span class="eyebrow">{{ region_label }} · {% for item in selected_sports %}{{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+      <h1>취득을 고려할 수 있는 자격 방향</h1>
+      <p>관심 종목과 지역의 프로그램 수요를 함께 비교했습니다. 자격 취득을 보장하거나 강제하는 결과가 아닙니다.</p>
+    </div>
+    <a class="secondary-action" href="{% url 'recommendations:unlicensed_recommendation_form' %}">조건 수정하기</a>
+  </header>
+  {% if shows_synthetic %}{% include 'recommendations/_synthetic_notice.html' %}{% endif %}
+
+  {% if results %}
+    <div class="result-list">
+    {% for result in results %}
+      <article class="recommend-card">
+        <div class="rank-column">
+          <span class="rank-badge">{{ forloop.counter }}위</span>
+          <div class="score-ring"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
+          {% if result.synthetic_data_used %}<span class="synthetic-badge">합성 데이터 기반</span>{% endif %}
+        </div>
+        <div class="result-main">
+          <div class="card-title-row">
+            <div><small>추천 종목</small><h2>{{ result.target.name }}</h2></div>
+            <a href="{% url 'recommendations:qualification_recommendation_detail' result.target.pk %}">자격·활동 상세 보기 →</a>
+          </div>
+          <div class="qualification-line"><span>관련 자격 정보</span><strong>{% if result.metrics.qualifications %}{% for qualification in result.metrics.qualifications %}{{ qualification.label }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}보유 데이터에서 확인 필요{% endif %}</strong></div>
+          <div class="fact-grid">
+            <div><span>해당 지역 프로그램</span><strong>{{ result.metrics.local_program_count|default:0 }}개</strong></div>
+            <div><span>최근 평균 신청률</span><strong>{% if result.metrics.average_rate is not None %}{{ result.metrics.average_rate|floatformat:1 }}%{% else %}데이터 없음{% endif %}</strong></div>
+            <div><span>자격 취득 규모</span><strong>{{ result.metrics.qualification_count|default:0 }}건</strong></div>
+            <div><span>활동 검토 지역</span><strong>{{ result.metrics.suggested_region|default:'데이터 없음' }}</strong></div>
+          </div>
+          <div class="result-columns">
+            <section><h3>추천 이유</h3><ul>{% for reason in result.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></section>
+            <section><h3>취득 후 살펴볼 곳</h3>{% if result.metrics.suggested_institution %}<p><a href="{% url 'analytics:institution_detail' result.metrics.suggested_institution.pk %}">{{ result.metrics.suggested_institution.name }}</a><br><small>{{ result.metrics.suggested_institution.region }}</small></p>{% else %}<p>조건에 맞는 기관 데이터가 없습니다.</p>{% endif %}</section>
+          </div>
+          {% if result.missing_data %}<p class="missing-note">{{ result.missing_data|join:', ' }}</p>{% endif %}
+          <details class="score-details"><summary>점수 구성 보기</summary><dl>{% for label, score in result.component_scores.items %}<div><dt>{{ label }}</dt><dd>{{ score }}점</dd></div>{% endfor %}</dl></details>
+        </div>
+      </article>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-recommendation"><span>⌕</span><h2>추천에 사용할 수 있는 종목 데이터를 찾지 못했습니다.</h2><p>다른 관심 종목을 선택하거나 지역 조건을 바꿔보세요.</p><a class="primary-action" href="{% url 'recommendations:unlicensed_recommendation_form' %}">다시 추천받기</a></div>
+  {% endif %}
+  <footer class="result-footer"><p>실제 채용 여부와 자격 취득 요건은 해당 기관 및 공식 자격 안내를 통해 별도로 확인해야 합니다.</p><a href="{% url 'recommendations:unlicensed_recommendation_form' %}">다시 추천받기</a></footer>
+</div>
+{% endblock %}

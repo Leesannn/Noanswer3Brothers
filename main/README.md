@@ -85,7 +85,7 @@ python manage.py runserver
 
 프로젝트 폴더 전체를 복사하되 `venv`, `.venv`, `__pycache__`는 제외합니다. 기존 SQLite 데이터까지 그대로 옮기려면 `db.sqlite3`도 함께 복사합니다. 처음부터 새로 만들려면 `db.sqlite3`을 제외하고, 새 컴퓨터에서 `migrate` 후 `generate_demo_data`를 실행합니다. 단, 합성 현황을 생성할 기존 프로그램 데이터는 먼저 업로드해야 합니다.
 
-복사 대상은 소스 코드, `requirements.txt`, 생성된 `app/migrations/`, `app/templates/`, `app/static/`, 필요한 경우 `data/`와 `db.sqlite3`입니다.
+복사 대상은 소스 코드, `requirements.txt`, 생성된 `analytics/migrations/`, `analytics/templates/`, `analytics/static/`, 필요한 경우 `data/`와 `db.sqlite3`입니다.
 
 ## 검증
 
@@ -102,7 +102,7 @@ python manage.py test
 python manage.py match_program_sports
 ```
 
-매칭 규칙은 `app/sport_matching_rules.json`에서 관리합니다. `synonyms`에는 신뢰할 수 있는
+매칭 규칙은 `analytics/sport_matching_rules.json`에서 관리합니다. `synonyms`에는 신뢰할 수 있는
 동의어, `parent_mappings`에는 세부 프로그램과 상위 자격 종목, `context_rules`에는 시설
 유형 같은 보조 문맥 규칙을 추가합니다. 각 규칙의 `targets`는 우선순위 목록이며 실제 자격
 taxonomy에 존재하는 첫 종목만 사용됩니다. 존재하지 않는 종목은 자동 생성하거나 강제로
@@ -123,6 +123,6 @@ python manage.py clean_program_data --reference-date 2026-07-31
 ```
 
 명령을 반복 실행해도 같은 프로그램의 결과가 갱신될 뿐 중복 행은 생기지 않습니다.
-정리 규칙은 `app/program_cleanup_rules.json`에서 관리합니다. 실행 후 `/current-programs/`에서
+정리 규칙은 `analytics/program_cleanup_rules.json`에서 관리합니다. 실행 후 `/current-programs/`에서
 원본명·정리명·운영 상태·제외 사유·판정 근거를 확인할 수 있고, `/demand-supply/`에서
 기존 정규화 지역과 자격증 집계값을 이용한 지역별 프로그램·자격증 비교를 볼 수 있습니다.

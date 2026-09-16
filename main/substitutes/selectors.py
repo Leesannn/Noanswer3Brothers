@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from app.models import CanonicalSport
+from analytics.models import CanonicalSport
 
 from .models import Posting, ReputationRecord
 
