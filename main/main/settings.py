@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
+    'analytics',
+    'recommendations',
     'substitutes',
     'community',
 ]
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'main.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR/'app'/'templates'],
+        'DIRS': [BASE_DIR/'analytics'/'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,7 +82,10 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 별도 DB를 만들거나 점검할 때 기존 운영 DB를 덮어쓰지 않고 경로만 바꾼다.
+        'NAME': Path(os.environ.get(
+            'DJANGO_DB_PATH', BASE_DIR / 'sports_service_202607.sqlite3',
+        )),
     }
 }
 
@@ -130,7 +134,8 @@ USE_TZ = True
 # 선행 슬래시가 없으면 /recommendations/ 같은 하위 URL에서
 # /recommendations/static/... 으로 해석되어 정적 파일이 404가 된다.
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'app' / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'analytics' / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

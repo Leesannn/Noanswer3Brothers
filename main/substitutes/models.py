@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from app.models import CanonicalSport, Institution
+from analytics.models import CanonicalSport, Institution
 
 
 POSITIVE_TAG_CHOICES = ['성실함', '시간엄수', '전문성', '친절함']

@@ -1,0 +1,24 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+{% block title %}보유 자격 조건 입력{% endblock %}
+{% block body_class %}recommendation-page{% endblock %}
+{% block main_class %}recommendation-main{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block content %}
+<div class="recommend-shell form-shell">
+  {% include 'recommendations/_steps.html' with current=2 %}
+  <div class="form-heading">
+    <a href="{% url 'recommendations:recommendation_start' %}" class="back-link">← 자격 여부 다시 선택</a>
+    <span class="eyebrow">자격증 보유자</span>
+    <h1>어떤 활동 기회를 찾고 있나요?</h1>
+    <p>종목과 지역은 꼭 선택하고, 나머지는 원하는 만큼 알려주세요.</p>
+  </div>
+  <form method="post" class="recommend-form" novalidate data-loading-form>
+    {% include 'recommendations/_form_fields.html' %}
+    <div class="form-actions">
+      <button class="primary-action" type="submit"><i class="button-spinner" aria-hidden="true"></i><span class="button-label">내 조건으로 기관 찾기 →</span></button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/recommendation-ui.js' %}" defer></script>{% endblock %}

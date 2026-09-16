@@ -1,0 +1,489 @@
+================================================================================
+현재 프로젝트 구조 설명서
+프로젝트: 스포츠 데이터 분석·추천 MVP (Django)
+작성 기준일: 2026-09-16
+기준 경로: C:\Users\dbals\OneDrive\Desktop\no
+================================================================================
+
+[1] 프로젝트 개요
+--------------------------------------------------------------------------------
+- Django 6.1.1 기반 웹 프로젝트이다.
+- 스포츠지도자 자격 취득 현황, 기관별 프로그램, 신청 현황을 SQLite DB에 저장하고
+  대시보드·통계·추천 서비스에서 조회한다.
+- CSV/XLSX는 데이터 입력 수단이다. 평상시 웹 페이지는 CSV가 아니라 db.sqlite3를
+  조회한다.
+- 주요 앱은 analytics, recommendations, community, substitutes 네 개이다.
+- 기본 언어/시간대는 ko-kr / Asia/Seoul이다.
+
+
+[2] 최상위 구조
+--------------------------------------------------------------------------------
+no/                                      저장소 루트
+├── .gitignore
+├── project_structure.txt                이전 구조 설명 문서
+├── project_structure_current.txt        현재 파일 기준 구조 설명 문서
+├── project_review.txt                   프로젝트 검토 문서
+├── 이응.txt
+└── main/                                Django 실행 루트
+    ├── manage.py                        Django 관리 명령 진입점
+    ├── requirements.txt                 Python 패키지 목록
+    ├── README.md                        설치·실행·데이터 적재 설명
+    ├── db.sqlite3                       실제 SQLite 데이터베이스
+    ├── .gitignore
+    ├── .venv/                           로컬 가상환경
+    ├── main/                            Django 전역 설정 패키지
+    ├── analytics/                       데이터 수집·정제·분석 앱
+    ├── recommendations/                 기관·자격 방향 추천 앱
+    ├── community/                       지역 커뮤니티 앱
+    ├── substitutes/                     단기 대타 구인구직 앱
+    ├── data/                            KSPO 관련 원천/보조 데이터
+    ├── media/                           업로드 파일 임시 보관 위치
+    └── exports/                         정리 결과 CSV 내보내기 위치
+
+※ .venv, __pycache__, media, exports 안의 실행 중 생성 파일은 소스 구조 설명에서 제외한다.
+
+
+[3] Django 전역 설정: main/main/
+--------------------------------------------------------------------------------
+main/main/
+├── settings.py                          앱, DB, 템플릿, 정적 파일 등 전역 설정
+├── urls.py                              사이트 최상위 URL 분배
+├── asgi.py                              ASGI 배포 진입점
+├── wsgi.py                              WSGI 배포 진입점
+└── __init__.py
+
+settings.py의 핵심 설정
+- INSTALLED_APPS
+  · analytics
+  · recommendations
+  · substitutes
+  · community
+- DATABASES: SQLite, 파일 위치는 main/db.sqlite3
+- TEMPLATES: analytics/templates를 공통 템플릿 위치로 포함
+- STATIC_URL: /static/
+- STATICFILES_DIRS: analytics/static
+- MEDIA_ROOT: main/media
+- PROGRAM_CLEANUP_REFERENCE_DATE: 프로그램 운영 상태 판단 기준일
+- KAKAO_MAP_APP_KEY: 기관 상세 지도용 환경 변수
+
+최상위 URL
+- /admin/             → Django 관리자
+- /                   → analytics.urls
+- /recommendations/   → recommendations.urls
+- /community/         → community.urls
+- /substitutes/       → substitutes.urls
+
+
+[4] analytics 앱: 데이터 입력·정규화·DB 저장·통계
+--------------------------------------------------------------------------------
+main/analytics/
+├── __init__.py
+├── apps.py                             앱 설정
+├── admin.py                            분석 모델 관리자 화면 등록
+├── models.py                           분석 영역 DB 모델
+├── forms.py                            파일 업로드·컬럼 매핑 폼
+├── selectors.py                        조회·필터용 쿼리
+├── views.py                            대시보드·업로드·현황 화면
+├── urls.py                             analytics URL
+├── program_cleanup_rules.json          프로그램 정리 규칙
+├── sport_matching_rules.json           종목 자동 매칭 규칙
+├── services/                           업무 로직
+├── management/commands/                관리 명령
+├── migrations/                         DB 스키마 변경 기록 0001~0006
+├── templates/analytics/                분석 화면 HTML
+├── static/analytics/                   공통 CSS·favicon
+└── tests/                              분석 앱 테스트
+
+중요: analytics/apps.py는 Python 패키지명은 analytics로 사용하지만, 기존 DB 테이블과
+마이그레이션 호환을 위해 Django app label을 'app'으로 유지한다.
+
+
+[4-1] analytics/models.py: DB 모델
+--------------------------------------------------------------------------------
+UploadBatch
+- CSV/XLSX 업로드 이력과 처리 상태를 저장한다.
+- 원본 파일명, 데이터 종류, 인코딩, 행 수, 성공/실패/중복 수, 컬럼 매핑,
+  미리보기와 오류 내용을 기록한다.
+- 웹 업로드 파일은 처리 완료 후 임시 파일이 삭제된다.
+
+Institution
+- 기관명, 지역, 주소, 기관 유형을 저장한다.
+- 정규화된 기관명 + 정규화된 지역 조합이 고유하다.
+
+CanonicalSport
+- 자격 종목의 기준 taxonomy이다.
+- 프로그램 종목을 하나의 기준 종목으로 연결할 때 사용한다.
+
+Program
+- 기관에서 운영하는 프로그램 원본 정보를 저장한다.
+- 기관, 프로그램명, 종목, 대상, 요일, 시간, 기간, 정원, 상태 등을 가진다.
+- source_key가 같은 데이터는 갱신하고 다르면 새 행으로 추가한다.
+- matched_sport와 match_* 필드에 자동 종목 매칭 결과를 저장한다.
+
+DataSource
+- 프로그램마다 반복되던 원본 파일명을 한 번만 저장하는 출처 사전이다.
+
+ProgramMatchPayload
+- 프로그램마다 반복되던 자동 매칭 규칙·후보 JSON을 고유 묶음으로 저장한다.
+
+ProgramCleanup
+- Program과 1:1로 연결되는 정리 결과이다.
+- 정리된 이름, 운영 상태, 사용 가능 여부, 제외 사유와 판단 근거를 저장한다.
+
+ProgramCleanupDetail
+- 반복되는 정리 근거 문장과 적용 규칙을 고유 묶음으로 저장한다.
+
+QualificationAggregate
+- 연도·지역·종목·자격 종류·등급별 자격 취득 집계이다.
+- 원본 파일명도 고유성 판단에 포함된다.
+
+ApplicationStatus
+- 프로그램별 기준일의 정원, 신청 인원, 대기 인원을 저장한다.
+- is_synthetic으로 실제 데이터와 시연용 생성 데이터를 구분한다.
+
+ExamSchedule
+- KSPO 시험 일정 캐시이다.
+
+ExamScheduleFetchStatus
+- 시험 일정별 최근 갱신 성공·확인 시각과 오류를 저장한다.
+
+
+[4-2] analytics/services/importers.py: CSV/XLSX 가져오기 핵심
+--------------------------------------------------------------------------------
+주요 상수
+- FIELD_LABELS
+  프로그램 내부에서 취급하는 전체 입력 필드와 사용자 표시 이름이다.
+- REQUIRED_FIELDS
+  데이터 종류별로 반드시 CSV 컬럼을 연결해야 하는 내부 필드이다.
+- ALIASES
+  서로 다른 CSV 컬럼명을 같은 내부 필드로 자동 연결하기 위한 별칭이다.
+
+예시
+  신청인원 / 접수인원 / 등록인원
+      ↓ 자동 컬럼 매핑
+  ApplicationStatus.applicants
+
+주의: 별칭 여러 개의 값을 합산하는 것이 아니다. 한 CSV에서 일치하는 컬럼 하나를
+선택해 applicants에 연결한다.
+
+주요 함수
+- detect_encoding()       UTF-8-SIG, UTF-8, CP949, EUC-KR 인코딩 탐지
+- xlsx_sheets()           XLSX 시트 목록 확인
+- iter_table()            CSV 또는 XLSX의 헤더와 행 읽기
+- detect_dataset_type()   qualification/program/application 자동 판별
+- suggest_mapping()       ALIASES를 이용한 컬럼 연결 자동 제안
+- preview()               행 수, 빈값 수, 앞 20행과 매핑 제안 생성
+- validate_mapping()      필수 필드 매핑과 존재하지 않는 컬럼 검사
+- _source_key()           여러 값을 SHA-256으로 묶어 고유 식별키 생성
+- import_batch()          데이터 종류에 맞는 저장 함수로 분기
+- _import_qualifications() 자격 취득 데이터 저장
+- _import_programs()       기관·프로그램 데이터 저장
+- _import_applications()   신청 현황 데이터 저장
+
+필수 컬럼 매핑
+- qualification: acquisition_date, sport, qualification
+- program: institution, program
+- application: program, capacity, applicants
+
+선택 필드는 FIELD_LABELS에는 있지만 REQUIRED_FIELDS에는 없는 항목이다.
+선택 필드가 매핑되지 않았을 때의 저장 형태
+- 문자열 필드: 주로 빈 문자열 ''
+- 날짜·시간·숫자 필드: 주로 NULL
+- 기본값이 있는 필드: 해당 기본값(예: 프로그램 상태 '운영')
+
+오류 처리
+- 기본값 allow_invalid=False
+  한 행이라도 검증 오류가 있으면 ImportValidationError가 발생한다.
+  import_batch()는 transaction.atomic이므로 해당 가져오기 전체가 롤백된다.
+- allow_invalid=True
+  오류 행을 제외하고 유효한 행만 DB에 저장한다.
+
+DB 저장 방식
+- bulk_create(..., update_conflicts=True)를 사용한다.
+- 동일한 고유키: 기존 행 UPDATE
+- 다른 고유키: 새 행 INSERT
+- 새 파일에서 빠진 기존 행: 자동 삭제하지 않고 DB에 계속 유지
+- 따라서 현재 가져오기 방식은 전체 교체가 아니라 누적 + 일부 갱신 방식이다.
+
+
+[4-3] analytics/services/: 분석 업무 로직
+--------------------------------------------------------------------------------
+analytics.py
+- 신청률, 수요 상태, 전체 요약과 종목별 분석 계산
+
+normalizers.py
+- 공백·문자열, 종목명, 지역명, 기관명 정규화
+- 자격 종류와 등급 분리
+
+sport_matching.py
+- sport_matching_rules.json을 읽어 Program을 CanonicalSport에 매칭
+- 정확/유사/검토 필요/미매칭 등 매칭 등급과 근거 생성
+
+program_cleanup.py
+- program_cleanup_rules.json을 읽어 프로그램명과 운영 상태 정리
+- 사용 가능 여부 및 제외 사유 판정
+
+program_catalog.py
+- 정리된 프로그램 목록 필터, 요약, 지역별 프로그램·자격 비교
+
+license_info.py
+- main/data의 KSPO 자격 등급·응시 경로·결격 사유 데이터 조회
+
+kspo_client.py
+- KSPO 페이지 HTTP 요청 공통 처리
+
+kspo_grades.py
+- KSPO 자격 등급과 관련 URL 정의
+
+kspo_license.py
+- KSPO 자격 정보 HTML 파싱·수집
+
+kspo_schedule.py
+- KSPO 연간 시험 일정 HTML 파싱·수집
+
+
+[4-4] analytics 화면과 URL
+--------------------------------------------------------------------------------
+/                              추천 서비스 시작 화면으로 이동
+/dashboard/                    전체 요약 대시보드
+/upload/                       CSV/XLSX 업로드
+/upload/<id>/mapping/          업로드 컬럼 매핑 확인
+/upload/<id>/errors.csv        오류 행 내역 다운로드
+/instructors/                  지도자 자격 현황
+/exam-info/                    시험·자격 정보
+/programs/                     원본 프로그램 현황
+/current-programs/             정리된 현재 운영 프로그램
+/institutions/<id>/            기관 상세
+/applications/                 신청 현황
+/demand-supply/                지역별 프로그램·자격 수요 공급 비교
+
+templates/analytics/
+- base.html                    분석·추천·커뮤니티 공통 레이아웃
+- dashboard.html               대시보드
+- upload.html                  파일 업로드
+- upload_mapping.html          컬럼 매핑
+- instructors.html             지도자 자격 현황
+- exam_info.html               시험 정보
+- programs.html                프로그램 현황
+- current_programs.html        정리된 프로그램
+- institution_detail.html      기관 상세
+- applications.html            신청 현황
+- demand_supply.html           수요 공급 분석
+- regional_comparison.html     지역 비교
+- _filters.html                공통 필터 부분 템플릿
+- _pagination.html             공통 페이지네이션
+
+
+[4-5] analytics 관리 명령
+--------------------------------------------------------------------------------
+실행 위치: main/ (manage.py가 있는 폴더)
+
+import_sports_file.py
+  python manage.py import_sports_file <CSV 또는 XLSX 경로>
+  옵션: --type auto|qualification|program|application, --sheet, --allow-invalid
+  로컬 파일을 읽어 자동 컬럼 매핑 후 DB에 저장한다.
+
+match_program_sports.py
+  python manage.py match_program_sports
+  기존 DB의 Program을 CanonicalSport에 자동 매칭한다. CSV를 읽지 않는다.
+
+clean_program_data.py
+  python manage.py clean_program_data
+  기존 DB의 Program을 분석해 ProgramCleanup을 생성·갱신한다. CSV를 읽지 않는다.
+
+export_cleaned_programs.py
+  정리된 프로그램을 exports/에 CSV로 내보낸다.
+
+generate_demo_data.py
+  신청 현황 시연용 데이터를 생성한다.
+
+crawl_license_info.py
+  KSPO 자격 상세 정보를 수집한다.
+
+refresh_exam_schedule.py
+  KSPO 시험 일정 캐시를 갱신한다.
+
+
+[5] recommendations 앱: 맞춤 추천
+--------------------------------------------------------------------------------
+main/recommendations/
+├── apps.py
+├── forms.py                            추천 조건 입력 폼
+├── services.py                         추천 점수 계산 핵심 로직
+├── views.py                            추천 입력·결과 화면
+├── urls.py
+├── tests.py
+├── templates/recommendations/
+└── static/recommendations/
+
+이 앱은 별도 models.py가 없다. analytics 앱의 Institution, Program,
+ProgramCleanup, CanonicalSport, QualificationAggregate, ApplicationStatus를 조회한다.
+
+추천 유형
+- 자격 보유자: 종목·지역·대상·요일·시간대 등을 반영한 기관 추천
+- 자격 미보유자: 관심 종목·지역과 수요 공급을 반영한 자격 방향 추천
+
+주요 URL
+- /recommendations/
+- /recommendations/licensed/
+- /recommendations/licensed/results/
+- /recommendations/unlicensed/
+- /recommendations/unlicensed/results/
+- /recommendations/qualifications/<id>/
+
+
+[6] community 앱: 익명 지역 커뮤니티
+--------------------------------------------------------------------------------
+main/community/
+├── models.py                           Post, Comment
+├── forms.py                            글·댓글·비밀번호 확인 폼
+├── selectors.py                        목록 필터
+├── views.py                            글·댓글 CRUD
+├── urls.py
+├── admin.py
+├── migrations/
+├── templates/community/
+└── management/commands/
+    └── generate_community_demo_data.py
+
+모델
+- Post: 카테고리, 제목, 닉네임, 비밀번호 해시, 내용, 조회 수, 공지 여부
+- Comment: 게시글, 닉네임, 비밀번호 해시, 내용
+
+주요 URL
+- /community/
+- /community/posts/new/
+- /community/posts/<id>/
+- /community/posts/<id>/edit/
+- /community/posts/<id>/delete/
+- /community/posts/<id>/comments/<comment_id>/delete/
+
+
+[7] substitutes 앱: 단기 대타 구인구직
+--------------------------------------------------------------------------------
+main/substitutes/
+├── models.py                           대타 구인구직 모델
+├── forms.py                            공고·지원·평가 폼
+├── selectors.py                        공고 필터·평판 요약
+├── views.py                            공고·지원·관리·평가 화면
+├── urls.py
+├── admin.py
+├── services/
+│   ├── pass_auth.py                    PASS 본인 인증 연결 지점
+│   ├── phone.py                        전화번호 정리·해시·마스킹
+│   ├── tokens.py                       공고 관리 토큰 생성·검증
+│   └── certification.py               지원자 자격 보유 여부 검사
+├── migrations/
+├── templates/substitutes/
+└── management/commands/
+    └── generate_substitute_demo_data.py
+
+모델
+- PhoneIdentity: 전화번호 원문 대신 해시와 마스킹 값 저장
+- CenterContact: 본인 인증을 마친 센터 담당자
+- Posting: 종목, 날짜, 시간, 지역, 급여, 모집 인원, 상태가 있는 대타 공고
+- Application: 공고 지원 기록
+- ReputationRecord: 노쇼·민원·긍정 태그 등 지원자 평판 기록
+
+주요 URL
+- /substitutes/
+- /substitutes/postings/new/
+- /substitutes/postings/<id>/
+- /substitutes/postings/<id>/apply/
+- /substitutes/postings/<id>/manage/<token>/
+- /substitutes/postings/<id>/manage/<token>/applications/<application_id>/evaluate/
+
+
+[8] 핵심 데이터 관계
+--------------------------------------------------------------------------------
+Institution 1 ─── N Program 1 ─── N ApplicationStatus
+                       │
+                       ├── 1 ProgramCleanup
+                       │
+                       └── N:1 CanonicalSport
+
+QualificationAggregate
+        │
+        └── 종목·지역별 자격 취득 집계로 분석과 추천에 사용
+
+CanonicalSport 1 ─── N substitutes.Posting
+
+community.Post 1 ─── N community.Comment
+
+substitutes.CenterContact 1 ─── N Posting 1 ─── N Application
+substitutes.PhoneIdentity 1 ─── N Application / ReputationRecord
+
+
+[9] CSV/XLSX부터 웹 화면까지의 흐름
+--------------------------------------------------------------------------------
+1. 웹 /upload/ 또는 import_sports_file 명령으로 파일 선택
+2. iter_table()이 CSV/XLSX를 읽음
+3. detect_dataset_type()이 데이터 종류 판별
+4. suggest_mapping()이 ALIASES로 컬럼 매핑 제안
+5. validate_mapping()이 필수 매핑과 실제 헤더 확인
+6. normalizers.py가 문자열·지역·종목·기관 값을 정규화
+7. _import_*()가 고유키를 만들고 SQLite에 INSERT 또는 UPDATE
+8. 웹 업로드인 경우 처리 완료 후 임시 원본 파일 삭제
+9. 이후 일반 웹 요청은 CSV가 아니라 db.sqlite3를 조회
+
+요약
+  CSV/XLSX
+      ↓ 가져오기 시에만 읽음
+  정규화·검증·고유키 생성
+      ↓
+  db.sqlite3
+      ↓ 평상시 웹 요청
+  대시보드·현황·추천·커뮤니티·대타 서비스
+
+
+[10] 테스트 구조
+--------------------------------------------------------------------------------
+analytics/tests/
+- test_services.py          분석 계산, 정규화, CSV/XLSX 가져오기와 롤백
+- test_views.py             분석 화면 응답과 필터
+- test_sport_matching.py    종목 매칭 규칙과 수동 매칭 보존
+- test_program_cleanup.py   프로그램 정리와 명령 멱등성
+- test_kspo_crawler.py      KSPO 파싱·네트워크 오류·일정 캐시
+- test_demo_data.py         시연 데이터 생성과 중복 방지
+
+recommendations/tests.py
+- 기관·자격 방향 추천 점수, 빈 결과, 공개 화면, 정렬 안정성
+
+실행
+  cd main
+  python manage.py test
+
+
+[11] 설치·실행 순서
+--------------------------------------------------------------------------------
+cd C:\Users\dbals\OneDrive\Desktop\no\main
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
+기존 db.sqlite3가 정상적으로 있다면 CSV 없이도 웹 조회·분석·추천이 작동한다.
+새 데이터를 반영할 때만 웹 업로드 또는 import_sports_file을 사용한다.
+
+
+[12] 자주 찾는 코드 위치
+--------------------------------------------------------------------------------
+DB 모델                         main/analytics/models.py
+CSV 전체 필드                   main/analytics/services/importers.py의 FIELD_LABELS
+필수 컬럼                       main/analytics/services/importers.py의 REQUIRED_FIELDS
+CSV 컬럼 별칭                   main/analytics/services/importers.py의 ALIASES
+CSV 검증·저장                   main/analytics/services/importers.py
+문자열·지역·종목 정규화         main/analytics/services/normalizers.py
+종목 자동 매칭                  main/analytics/services/sport_matching.py
+프로그램 정리                   main/analytics/services/program_cleanup.py
+분석 계산                       main/analytics/services/analytics.py
+추천 점수 계산                  main/recommendations/services.py
+웹 업로드 처리                  main/analytics/views.py의 upload_data(), map_upload()
+터미널 파일 가져오기            main/analytics/management/commands/import_sports_file.py
+전체 URL                        main/main/urls.py 및 각 앱의 urls.py
+DB 연결 설정                    main/main/settings.py의 DATABASES
+
+================================================================================
+문서 끝
+================================================================================

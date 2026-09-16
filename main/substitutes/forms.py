@@ -1,6 +1,6 @@
 from django import forms
 
-from app.models import CanonicalSport
+from analytics.models import CanonicalSport
 
 from .models import POSITIVE_TAG_CHOICES, Posting
 

@@ -1,0 +1,56 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+{% block title %}스포츠 커리어 레시피 | 경험을 기회로{% endblock %}
+{% block body_class %}motion-landing-page{% endblock %}
+{% block main_class %}motion-landing-main{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/motion-landing.css' %}">{% endblock %}
+{% block header %}
+<header class="motion-header">
+  <a class="motion-brand" href="{% url 'recommendations:recommendation_start' %}" aria-label="스포츠 커리어 레시피 홈">
+    <span class="motion-brand-mark" aria-hidden="true"><i></i><b></b></span>
+    <span>SPORTS<br>CAREER RECIPE</span>
+  </a>
+  <nav aria-label="랜딩 페이지 메뉴">
+    <a href="#service-paths">추천 시작</a>
+    <a href="{% url 'analytics:dashboard' %}">데이터 보기</a>
+  </nav>
+</header>
+{% endblock %}
+{% block content %}
+<section class="motion-hero" data-motion-root data-motion-state="loading" aria-labelledby="landing-title">
+  <canvas class="motion-canvas" data-particle-canvas aria-hidden="true"></canvas>
+  {% include 'recommendations/partials/hero_motion.html' %}
+
+  <div class="motion-controls" aria-label="인트로 모션 제어">
+    <button type="button" class="motion-control motion-skip" data-motion-skip>모션 건너뛰기</button>
+    <button type="button" class="motion-control motion-replay" data-motion-replay>다시 보기</button>
+  </div>
+
+  <div class="scene-caption" aria-hidden="true">
+    <span data-scene-caption="1">가능성은 데이터에서 시작됩니다</span>
+    <span data-scene-caption="4">경험을 자격으로</span>
+    <span data-scene-caption="5">자격을 기회로</span>
+  </div>
+
+  <div class="motion-hero-copy">
+    <p class="motion-kicker">스포츠 지도자의 다음 기회 · DATA-DRIVEN CAREER PATH</p>
+    <h1 id="landing-title">경험을 자격으로,<br><em>자격을 기회로.</em></h1>
+    <p class="motion-description">스포츠 경험과 공공데이터를 연결해<br>당신의 다음 자격과 활동 무대를 발견합니다.</p>
+    <div class="motion-actions">
+      <a class="motion-action motion-action-primary" data-transition-link data-target="qualification" href="{% url 'recommendations:unlicensed_recommendation_form' %}">
+        <span>나에게 맞는 자격증 찾기</span><b aria-hidden="true">↗</b>
+      </a>
+      <a class="motion-action" data-transition-link data-target="opportunity" href="{% url 'recommendations:licensed_recommendation_form' %}">
+        <span>내 자격으로 활동 무대 찾기</span><b aria-hidden="true">↗</b>
+      </a>
+    </div>
+  </div>
+
+  <div class="motion-index" aria-hidden="true"><span>01</span><i></i><span>06</span></div>
+  <a class="motion-scroll-cue" href="#service-paths"><span>SCROLL TO EXPLORE</span><i aria-hidden="true"></i></a>
+</section>
+
+{% include 'recommendations/partials/service_paths.html' %}
+{% endblock %}
+{% block footer %}{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/motion-landing.js' %}" defer></script>{% endblock %}
