@@ -9,6 +9,7 @@ __pycache__/
 
 # CSV data files
 *.csv
+!data/application_demo.csv
 !/data/kspo_license_grades.csv
 !/data/kspo_license_eligibility_paths.csv
 

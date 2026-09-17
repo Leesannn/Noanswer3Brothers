@@ -20,6 +20,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+DJANGO_DB_PATH = Path(os.environ.get(
+    'DJANGO_DB_PATH', 'sports_service_202607.sqlite3',
+))
+if not DJANGO_DB_PATH.is_absolute():
+    DJANGO_DB_PATH = BASE_DIR / DJANGO_DB_PATH
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
@@ -85,9 +91,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # 별도 DB를 만들거나 점검할 때 기존 운영 DB를 덮어쓰지 않고 경로만 바꾼다.
-        'NAME': Path(os.environ.get(
-            'DJANGO_DB_PATH', BASE_DIR / 'sports_service_202607.sqlite3',
-        )),
+        'NAME': DJANGO_DB_PATH,
     },
     'community': {
         'ENGINE': 'django.db.backends.postgresql',

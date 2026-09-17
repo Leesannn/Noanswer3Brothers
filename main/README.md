@@ -51,13 +51,22 @@ python manage.py generate_demo_data --refresh
 
 ## 원본 데이터
 
-원본 CSV/XLSX는 프로젝트의 `data/` 폴더에 복사한 뒤 웹의 **데이터 업로드** 화면에서 불러오거나 다음 명령을 사용할 수 있습니다.
+원본 CSV/XLSX는 프로젝트의 `data/` 폴더에 복사한 뒤 다음 관리 명령으로 불러올 수 있습니다.
 
 ```bash
 python manage.py import_sports_file data/programs.csv --type auto --allow-invalid
 ```
 
 CSV의 UTF-8, UTF-8-SIG, CP949, EUC-KR 인코딩과 XLSX를 지원합니다.
+
+대시보드 확인용 신청 인원 CSV는 다음 명령으로 불러옵니다.
+
+```bat
+copy sports_service_202607.sqlite3 local.sqlite3
+python manage.py import_sports_file data/application_demo.csv --type application
+```
+
+`.env`의 `DJANGO_DB_PATH=local.sqlite3` 설정으로 Git에 포함되지 않는 로컬 DB만 변경합니다.
 
 새 데이터베이스에서 실제 프로그램 자료부터 준비하는 정확한 순서는 다음과 같습니다.
 
