@@ -4,6 +4,9 @@ __pycache__/
 *.py[cod]
 .DS_Store
 
+# Local environment variables and secrets
+.env
+
 # CSV data files
 *.csv
 
