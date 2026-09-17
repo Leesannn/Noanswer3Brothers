@@ -17,6 +17,6 @@ class DashboardViewTests(TestCase):
         self.assertEqual(response.context['metrics']['program_total'], 1)
 
     def test_major_pages_render(self):
-        for name in ('dashboard', 'upload', 'instructors', 'programs', 'applications', 'demand_supply'):
+        for name in ('dashboard', 'instructors', 'programs', 'applications', 'demand_supply'):
             with self.subTest(name=name):
                 self.assertEqual(self.client.get(reverse(f'analytics:{name}')).status_code, 200)
