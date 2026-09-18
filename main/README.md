@@ -6,20 +6,35 @@
 
 ## Windows
 
+`python` 명령이 Microsoft Store용 Python(3.11 등 낮은 버전)으로 연결되어 있는 경우가 많고,
+`py` 런처가 설치되어 있지 않을 수도 있습니다. 반드시 아래처럼 **Python 3.13 실행 파일 경로를
+직접 지정**해서 가상환경을 만드세요. 그래야 가상환경 안에서는 `python`, `pip`가 항상 3.13을
+가리킵니다.
+
 ```bash
-py -m venv venv
-venv\Scripts\activate
+# 설치된 Python 3.13 경로 확인 (winget으로 설치했다면 보통 아래 경로)
+"C:\Users\<사용자명>\AppData\Local\Programs\Python\Python313\python.exe" --version
+
+# 가상환경 생성 (프로젝트의 main 폴더 기준, 폴더 이름은 .venv)
+"C:\Users\<사용자명>\AppData\Local\Programs\Python\Python313\python.exe" -m venv .venv
+.venv\Scripts\activate
+python --version   # Python 3.13.x 가 나와야 정상
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py generate_demo_data
 python manage.py runserver
 ```
 
+VSCode를 쓴다면 `.vscode/settings.json`의 `python.defaultInterpreterPath`가 `main/.venv`를
+가리키도록 되어 있어, 통합 터미널을 새로 열면 activate 없이도 자동으로 3.13 가상환경이
+적용됩니다.
+
 ## macOS/Linux
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3.13 -m venv .venv
+source .venv/bin/activate
+python --version   # Python 3.13.x 가 나와야 정상
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py generate_demo_data
@@ -27,6 +42,21 @@ python manage.py runserver
 ```
 
 실행 후 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)에 접속합니다. 기본 DB는 프로젝트 내부의 `db.sqlite3`이며 별도 DB 서버가 필요하지 않습니다.
+
+## 파이썬 버전 오류가 날 때
+
+`requirements.txt`의 `Django==6.1.1`은 **Python 3.12 이상**이 필요합니다. `pip install -r
+requirements.txt`가 `Could not find a version that satisfies the requirement Django==6.1.1`
+같은 에러를 내면 지금 활성화된 Python이 3.12 미만이라는 뜻입니다.
+
+1. `python --version`으로 현재 버전을 확인합니다.
+2. 3.13 미만이면 가상환경을 활성화하지 않고 전역 `python`을 그대로 쓰고 있는 것입니다.
+   위 Windows/macOS·Linux 안내대로 Python 3.13으로 가상환경(`.venv`)을 새로 만들고
+   반드시 `.venv\Scripts\activate`(Windows) 또는 `source .venv/bin/activate`(macOS/Linux)로
+   활성화한 뒤 명령을 실행하세요.
+3. 이미 `.venv`가 있는데도 에러가 난다면, 그 `.venv`가 3.13 이전 버전으로 만들어졌을 수
+   있습니다. `.venv/pyvenv.cfg`(또는 `.venv\pyvenv.cfg`)의 `version` 값을 확인하고, 3.13이
+   아니면 `.venv` 폴더를 삭제한 뒤 위 명령으로 다시 만듭니다.
 
 ## 지도자 맞춤 추천
 

@@ -1,56 +1,76 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
-{% block title %}스포츠 커리어 레시피 | 경험을 기회로{% endblock %}
-{% block body_class %}motion-landing-page{% endblock %}
-{% block main_class %}motion-landing-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/motion-landing.css' %}">{% endblock %}
+{% block title %}스포츠 커리어 나침반 | 경험을 다음 기회로{% endblock %}
+{% block body_class %}editorial-home motion-landing-page{% endblock %}
+{% block main_class %}editorial-main{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}">
+<noscript><style>
+.editorial-home .editorial-header,.editorial-home .hero-kicker,.editorial-home .hero-title .title-line>span,
+.editorial-home .hero-subcopy,.editorial-home .hero-actions,.editorial-home .hero-meta,.editorial-home .hero-stats,
+.editorial-home .sport-switch,.editorial-home .stage-card,.editorial-home .stage-badge,.editorial-home .stage-float,
+.editorial-home .stage-note,.editorial-home .athlete-figure.is-active { opacity: 1 !important; transform: none !important; }
+.editorial-home .hero-highlight { background-size: 100% 100% !important; }
+.editorial-home .intro-controls { display: none !important; }
+</style></noscript>
+{% endblock %}
 {% block header %}
-<header class="motion-header">
-  <a class="motion-brand" href="{% url 'recommendations:recommendation_start' %}" aria-label="스포츠 커리어 레시피 홈">
-    <span class="motion-brand-mark" aria-hidden="true"><i></i><b></b></span>
-    <span>SPORTS<br>CAREER RECIPE</span>
+<header class="editorial-header">
+  <a class="editorial-brand" href="{% url 'recommendations:recommendation_start' %}" aria-label="스포츠 커리어 나침반 홈">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text"><strong>스포츠 커리어 나침반</strong><small>SPORTS CREATES NEXT CAREERS</small></span>
   </a>
-  <nav aria-label="랜딩 페이지 메뉴">
-    <a href="#service-paths">추천 시작</a>
-    <a href="{% url 'analytics:dashboard' %}">데이터 보기</a>
+  <nav class="editorial-nav" aria-label="랜딩 페이지 메뉴">
+    <a href="{% url 'analytics:dashboard' %}">서비스</a>
+    <a href="{% url 'analytics:demand_supply' %}">데이터 이야기</a>
+    <a class="editorial-nav-cta" href="#recommend-split">추천 시작 <span aria-hidden="true">→</span></a>
   </nav>
 </header>
 {% endblock %}
 {% block content %}
-<section class="motion-hero" data-motion-root data-motion-state="loading" aria-labelledby="landing-title">
-  <canvas class="motion-canvas" data-particle-canvas aria-hidden="true"></canvas>
-  {% include 'recommendations/partials/hero_motion.html' %}
+<section class="editorial-hero" data-motion-root aria-labelledby="landing-title">
+  <div class="hero-copy">
+    <p class="hero-kicker">PLAY · LEARN · TEACH · GROW</p>
+    <h1 id="landing-title" class="hero-title">
+      <span class="title-line"><span>당신의 스포츠 경험은</span></span>
+      <span class="title-line"><span><span class="hero-highlight">다음 기회가 된다.</span></span></span>
+    </h1>
+    <p class="hero-subcopy">지도자 자격 취득 현황과 기관 프로그램 데이터를 연결합니다.</p>
 
-  <div class="motion-controls" aria-label="인트로 모션 제어">
-    <button type="button" class="motion-control motion-skip" data-motion-skip>모션 건너뛰기</button>
-    <button type="button" class="motion-control motion-replay" data-motion-replay>다시 보기</button>
-  </div>
-
-  <div class="scene-caption" aria-hidden="true">
-    <span data-scene-caption="1">가능성은 데이터에서 시작됩니다</span>
-    <span data-scene-caption="4">경험을 자격으로</span>
-    <span data-scene-caption="5">자격을 기회로</span>
-  </div>
-
-  <div class="motion-hero-copy">
-    <p class="motion-kicker">스포츠 지도자의 다음 기회 · DATA-DRIVEN CAREER PATH</p>
-    <h1 id="landing-title">경험을 자격으로,<br><em>자격을 기회로.</em></h1>
-    <p class="motion-description">스포츠 경험과 공공데이터를 연결해<br>당신의 다음 자격과 활동 무대를 발견합니다.</p>
-    <div class="motion-actions">
-      <a class="motion-action motion-action-primary" data-transition-link data-target="qualification" href="{% url 'recommendations:unlicensed_recommendation_form' %}">
-        <span>나에게 맞는 자격증 찾기</span><b aria-hidden="true">↗</b>
-      </a>
-      <a class="motion-action" data-transition-link data-target="opportunity" href="{% url 'recommendations:licensed_recommendation_form' %}">
-        <span>내 자격으로 활동 무대 찾기</span><b aria-hidden="true">↗</b>
-      </a>
+    <div class="hero-actions">
+      <a class="hero-btn hero-btn-dark" data-transition-link data-target="qualification" href="{% url 'recommendations:unlicensed_recommendation_form' %}">자격증 추천받기 <span aria-hidden="true">→</span></a>
+      <a class="hero-btn hero-btn-blue" data-transition-link data-target="opportunity" href="{% url 'recommendations:licensed_recommendation_form' %}">활동 기관 찾아보기 <span aria-hidden="true">→</span></a>
     </div>
+
+    <div class="sport-switch" role="group" aria-label="선수 이미지 종목 선택">
+      <button type="button" class="sport-switch-btn is-active" data-sport-select="running" data-veil-shape="slide" data-veil-color="#2457f5" aria-pressed="true">러닝</button>
+      <button type="button" class="sport-switch-btn" data-sport-select="tennis" data-veil-shape="block" data-veil-color="#f04a32" aria-pressed="false">테니스</button>
+      <button type="button" class="sport-switch-btn" data-sport-select="swimming" data-veil-shape="wave" data-veil-color="#111111" aria-pressed="false">수영</button>
+      <button type="button" class="sport-switch-btn" data-sport-select="basketball" data-veil-shape="circle" data-veil-color="#f3cc4b" aria-pressed="false">농구</button>
+      <button type="button" class="sport-switch-btn" data-sport-select="football" data-veil-shape="diagonal" data-veil-color="#111111" aria-pressed="false">축구</button>
+    </div>
+
+    <p class="hero-meta">
+      <span>MORE SPORTS<br>BRIGHTER PEOPLE</span><i aria-hidden="true"></i>
+      <span class="hero-meta-ko">스포츠가 만드는<br>더 많은 가능성</span>
+    </p>
+
+    <p class="hero-stats">
+      <strong>{{ home_metrics.program_count|default:0 }}</strong>개 운영 프로그램 ·
+      <strong>{{ home_metrics.institution_count|default:0 }}</strong>개 분석 가능 기관 ·
+      <strong>{{ home_metrics.sport_count|default:0 }}</strong>개 추천 가능 종목
+    </p>
   </div>
 
-  <div class="motion-index" aria-hidden="true"><span>01</span><i></i><span>06</span></div>
-  <a class="motion-scroll-cue" href="#service-paths"><span>SCROLL TO EXPLORE</span><i aria-hidden="true"></i></a>
+  {% include 'recommendations/partials/hero_athletes.html' %}
+
+  <div class="intro-controls" aria-label="인트로 모션 제어">
+    <button type="button" class="intro-control intro-skip" data-intro-skip>모션 건너뛰기</button>
+    <button type="button" class="intro-control intro-replay" data-intro-replay>다시 보기</button>
+  </div>
 </section>
 
 {% include 'recommendations/partials/service_paths.html' %}
 {% endblock %}
 {% block footer %}{% endblock %}
-{% block scripts %}<script src="{% static 'recommendations/motion-landing.js' %}" defer></script>{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}" defer></script>{% endblock %}

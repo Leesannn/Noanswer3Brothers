@@ -3,30 +3,22 @@
 {% block content %}
 <div class="mb-4"><h1 class="h3 mb-1">지도자 자격 취득 현황</h1><p class="text-secondary">개인 식별자와 시험 점수는 제외하고 종목·지역·연도 단위로 집계한 결과입니다.</p></div>
 {% include 'analytics/_filters.html' %}
-<div class="row g-4 mb-4">
-  <div class="col-xl-7">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5">종목별 자격 취득 건수</h2>
-        <div class="chart-wrap"><canvas id="chart"></canvas></div>
-      </div>
-    </div>
-  </div>
-  <div class="col-xl-5">
-    <div class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <h2 class="h5">연도별 취득 추이</h2>
-        <div class="year-trend-scroll" tabindex="0" role="region" aria-label="연도별 취득 추이 표">
-          <table class="table">
-            <thead><tr><th>연도</th><th>취득 건수</th></tr></thead>
-            <tbody>{% for row in by_year %}<tr><td>{{ row.acquisition_year|default:'미상' }}</td><td>{{ row.total|floatformat:'0g' }}</td></tr>{% empty %}<tr><td colspan="2">데이터가 없습니다.</td></tr>{% endfor %}</tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="row g-4 mb-4 align-items-start"><div class="col-xl-7"><div class="card border-0 shadow-sm"><div class="card-body"><h2 class="h5">종목별 자격 취득 건수</h2><div class="chart-wrap chart-scroll-x"><div class="chart-scroll-inner"><canvas id="chart"></canvas></div></div></div></div></div><div class="col-xl-5"><div class="card border-0 shadow-sm"><div class="card-body"><h2 class="h5">연도별 취득 추이</h2><div class="table-scroll-y"><table class="table"><thead><tr><th>연도</th><th>취득 건수</th></tr></thead><tbody>{% for row in by_year %}<tr><td>{{ row.acquisition_year|default:'미상' }}</td><td>{{ row.total|floatformat:'0g' }}</td></tr>{% empty %}<tr><td colspan="2">데이터가 없습니다.</td></tr>{% endfor %}</tbody></table></div></div></div></div></div>
 <div class="row g-4 mb-4"><div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><h2 class="h5">자격 종류·등급별 현황</h2><table class="table"><thead><tr><th>자격</th><th>등급</th><th>건수</th></tr></thead><tbody>{% for row in by_qualification %}<tr><td>{{ row.qualification_type }}</td><td>{{ row.grade|default:'-' }}</td><td>{{ row.total|floatformat:'0g' }}</td></tr>{% endfor %}</tbody></table></div></div></div><div class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><h2 class="h5">지역별 현황</h2><table class="table"><thead><tr><th>지역</th><th>건수</th></tr></thead><tbody>{% for row in by_region %}<tr><td>{{ row.region|default:'지역 미상' }}</td><td>{{ row.total|floatformat:'0g' }}</td></tr>{% endfor %}</tbody></table></div></div></div></div>
 <div class="card border-0 shadow-sm"><div class="card-body"><h2 class="h5">원본 기준 집계표</h2><div class="table-responsive"><table class="table table-hover"><thead><tr><th><a href="{% querystring sort='-year' page=None %}">연도</a></th><th>지역</th><th><a href="{% querystring sort='sport' page=None %}">종목</a></th><th>자격 종류</th><th>등급</th><th><a href="{% querystring sort='-count' page=None %}">취득 건수</a></th><th>출처</th></tr></thead><tbody>{% for row in page_obj %}<tr><td>{{ row.acquisition_year|default:'-' }}</td><td>{{ row.region|default:'-' }}</td><td>{{ row.sport }}</td><td>{{ row.qualification_type }}</td><td>{{ row.grade|default:'-' }}</td><td>{{ row.acquisition_count|floatformat:'0g' }}</td><td>{{ row.source_filename }}</td></tr>{% empty %}<tr><td colspan="7">표시할 데이터가 없습니다.</td></tr>{% endfor %}</tbody></table></div>{% include 'analytics/_pagination.html' %}</div></div>
 {% endblock %}
-{% block scripts %}<script>new Chart(document.getElementById('chart'),{type:'bar',data:{labels:{{ chart_labels|safe }},datasets:[{label:'취득 건수',data:{{ chart_values|safe }},backgroundColor:'#2563eb'}]},options:{responsive:true,maintainAspectRatio:false}});</script>{% endblock %}
+{% block scripts %}<script>
+(function () {
+  var labels = {{ chart_labels|safe }};
+  var canvas = document.getElementById('chart');
+  var inner = canvas.parentElement;
+  var minWidth = Math.max(labels.length * 64, inner.parentElement.clientWidth);
+  inner.style.minWidth = minWidth + 'px';
+  inner.style.height = '100%';
+  new Chart(canvas, {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ label: '취득 건수', data: {{ chart_values|safe }}, backgroundColor: '#2563eb' }] },
+    options: { responsive: true, maintainAspectRatio: false },
+  });
+})();
+</script>{% endblock %}

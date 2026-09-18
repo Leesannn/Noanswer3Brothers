@@ -122,5 +122,8 @@ def regional_program_qualification_comparison(params):
         unmatched=Count('id', filter=Q(exclusion_reason='unmatched')),
     )
     summary['qualification_count'] = qualifications.aggregate(total=Sum('acquisition_count'))['total'] or 0
-    rows = sorted(stats.values(), key=lambda row: (row['region'], row['sport']))
+    rows = sorted(
+        stats.values(),
+        key=lambda row: (row['supply_per_program'] is None, row['region'], row['sport']),
+    )
     return rows, summary

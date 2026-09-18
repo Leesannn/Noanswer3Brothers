@@ -1,0 +1,197 @@
+/*
+ * Site-wide light "editorial" re-theme, loaded last so it overrides the
+ * dark palettes in service-ui.css and recommendation-ui.css. It reuses
+ * their existing selectors/custom properties rather than restyling markup,
+ * so every page built on those two stylesheets (dashboard, forms, results,
+ * tables, exam info, substitutes, community...) picks up the same ivory /
+ * blue / red / yellow tone as the landing page. The top nav and footer are
+ * intentionally left on their original dark styling as bookends.
+ * Landing page (.motion-landing-page) is untouched: it uses separate
+ * --editorial-* custom properties and its own stylesheet.
+ */
+
+:root {
+  /* service-ui.css tokens */
+  --service-bg: #f2efe7;
+  --service-panel: #ffffff;
+  --service-panel-raised: #ffffff;
+  --service-text: #111111;
+  --service-muted: #6f6b62;
+  --service-line: rgba(17, 17, 17, .12);
+  --service-line-strong: rgba(17, 17, 17, .24);
+  --service-accent: #2457f5;
+  --service-mint: #059669;
+  --service-warning: #b45309;
+  --service-danger: #dc2626;
+
+  /* recommendation-ui.css tokens */
+  --recipe-bg: #f2efe7;
+  --recipe-panel: #ffffff;
+  --recipe-panel-2: #ffffff;
+  --recipe-text: #111111;
+  --recipe-muted: #6f6b62;
+  --recipe-line: rgba(17, 17, 17, .12);
+  --recipe-line-strong: rgba(17, 17, 17, .24);
+  --recipe-accent: #2457f5;
+  --recipe-mint: #059669;
+  --recipe-warn: #b45309;
+}
+
+/* ------------------------------------------------------------------ */
+/* service-ui.css: patch the hardcoded (non-variable) dark colors      */
+/* ------------------------------------------------------------------ */
+.app-shell-page:not(.motion-landing-page)::before { background-image: none !important; }
+
+.app-shell-page:not(.motion-landing-page) a { color: var(--service-accent); }
+.app-shell-page:not(.motion-landing-page) a:hover { color: #111111; }
+.app-shell-page:not(.motion-landing-page) code { color: #1d3fd6; background: rgba(36, 87, 245, .1); }
+
+.app-shell-page:not(.motion-landing-page) .card,
+.app-shell-page:not(.motion-landing-page) .metric-card,
+.app-shell-page:not(.motion-landing-page) .empty-state,
+.app-shell-page:not(.motion-landing-page) .exam-path-card { background: #ffffff !important; }
+.app-shell-page:not(.motion-landing-page) .recommend-steps b { background: #ffffff; }
+
+.app-shell-page:not(.motion-landing-page) .form-label,
+.app-shell-page:not(.motion-landing-page) form.card .form-label,
+.app-shell-page:not(.motion-landing-page) .field-label label { color: #1e293b; }
+.app-shell-page:not(.motion-landing-page) .form-control,
+.app-shell-page:not(.motion-landing-page) .form-select { background-color: #ffffff !important; color-scheme: light; }
+.app-shell-page:not(.motion-landing-page) .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m3 6 5 5 5-5'/%3E%3C/svg%3E") !important; }
+.app-shell-page:not(.motion-landing-page) .form-select option,
+.app-shell-page:not(.motion-landing-page) .form-select optgroup,
+.app-shell-page:not(.motion-landing-page) select option,
+.app-shell-page:not(.motion-landing-page) select optgroup { color: #111111 !important; background: #ffffff !important; }
+.app-shell-page:not(.motion-landing-page) .form-control:focus,
+.app-shell-page:not(.motion-landing-page) .form-select:focus { color: #111111 !important; background-color: #ffffff !important; box-shadow: 0 0 0 3px rgba(36, 87, 245, .14); }
+.app-shell-page:not(.motion-landing-page) .form-control:disabled,
+.app-shell-page:not(.motion-landing-page) .form-select:disabled { color: #94a3b8 !important; background: #f1f5f9 !important; }
+.app-shell-page:not(.motion-landing-page) input:-webkit-autofill,
+.app-shell-page:not(.motion-landing-page) input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 1000px #ffffff inset; }
+.app-shell-page:not(.motion-landing-page) input[type="date"]::-webkit-calendar-picker-indicator,
+.app-shell-page:not(.motion-landing-page) input[type="time"]::-webkit-calendar-picker-indicator { filter: none; }
+.app-shell-page:not(.motion-landing-page) input[type="file"]::file-selector-button { background: #f1f5f9; }
+
+.app-shell-page:not(.motion-landing-page) .required-chip { color: #1d3fd6; background: rgba(36, 87, 245, .12); }
+.app-shell-page:not(.motion-landing-page) .optional-chip { color: #6f6b62; background: rgba(17, 17, 17, .05); }
+.app-shell-page:not(.motion-landing-page) .checkbox-field label { color: #3a382f; }
+
+.app-shell-page:not(.motion-landing-page) .btn-primary,
+.app-shell-page:not(.motion-landing-page) .primary-action,
+.app-shell-page:not(.motion-landing-page) .btn-small { color: #ffffff !important; border-color: #111111 !important; background: #111111 !important; }
+.app-shell-page:not(.motion-landing-page) .btn-primary:hover,
+.app-shell-page:not(.motion-landing-page) .btn-primary:focus,
+.app-shell-page:not(.motion-landing-page) .primary-action:hover,
+.app-shell-page:not(.motion-landing-page) .primary-action:focus,
+.app-shell-page:not(.motion-landing-page) .btn-small:hover { color: #ffffff !important; }
+.app-shell-page:not(.motion-landing-page) .btn-outline-secondary,
+.app-shell-page:not(.motion-landing-page) .btn-outline-primary,
+.app-shell-page:not(.motion-landing-page) .secondary-action,
+.app-shell-page:not(.motion-landing-page) .btn-outline { color: #111111 !important; }
+.app-shell-page:not(.motion-landing-page) .btn-outline-secondary:hover,
+.app-shell-page:not(.motion-landing-page) .btn-outline-primary:hover,
+.app-shell-page:not(.motion-landing-page) .secondary-action:hover,
+.app-shell-page:not(.motion-landing-page) .btn-outline:hover { color: #111111 !important; background: rgba(36, 87, 245, .08) !important; }
+.app-shell-page:not(.motion-landing-page) .btn-danger,
+.app-shell-page:not(.motion-landing-page) .btn-outline-danger { border-color: rgba(220, 38, 38, .4); }
+.app-shell-page:not(.motion-landing-page) .btn-danger:hover,
+.app-shell-page:not(.motion-landing-page) .btn-outline-danger:hover { color: #ffffff !important; }
+
+.app-shell-page:not(.motion-landing-page) .table { --bs-table-color: #1e293b; --bs-table-hover-color: #0f172a; --bs-table-hover-bg: rgba(36, 87, 245, .06); }
+.app-shell-page:not(.motion-landing-page) .table thead th { color: #475569; background: #f8fafc; }
+.app-shell-page:not(.motion-landing-page) .table td { color: #1e293b; }
+.app-shell-page:not(.motion-landing-page) .table a { color: #1d4ed8; }
+.app-shell-page:not(.motion-landing-page) .fact-grid > div { background: #f8fafc; }
+.app-shell-page:not(.motion-landing-page) .analysis-copy { color: #6f6b62; }
+.app-shell-page:not(.motion-landing-page) .app-main .border.rounded { background: #f8fafc; }
+
+.app-shell-page:not(.motion-landing-page) .text-bg-primary { color: #1d3fd6 !important; background: rgba(36, 87, 245, .14) !important; }
+.app-shell-page:not(.motion-landing-page) .text-bg-info,
+.app-shell-page:not(.motion-landing-page) .text-bg-success { color: #065f46 !important; background: rgba(5, 150, 105, .12) !important; }
+.app-shell-page:not(.motion-landing-page) .text-bg-warning { color: #92400e !important; background: rgba(180, 83, 9, .12) !important; }
+.app-shell-page:not(.motion-landing-page) .text-bg-danger { color: #991b1b !important; background: rgba(220, 38, 38, .1) !important; }
+.app-shell-page:not(.motion-landing-page) .text-bg-secondary,
+.app-shell-page:not(.motion-landing-page) .text-bg-light { color: #475569 !important; background: rgba(17, 17, 17, .05) !important; }
+.app-shell-page:not(.motion-landing-page) .bg-light { color: #334155 !important; background-color: #f1f5f9 !important; }
+.app-shell-page:not(.motion-landing-page) .text-primary { color: #2457f5 !important; }
+.app-shell-page:not(.motion-landing-page) .demand-badge,
+.app-shell-page:not(.motion-landing-page) .diagnosis { color: #1d3fd6; background: rgba(36, 87, 245, .08); }
+
+.app-shell-page:not(.motion-landing-page) .alert,
+.app-shell-page:not(.motion-landing-page) .notice,
+.app-shell-page:not(.motion-landing-page) .synthetic-notice { color: #334155; background: #ffffff; }
+.app-shell-page:not(.motion-landing-page) .alert-warning,
+.app-shell-page:not(.motion-landing-page) .demo-notice { color: #78350f; background: rgba(180, 83, 9, .06); }
+.app-shell-page:not(.motion-landing-page) .alert-danger { color: #7f1d1d; background: rgba(220, 38, 38, .06); }
+.app-shell-page:not(.motion-landing-page) .notice strong { color: #1e293b; }
+.app-shell-page:not(.motion-landing-page) .notice p { color: #475569; }
+.app-shell-page:not(.motion-landing-page) .rep-pill { color: #475569; background: #f8fafc; }
+.app-shell-page:not(.motion-landing-page) .new-badge { color: #92400e; background: rgba(180, 83, 9, .12); }
+
+.app-shell-page:not(.motion-landing-page) .exam-info-block,
+.app-shell-page:not(.motion-landing-page) .exam-path-card,
+.app-shell-page:not(.motion-landing-page) .exam-path-grid > div,
+.app-shell-page:not(.motion-landing-page) .milestone-cell,
+.app-shell-page:not(.motion-landing-page) .path-eligibility,
+.app-shell-page:not(.motion-landing-page) .eval-box { color: #334155; background: #f8fafc; }
+.app-shell-page:not(.motion-landing-page) .exam-info-block p,
+.app-shell-page:not(.motion-landing-page) .exam-path-grid strong,
+.app-shell-page:not(.motion-landing-page) .milestone-cell strong,
+.app-shell-page:not(.motion-landing-page) .path-eligibility { color: #1e293b; }
+.app-shell-page:not(.motion-landing-page) .milestone-cell.is-upcoming { border-color: rgba(180, 83, 9, .4); background: rgba(180, 83, 9, .07); }
+.app-shell-page:not(.motion-landing-page) .course-label { color: #1d3fd6; background: rgba(36, 87, 245, .1); }
+
+.app-shell-page:not(.motion-landing-page) .page-link { color: #334155; }
+.app-shell-page:not(.motion-landing-page) .page-link:hover { color: #1d3fd6 !important; background: rgba(36, 87, 245, .1) !important; }
+.app-shell-page:not(.motion-landing-page) .kakao-map-box,
+.app-shell-page:not(.motion-landing-page) .map-placeholder { background: #f1f5f9; }
+
+/* .nav-recommend uses var(--service-text)/var(--recipe-text) as its own
+   background (a "bright pill on dark nav" trick) -- now that those tokens
+   are dark, it needs its own explicit colors instead of inheriting them. */
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-recommend { color: #ffffff !important; background: var(--service-accent); }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-recommend:hover { color: #111111 !important; background: #ffffff; }
+.recommendation-page .app-nav .nav-recommend { color: #ffffff !important; background: var(--recipe-accent); }
+.recommendation-page .app-nav .nav-recommend:hover { color: #111111 !important; background: #ffffff; }
+
+/* ------------------------------------------------------------------ */
+/* recommendation-ui.css: patch the hardcoded (non-variable) colors    */
+/* ------------------------------------------------------------------ */
+.recommendation-main::before { background-image: none !important; }
+
+.recommendation-page .required-chip { color: #1d3fd6; background: rgba(36, 87, 245, .12); }
+.recommendation-page .optional-chip { color: #6f6b62; background: rgba(17, 17, 17, .05); }
+.recommendation-page .recommend-field .form-control,
+.recommendation-page .recommend-field .form-select { background-color: #ffffff; color-scheme: light; }
+.recommendation-page .checkbox-field label { color: #3a382f; }
+.recommendation-page .form-help { color: #6f6b62; }
+.recommendation-page .field-error { color: #dc2626; }
+
+.recommendation-page .primary-action { color: #ffffff !important; background: #111111 !important; }
+.recommendation-page .button-spinner { border-color: rgba(255, 255, 255, .35); border-top-color: #ffffff; }
+.recommendation-page .synthetic-notice { color: #78350f; background: rgba(180, 83, 9, .07); }
+.recommendation-page .synthetic-notice strong { color: #b45309; }
+.recommendation-page .recommend-card:hover { background: rgba(17, 17, 17, .02); }
+.recommendation-page .fact-grid span { color: #6f6b62; }
+.recommendation-page .result-columns h3 small,
+.recommendation-page .result-columns ul,
+.recommendation-page .result-columns p { color: #475569; }
+.recommendation-page .missing-note { color: #78350f; background: rgba(180, 83, 9, .06); }
+.recommendation-page .score-details summary { color: #475569; }
+.recommendation-page .score-details dt { color: #64748b; }
+.recommendation-page .result-footer { color: #475569; }
+.recommendation-page .card-title-row small { color: #64748b; }
+.recommendation-page .qualification-line span { color: #64748b; }
+.recommendation-page .qualification-line strong { color: #1e293b; }
+.recommendation-page .score-ring span { color: #64748b; }
+.recommendation-page .synthetic-badge { color: #92400e; background: rgba(180, 83, 9, .1); }
+.recommendation-page .qualification-list span,
+.recommendation-page .institution-list span { color: #64748b; }
+.recommendation-page .legal-note { color: #6f6b62; }
+.recommendation-page .metric-card span { color: #6f6b62; }
+
+.recommendation-page .table { --bs-table-color: #1e293b; }
+.recommendation-page .table thead th { color: #475569; background: #f8fafc; }
+.recommendation-page .table-hover > tbody > tr:hover > * { color: #0f172a; }
+.recommendation-page .map-placeholder,
+.recommendation-page .kakao-map-box { background: #f1f5f9; }

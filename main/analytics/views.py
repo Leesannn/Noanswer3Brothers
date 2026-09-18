@@ -12,6 +12,9 @@ from .models import (
 )
 from .selectors import apply_filters, exam_schedule_fetch_status, filter_options, group_exam_schedule
 from .services.analytics import sport_analysis, summary
+from .services.dummy_dashboard import (
+    dummy_application_rows, dummy_dashboard_metrics, dummy_latest_period, dummy_sport_chart,
+)
 from .services.kspo_grades import GRADES
 from .services.license_info import get_disqualification_text, get_eligibility_paths, get_license_grades
 from .services.program_catalog import (
@@ -89,13 +92,29 @@ def dashboard(request):
     sports, thresholds = sport_analysis(qualifications, programs, dashboard_applications)
     application_rows = list(dashboard_applications.order_by()[:100])
     _attach_synthetic_insights([item.program for item in application_rows])
+    chart_labels = [row['sport'] for row in sports[:10]]
+    chart_rates = [round(row['rate'] or 0, 1) for row in sports[:10]]
+
+    # 실제 신청 현황이 전혀 없으면 DB에 쓰지 않고 CSV 더미 데이터로만 화면을 채운다.
+    using_demo_applications = False
+    if not applications.exists():
+        demo_metrics = dummy_dashboard_metrics()
+        if demo_metrics:
+            using_demo_applications = True
+            metrics.update(demo_metrics)
+            chart_labels, chart_rates = dummy_sport_chart()
+            application_rows = dummy_application_rows()
+            latest_period = dummy_latest_period()
+            shows_synthetic = True
+
     context = _base_context(request)
     context.update({
         'metrics': metrics, 'sports': sports[:15], 'thresholds': thresholds,
-        'chart_labels': json.dumps([row['sport'] for row in sports[:10]], ensure_ascii=False),
-        'chart_rates': json.dumps([round(row['rate'] or 0, 1) for row in sports[:10]]),
+        'chart_labels': json.dumps(chart_labels, ensure_ascii=False),
+        'chart_rates': json.dumps(chart_rates),
         'application_rows': application_rows, 'latest_period': latest_period,
         'shows_synthetic': shows_synthetic,
+        'using_demo_applications': using_demo_applications,
     })
     return render(request, 'analytics/dashboard.html', context)
 
