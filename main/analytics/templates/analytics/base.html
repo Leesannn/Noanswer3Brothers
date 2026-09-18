@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="{% static 'analytics/app.css' %}">
   <link rel="stylesheet" href="{% static 'analytics/service-ui.css' %}">
   {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'analytics/editorial-theme.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body class="app-shell-page {% block body_class %}{% endblock %}">
@@ -36,7 +37,6 @@
           <ul class="dropdown-menu dropdown-menu-end app-dropdown">
             <li><a class="dropdown-item" href="{% url 'analytics:current_programs' %}">현재 프로그램</a></li>
             <li><a class="dropdown-item" href="{% url 'analytics:demand_supply' %}">수요·공급 분석</a></li>
-            <li><a class="dropdown-item" href="{% url 'analytics:upload' %}">데이터 업로드</a></li>
           </ul>
         </div>
         <a class="nav-link nav-recommend" href="{% url 'recommendations:recommendation_start' %}">맞춤 추천 시작</a>

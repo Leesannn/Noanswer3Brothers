@@ -4,252 +4,344 @@
   const root = document.querySelector('[data-motion-root]');
   if (!root) return;
 
-  const canvas = root.querySelector('[data-particle-canvas]');
+  const stage = root.querySelector('[data-athlete-stage]');
+  const canvas = root.querySelector('[data-trajectory-canvas]');
   const context = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const compactMotion = window.matchMedia('(max-width: 700px)');
   const precisePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-  const sessionKey = 'sportsCareerMotionPlayed';
-  const sceneClasses = ['scene-1', 'scene-2', 'scene-3', 'scene-4', 'scene-5', 'scene-6'];
-  const sportScenes = {
-    data: { scene: 1, accent: '#f5f5f2' },
-    athlete: { scene: 2, accent: '#91f5d2' },
-    sports: { scene: 3, accent: '#5b7cff' },
-    qualification: { scene: 4, accent: '#5b7cff' },
-    opportunity: { scene: 5, accent: '#91f5d2' },
-    settled: { scene: 6, accent: '#5b7cff' },
-  };
+
+  const sessionKey = 'editorialLandingIntroPlayed';
   const controller = new AbortController();
   const signal = controller.signal;
   const timeouts = [];
-  const pointer = { targetX: 0, targetY: 0, x: 0, y: 0 };
-  let frameId = 0;
-  let resizeTimer = 0;
-  let scrollFrame = 0;
-  let heroVisible = true;
   let pageVisible = !document.hidden;
-  let particles = [];
-  let width = 0;
-  let height = 0;
-  let dpr = 1;
+  let resizeTimer = 0;
 
   function safeSessionGet() {
     try { return sessionStorage.getItem(sessionKey); } catch (error) { return null; }
   }
-
   function safeSessionSet() {
-    try { sessionStorage.setItem(sessionKey, '1'); } catch (error) { /* storage is optional */ }
+    try { sessionStorage.setItem(sessionKey, '1'); } catch (error) { /* storage optional */ }
   }
-
   function clearTimeline() {
     while (timeouts.length) window.clearTimeout(timeouts.pop());
   }
 
-  function setCaption(scene) {
-    root.querySelectorAll('[data-scene-caption]').forEach((caption) => {
-      caption.classList.toggle('is-active', Number(caption.dataset.sceneCaption) === scene);
-    });
-  }
+  /* ---------------------------------------------------------------- */
+  /* Intro motion: progressive reveal driven by classes on <body>      */
+  /* ---------------------------------------------------------------- */
+  function initIntroMotion() {
+    const body = document.body;
 
-  function setScene(scene) {
-    root.classList.remove(...sceneClasses);
-    root.classList.add(`scene-${scene}`);
-    root.style.setProperty('--scene-progress', `${Math.min(100, scene / 6 * 100)}%`);
-    setCaption(scene);
-  }
+    function addScene(n) { body.classList.add(`is-intro-scene-${n}`); }
 
-  function settle(state = 'settled') {
-    clearTimeline();
-    setScene(sportScenes.settled.scene);
-    root.dataset.motionState = state;
-    safeSessionSet();
-  }
-
-  function playIntro() {
-    clearTimeline();
-    root.classList.remove('is-leaving');
-    root.dataset.motionState = 'intro';
-    const timing = compactMotion.matches
-      ? [[1, 0], [2, 380], [3, 950], [4, 1500], [5, 2150], [6, 2700]]
-      : [[1, 0], [2, 1000], [3, 2500], [4, 4000], [5, 5000], [6, 6000]];
-
-    timing.forEach(([scene, delay]) => {
-      timeouts.push(window.setTimeout(() => setScene(scene), delay));
-    });
-    timeouts.push(window.setTimeout(() => settle('settled'), compactMotion.matches ? 3000 : 7000));
-  }
-
-  function createParticles() {
-    const total = compactMotion.matches ? 12 : 30;
-    particles = Array.from({ length: total }, (_, index) => ({
-      x: ((index * 47) % 101) / 100 * width,
-      y: ((index * 73 + 17) % 103) / 102 * height,
-      vx: ((index % 5) - 2) * .045,
-      vy: (((index * 3) % 5) - 2) * .032,
-      radius: index % 7 === 0 ? 1.8 : 1,
-      phase: index * .73,
-    }));
-  }
-
-  function resizeCanvas() {
-    if (!context || !canvas) return;
-    const bounds = root.getBoundingClientRect();
-    width = Math.max(1, Math.round(bounds.width));
-    height = Math.max(1, Math.round(bounds.height));
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    createParticles();
-  }
-
-  function drawParticles(now) {
-    if (!context || !pageVisible || !heroVisible) return;
-    context.clearRect(0, 0, width, height);
-    const settledMotion = root.dataset.motionState !== 'intro';
-    const pull = root.classList.contains('scene-1') ? .0018 : 0;
-    const centerX = width * .58;
-    const centerY = height * .43;
-
-    particles.forEach((particle, index) => {
-      if (!reduceMotion.matches) {
-        particle.x += particle.vx + Math.sin(now * .00032 + particle.phase) * (settledMotion ? .018 : .05);
-        particle.y += particle.vy + Math.cos(now * .00028 + particle.phase) * (settledMotion ? .015 : .04);
-        particle.x += (centerX - particle.x) * pull;
-        particle.y += (centerY - particle.y) * pull;
-      }
-      if (particle.x < -10) particle.x = width + 10;
-      if (particle.x > width + 10) particle.x = -10;
-      if (particle.y < -10) particle.y = height + 10;
-      if (particle.y > height + 10) particle.y = -10;
-
-      context.beginPath();
-      context.fillStyle = index % 9 === 0 ? 'rgba(91,124,255,.78)' : 'rgba(245,245,242,.55)';
-      context.arc(particle.x + pointer.x * .18, particle.y + pointer.y * .18, particle.radius, 0, Math.PI * 2);
-      context.fill();
-    });
-
-    for (let i = 0; i < particles.length; i += 1) {
-      for (let j = i + 1; j < particles.length; j += 1) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 130) {
-          context.beginPath();
-          context.strokeStyle = `rgba(245,245,242,${(1 - distance / 130) * .12})`;
-          context.lineWidth = .6;
-          context.moveTo(particles[i].x, particles[i].y);
-          context.lineTo(particles[j].x, particles[j].y);
-          context.stroke();
-        }
-      }
-    }
-  }
-
-  function render(now) {
-    frameId = 0;
-    if (!pageVisible || !heroVisible || reduceMotion.matches) return;
-    pointer.x += (pointer.targetX - pointer.x) * .055;
-    pointer.y += (pointer.targetY - pointer.y) * .055;
-    root.querySelectorAll('.parallax-layer').forEach((layer) => {
-      const depth = Number(layer.dataset.depth || 8) / 16;
-      layer.style.setProperty('--layer-x', `${(pointer.x * depth).toFixed(2)}px`);
-      layer.style.setProperty('--layer-y', `${(pointer.y * depth).toFixed(2)}px`);
-    });
-    drawParticles(now);
-    frameId = window.requestAnimationFrame(render);
-  }
-
-  function syncRender() {
-    if (reduceMotion.matches) {
-      window.cancelAnimationFrame(frameId);
-      frameId = 0;
-      drawParticles(0);
-      return;
-    }
-    if (pageVisible && heroVisible && !frameId) frameId = window.requestAnimationFrame(render);
-    if ((!pageVisible || !heroVisible) && frameId) {
-      window.cancelAnimationFrame(frameId);
-      frameId = 0;
-    }
-  }
-
-  function updateScroll() {
-    scrollFrame = 0;
-    const bounds = root.getBoundingClientRect();
-    const progress = Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height * .72)));
-    root.style.setProperty('--scroll-progress', progress.toFixed(3));
-    const paths = document.querySelector('.service-paths');
-    if (paths) {
-      paths.style.setProperty('--bridge-x', `${(progress * 110).toFixed(1)}px`);
-      paths.style.setProperty('--bridge-y', `${(progress * 160).toFixed(1)}px`);
-    }
-  }
-
-  function onPointerMove(event) {
-    if (!precisePointer.matches || reduceMotion.matches) return;
-    pointer.targetX = Math.max(-16, Math.min(16, (event.clientX / window.innerWidth - .5) * 24));
-    pointer.targetY = Math.max(-12, Math.min(12, (event.clientY / window.innerHeight - .5) * 18));
-  }
-
-  function handleTransition(event) {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || reduceMotion.matches) return;
-    const link = event.currentTarget;
-    const url = link.href;
-    if (!url) return;
-    event.preventDefault();
-    safeSessionSet();
-    root.dataset.leaveTarget = link.dataset.target || 'qualification';
-    root.classList.add('is-leaving');
-    window.setTimeout(() => window.location.assign(url), 360);
-  }
-
-  try {
-    root.classList.add('motion-ready');
-    resizeCanvas();
-    updateScroll();
-
-    root.querySelector('[data-motion-skip]')?.addEventListener('click', () => settle('skipped'), { signal });
-    root.querySelector('[data-motion-replay]')?.addEventListener('click', playIntro, { signal });
-    root.querySelectorAll('[data-transition-link]').forEach((link) => link.addEventListener('click', handleTransition, { signal }));
-    window.addEventListener('pointermove', onPointerMove, { passive: true, signal });
-    window.addEventListener('scroll', () => {
-      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScroll);
-    }, { passive: true, signal });
-    window.addEventListener('resize', () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => { resizeCanvas(); updateScroll(); }, 140);
-    }, { passive: true, signal });
-    document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; syncRender(); }, { signal });
-    window.addEventListener('pageshow', (event) => { if (event.persisted) settle('settled'); }, { signal });
-    window.addEventListener('pagehide', () => {
+    function settle(state) {
       clearTimeline();
-      window.cancelAnimationFrame(frameId);
-      window.cancelAnimationFrame(scrollFrame);
-      window.clearTimeout(resizeTimer);
-      controller.abort();
-    }, { once: true });
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => { heroVisible = entries[0]?.isIntersecting ?? true; syncRender(); }, { threshold: 0 });
-      observer.observe(root);
-      signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+      for (let i = 1; i <= 7; i += 1) addScene(i);
+      body.classList.remove('is-intro-scene-loading');
+      body.classList.add(`is-intro-${state}`);
+      body.classList.remove('is-intro-intro');
+      safeSessionSet();
+      window.dispatchEvent(new CustomEvent('editorial:settled'));
     }
 
-    syncRender();
+    function playIntro() {
+      clearTimeline();
+      for (let i = 1; i <= 7; i += 1) body.classList.remove(`is-intro-scene-${i}`);
+      body.classList.remove('is-intro-settled', 'is-intro-skipped', 'is-intro-reduced');
+      body.classList.add('is-intro-intro');
+
+      const timing = compactMotion.matches
+        ? [[1, 0], [2, 250], [3, 700], [4, 1050], [5, 1450], [6, 1850], [7, 2200]]
+        : [[1, 0], [2, 450], [3, 1050], [4, 1550], [5, 2150], [6, 2750], [7, 3300]];
+
+      timing.forEach(([scene, delay]) => {
+        timeouts.push(window.setTimeout(() => addScene(scene), delay));
+      });
+      timeouts.push(window.setTimeout(() => settle('settled'), compactMotion.matches ? 2700 : 4000));
+    }
+
+    root.querySelector('[data-intro-skip]')?.addEventListener('click', () => settle('skipped'), { signal });
+    root.querySelector('[data-intro-replay]')?.addEventListener('click', playIntro, { signal });
+
+    document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; }, { signal });
+    window.addEventListener('pageshow', (event) => { if (event.persisted) settle('settled'); }, { signal });
+
     if (reduceMotion.matches) {
-      setScene(6);
-      root.dataset.motionState = 'reduced-motion';
+      body.classList.add('is-intro-reduced');
     } else if (safeSessionGet()) {
       settle('settled');
     } else {
       playIntro();
     }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Athlete switcher                                                   */
+  /* ---------------------------------------------------------------- */
+  function initAthleteSwitcher() {
+    if (!stage) return;
+    const buttons = Array.from(root.querySelectorAll('[data-sport-select]'));
+    const images = Array.from(stage.querySelectorAll('[data-athlete-image]'));
+    if (!buttons.length || !images.length) return;
+
+    let veil = stage.querySelector('.switch-veil');
+    if (!veil) {
+      veil = document.createElement('div');
+      veil.className = 'switch-veil';
+      veil.setAttribute('aria-hidden', 'true');
+      stage.appendChild(veil);
+    }
+
+    let switching = false;
+
+    function activate(sport, button) {
+      if (switching || button.classList.contains('is-active')) return;
+      const targetImage = images.find((img) => img.dataset.athleteImage === sport);
+      if (!targetImage) return;
+
+      buttons.forEach((btn) => {
+        const isTarget = btn === button;
+        btn.classList.toggle('is-active', isTarget);
+        btn.setAttribute('aria-pressed', isTarget ? 'true' : 'false');
+      });
+
+      const shape = button.dataset.veilShape || 'slide';
+      const color = button.dataset.veilColor || 'var(--editorial-blue)';
+      stage.style.setProperty('--veil-color', color);
+      stage.dataset.veilShape = shape;
+
+      if (reduceMotion.matches) {
+        images.forEach((img) => img.classList.toggle('is-active', img === targetImage));
+        return;
+      }
+
+      switching = true;
+      stage.classList.add('is-switching');
+      const current = images.find((img) => img.classList.contains('is-active'));
+      current?.classList.add('is-leaving');
+
+      const swapDelay = 260;
+      const endDelay = 620;
+      timeouts.push(window.setTimeout(() => {
+        images.forEach((img) => {
+          img.classList.remove('is-leaving');
+          img.classList.toggle('is-active', img === targetImage);
+        });
+      }, swapDelay));
+      timeouts.push(window.setTimeout(() => {
+        stage.classList.remove('is-switching');
+        switching = false;
+      }, endDelay));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => activate(button.dataset.sportSelect, button), { signal });
+    });
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Canvas trajectories: hand-drawn curves connecting cards & figure  */
+  /* ---------------------------------------------------------------- */
+  function initCanvasTrajectories() {
+    if (!context || !canvas || !stage) return;
+    if (compactMotion.matches) return;
+
+    const linkGroups = [
+      ['[data-stage-card="sport"]', '[data-stage-card="region"]'],
+      ['[data-stage-card="region"]', '[data-stage-card="qual"]'],
+      ['[data-stage-card="qual"]', '[data-stage-card="org"]'],
+      ['[data-stage-card="qual"]', '[data-stage-float="basketball"]'],
+      ['[data-stage-badge]', '[data-stage-card="org"]'],
+    ];
+
+    let curves = [];
+    let progress = 0;
+    let frameId = 0;
+    let drawn = false;
+
+    function anchor(selector) {
+      const el = stage.querySelector(selector);
+      if (!el) return null;
+      const stageBox = stage.getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      return {
+        x: box.left - stageBox.left + box.width / 2,
+        y: box.top - stageBox.top + box.height / 2,
+      };
+    }
+
+    function buildCurves() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const box = stage.getBoundingClientRect();
+      canvas.width = Math.round(box.width * dpr);
+      canvas.height = Math.round(box.height * dpr);
+      canvas.style.width = `${box.width}px`;
+      canvas.style.height = `${box.height}px`;
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      curves = linkGroups.map(([fromSel, toSel]) => {
+        const from = anchor(fromSel);
+        const to = anchor(toSel);
+        if (!from || !to) return null;
+        const mx = (from.x + to.x) / 2 + (to.y - from.y) * .18;
+        const my = (from.y + to.y) / 2 - (to.x - from.x) * .18;
+        const points = [];
+        const steps = 28;
+        for (let i = 0; i <= steps; i += 1) {
+          const t = i / steps;
+          const x = (1 - t) ** 2 * from.x + 2 * (1 - t) * t * mx + t ** 2 * to.x;
+          const y = (1 - t) ** 2 * from.y + 2 * (1 - t) * t * my + t ** 2 * to.y;
+          points.push({ x, y });
+        }
+        return points;
+      }).filter(Boolean);
+    }
+
+    function draw() {
+      const box = stage.getBoundingClientRect();
+      context.clearRect(0, 0, box.width, box.height);
+      context.strokeStyle = 'rgba(17,17,17,.5)';
+      context.lineWidth = 1.3;
+      context.lineCap = 'round';
+
+      curves.forEach((points) => {
+        const count = Math.max(2, Math.round(points.length * progress));
+        context.beginPath();
+        points.slice(0, count).forEach((point, index) => {
+          if (index === 0) context.moveTo(point.x, point.y);
+          else context.lineTo(point.x, point.y);
+        });
+        context.stroke();
+
+        if (progress >= 1) {
+          const dot = points[points.length - 1];
+          context.beginPath();
+          context.fillStyle = '#2457f5';
+          context.arc(dot.x, dot.y, 3, 0, Math.PI * 2);
+          context.fill();
+        }
+      });
+    }
+
+    function animateIn() {
+      if (drawn) return;
+      drawn = true;
+      const start = performance.now();
+      const duration = reduceMotion.matches ? 1 : 900;
+
+      function step(now) {
+        progress = Math.min(1, (now - start) / duration);
+        draw();
+        if (progress < 1 && pageVisible) frameId = window.requestAnimationFrame(step);
+      }
+      frameId = window.requestAnimationFrame(step);
+    }
+
+    buildCurves();
+    if (reduceMotion.matches) {
+      progress = 1;
+      draw();
+    } else {
+      window.addEventListener('editorial:canvasReady', animateIn, { signal, once: true });
+    }
+
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => { buildCurves(); draw(); }, 150);
+    }, { passive: true, signal });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) window.cancelAnimationFrame(frameId);
+    }, { signal });
+
+    signal.addEventListener('abort', () => window.cancelAnimationFrame(frameId), { once: true });
+
+    // Fallback: if intro settles without ever dispatching canvasReady (e.g. repeat visit), draw immediately.
+    if (safeSessionGet() || reduceMotion.matches) {
+      progress = 1;
+      draw();
+    } else {
+      timeouts.push(window.setTimeout(() => window.dispatchEvent(new CustomEvent('editorial:canvasReady')), compactMotion.matches ? 1850 : 2750));
+    }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Pointer parallax (desktop only, subtle)                           */
+  /* ---------------------------------------------------------------- */
+  function initPointerParallax() {
+    if (!stage || !precisePointer.matches || reduceMotion.matches) return;
+    const layers = [
+      stage.querySelector('.athlete-figure-wrap'),
+      ...stage.querySelectorAll('.stage-card'),
+      stage.querySelector('.stage-badge'),
+    ].filter(Boolean);
+    if (!layers.length) return;
+
+    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let frameId = 0;
+
+    function onMove(event) {
+      const box = stage.getBoundingClientRect();
+      pointer.targetX = ((event.clientX - box.left) / box.width - .5) * 16;
+      pointer.targetY = ((event.clientY - box.top) / box.height - .5) * 12;
+    }
+
+    function render() {
+      pointer.x += (pointer.targetX - pointer.x) * .08;
+      pointer.y += (pointer.targetY - pointer.y) * .08;
+      layers.forEach((layer, index) => {
+        const depth = index === 0 ? .3 : .6 + index * .08;
+        layer.style.translate = `${(pointer.x * depth).toFixed(2)}px ${(pointer.y * depth).toFixed(2)}px`;
+      });
+      frameId = window.requestAnimationFrame(render);
+    }
+
+    stage.addEventListener('pointermove', onMove, { passive: true, signal });
+    stage.addEventListener('pointerleave', () => { pointer.targetX = 0; pointer.targetY = 0; }, { signal });
+    frameId = window.requestAnimationFrame(render);
+    signal.addEventListener('abort', () => window.cancelAnimationFrame(frameId), { once: true });
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Reduced motion + page-leave transition                            */
+  /* ---------------------------------------------------------------- */
+  function initReducedMotion() {
+    if (reduceMotion.matches) document.body.classList.add('is-intro-reduced');
+  }
+
+  function initLeaveTransition() {
+    root.querySelectorAll('[data-transition-link]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || reduceMotion.matches) return;
+        const url = link.href;
+        if (!url) return;
+        event.preventDefault();
+        root.dataset.leaveTarget = link.dataset.target || 'qualification';
+        root.classList.add('is-leaving');
+        window.setTimeout(() => window.location.assign(url), 340);
+      }, { signal });
+    });
+  }
+
+  try {
+    initReducedMotion();
+    initIntroMotion();
+    initAthleteSwitcher();
+    initCanvasTrajectories();
+    initPointerParallax();
+    initLeaveTransition();
+
+    window.addEventListener('pagehide', () => {
+      clearTimeline();
+      window.clearTimeout(resizeTimer);
+      controller.abort();
+    }, { once: true });
   } catch (error) {
     clearTimeline();
-    root.classList.add('motion-ready', 'scene-6');
-    root.dataset.motionState = 'error';
+    for (let i = 1; i <= 7; i += 1) document.body.classList.add(`is-intro-scene-${i}`);
+    document.body.classList.add('is-intro-settled');
   }
 })();

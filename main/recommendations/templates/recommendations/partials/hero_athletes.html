@@ -1,50 +1,52 @@
-<div class="motion-stage" aria-hidden="true" data-motion-stage>
-  <svg class="motion-svg" viewBox="0 0 1200 760" role="presentation" focusable="false">
-    <defs>
-      <linearGradient id="orbitGradient" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#5b7cff"/>
-        <stop offset="1" stop-color="#91f5d2"/>
-      </linearGradient>
-      <linearGradient id="passGradient" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
-        <stop offset="1" stop-color="#5b7cff" stop-opacity=".04"/>
-      </linearGradient>
-    </defs>
-    <g class="scene-data parallax-layer" data-depth="5">
-      <path class="data-line line-a" d="M90 230 C260 110 430 330 600 248 S930 92 1120 220"/>
-      <path class="data-line line-b" d="M50 530 C310 660 430 420 610 515 S910 670 1160 470"/>
-      <path class="data-line line-c" d="M210 72 C310 240 480 138 595 320 S830 520 1045 610"/>
-      <g class="data-points"><circle cx="90" cy="230" r="4"/><circle cx="250" cy="174" r="3"/><circle cx="420" cy="292" r="5"/><circle cx="600" cy="248" r="4"/><circle cx="785" cy="162" r="3"/><circle cx="960" cy="137" r="5"/><circle cx="1120" cy="220" r="3"/><circle cx="180" cy="592" r="4"/><circle cx="418" cy="462" r="3"/><circle cx="610" cy="515" r="5"/><circle cx="840" cy="594" r="3"/><circle cx="1065" cy="520" r="4"/></g>
-    </g>
-    <g class="scene-athlete parallax-layer" data-depth="11">
-      <circle class="athlete-head" cx="635" cy="186" r="24"/>
-      <path class="athlete-trail" d="M305 510 C420 478 472 417 524 340 C552 298 598 264 627 230 C678 248 726 280 775 330 C825 380 886 389 953 362"/>
-      <path class="athlete-body" d="M627 230 C602 295 622 349 676 386 M617 285 C550 307 509 350 474 405 M660 285 C713 303 757 337 794 381 M676 386 C629 431 592 485 575 552 M676 386 C738 427 797 463 870 482"/>
-      <path class="athlete-speed" d="M420 356 L302 390 M446 405 L334 456 M780 438 L920 472"/>
-    </g>
-    <g class="scene-sports parallax-layer" data-depth="14">
-      <path class="sport-orbit sport-orbit-a" d="M210 482 C344 250 523 231 650 420 S914 598 1055 286"/>
-      <path class="sport-orbit sport-orbit-b" d="M175 430 C360 570 502 546 625 422 S867 270 1052 366"/>
-      <circle class="sport-ball" cx="470" cy="322" r="42"/>
-      <path class="sport-ball-detail" d="M431 303 C455 306 479 330 489 362 M448 284 C476 296 500 310 511 338"/>
-      <path class="sport-wave" d="M312 506 C370 463 429 550 487 506 S605 463 663 506 S781 550 839 506"/>
-      <path class="sport-shuttle" d="M900 262 l48 28 l-36 14 z M948 290 l34 -32 M948 290 l42 -5"/>
-    </g>
-    <g class="scene-pass parallax-layer" data-depth="9">
-      <rect class="pass-shell" x="392" y="215" width="416" height="286" rx="14" fill="url(#passGradient)"/>
-      <path class="pass-corner" d="M392 272 V229 Q392 215 406 215 H465 M735 501 H794 Q808 501 808 487 V444"/>
-      <circle class="pass-symbol" cx="465" cy="298" r="31"/>
-      <path class="pass-symbol-line" d="M449 298 l11 11 l22 -26"/>
-      <text x="518" y="276" class="pass-label">DIGITAL QUALIFICATION PASS</text><text x="518" y="317" class="pass-title">SPORTS LEADER</text>
-      <path class="pass-rule" d="M432 365 H768"/><text x="432" y="401" class="pass-data">SPORT · REGION · EXPERIENCE</text><text x="432" y="449" class="pass-value">SWIM / SEOUL / 04Y</text><text x="724" y="449" class="pass-id">QF–26</text>
-    </g>
-    <g class="scene-nodes parallax-layer" data-depth="15">
-      <path class="node-line" d="M600 360 C450 266 368 251 234 205 M600 360 C448 403 358 475 242 544 M600 360 C770 273 865 252 1000 210 M600 360 C750 440 854 478 1018 536"/>
-      <g class="node node-one" transform="translate(154 164)"><rect width="164" height="82" rx="8"/><text x="17" y="29">INSTITUTION</text><text x="17" y="57">SEOUL · 04</text></g>
-      <g class="node node-two" transform="translate(164 505)"><rect width="172" height="82" rx="8"/><text x="17" y="29">PROGRAM</text><text x="17" y="57">SWIM · 12</text></g>
-      <g class="node node-three is-selected" transform="translate(914 166)"><rect width="172" height="88" rx="8"/><text x="17" y="30">OPPORTUNITY</text><text x="17" y="60">MATCH · 92</text></g>
-      <g class="node node-four" transform="translate(923 497)"><rect width="162" height="82" rx="8"/><text x="17" y="29">DEMAND</text><text x="17" y="57">REGION · A</text></g>
-      <circle class="node-core" cx="600" cy="360" r="9"/>
-    </g>
-  </svg>
+{% load static %}
+<div class="athlete-stage" data-athlete-stage data-veil-shape="slide" aria-hidden="true">
+  <canvas class="trajectory-canvas" data-trajectory-canvas></canvas>
+
+  <div class="athlete-figure-wrap">
+    <img class="athlete-figure is-active" data-athlete-image="running"
+         src="{% static 'recommendations/images/athletes/web/runner-blue.webp' %}"
+         width="900" height="1350" alt="" fetchpriority="high">
+    <img class="athlete-figure" data-athlete-image="tennis"
+         src="{% static 'recommendations/images/athletes/web/tennis-red.webp' %}"
+         width="720" height="1080" alt="" loading="lazy">
+    <img class="athlete-figure" data-athlete-image="swimming"
+         src="{% static 'recommendations/images/athletes/web/swimmer-black.webp' %}"
+         width="1000" height="500" alt="" loading="lazy">
+    <img class="athlete-figure" data-athlete-image="basketball"
+         src="{% static 'recommendations/images/athletes/web/basketball-yellow.webp' %}"
+         width="720" height="1080" alt="" loading="lazy">
+    <img class="athlete-figure" data-athlete-image="football"
+         src="{% static 'recommendations/images/athletes/web/football-black.webp' %}"
+         width="720" height="1080" alt="" loading="lazy">
+  </div>
+
+  <img class="stage-float stage-float-swim" data-stage-float="swim"
+       src="{% static 'recommendations/images/athletes/web/swimmer-black.webp' %}"
+       width="1000" height="500" alt="" loading="lazy">
+  <img class="stage-float stage-float-basketball" data-stage-float="basketball"
+       src="{% static 'recommendations/images/athletes/web/basketball-yellow.webp' %}"
+       width="720" height="1080" alt="" loading="lazy">
+
+  <div class="stage-card card-sport" data-stage-card="sport">
+    <small>종목<span class="card-index">01</span></small>
+    <p>TENNIS<br>SWIMMING<br>BASKETBALL<br>ETC.</p>
+  </div>
+  <div class="stage-card card-region" data-stage-card="region">
+    <small><i class="card-pin"></i>지역</small>
+    <p>SEOUL<br>BUSAN<br>DAEGU<br>GWANGJU<br>ETC.</p>
+  </div>
+  <div class="stage-card card-qual" data-stage-card="qual">
+    <small>자격</small>
+    <p>SPORTS<br>INSTRUCTOR<br>CERTIFICATION</p>
+  </div>
+  <div class="stage-card card-org" data-stage-card="org">
+    <small>기관</small>
+    <p>SPORTS CENTER<br>PUBLIC INSTITUTION<br>SCHOOL<br>PRIVATE ACADEMY<br>ETC.</p>
+  </div>
+
+  <div class="stage-badge" data-stage-badge>나만의<br>커리어<br>레시피</div>
+
+  <span class="stage-note note-top">PLAY<br>LEARN<br>TEACH<br>GROW</span>
+  <span class="stage-note note-mid">EXPERIENCE TO<br>OPPORTUNITY</span>
+  <span class="stage-note note-bottom">GOOD SPORTS<br>A BRIGHTER<br>TOMORROW</span>
 </div>

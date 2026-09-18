@@ -1,22 +1,20 @@
-import csv
 import json
 
 from django.conf import settings
-from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q, Sum
 from django.db.models.functions import ExtractHour
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 
-from .forms import MappingForm, UploadForm
 from .models import (
     ApplicationStatus, CanonicalSport, Institution, Program,
-    QualificationAggregate, UploadBatch,
+    QualificationAggregate,
 )
 from .selectors import apply_filters, exam_schedule_fetch_status, filter_options, group_exam_schedule
 from .services.analytics import sport_analysis, summary
-from .services.importers import FIELD_LABELS, ImportValidationError, import_batch, preview, suggest_mapping
+from .services.dummy_dashboard import (
+    dummy_application_rows, dummy_dashboard_metrics, dummy_latest_period, dummy_sport_chart,
+)
 from .services.kspo_grades import GRADES
 from .services.license_info import get_disqualification_text, get_eligibility_paths, get_license_grades
 from .services.program_catalog import (
@@ -94,92 +92,31 @@ def dashboard(request):
     sports, thresholds = sport_analysis(qualifications, programs, dashboard_applications)
     application_rows = list(dashboard_applications.order_by()[:100])
     _attach_synthetic_insights([item.program for item in application_rows])
+    chart_labels = [row['sport'] for row in sports[:10]]
+    chart_rates = [round(row['rate'] or 0, 1) for row in sports[:10]]
+
+    # 실제 신청 현황이 전혀 없으면 DB에 쓰지 않고 CSV 더미 데이터로만 화면을 채운다.
+    using_demo_applications = False
+    if not applications.exists():
+        demo_metrics = dummy_dashboard_metrics()
+        if demo_metrics:
+            using_demo_applications = True
+            metrics.update(demo_metrics)
+            chart_labels, chart_rates = dummy_sport_chart()
+            application_rows = dummy_application_rows()
+            latest_period = dummy_latest_period()
+            shows_synthetic = True
+
     context = _base_context(request)
     context.update({
         'metrics': metrics, 'sports': sports[:15], 'thresholds': thresholds,
-        'chart_labels': json.dumps([row['sport'] for row in sports[:10]], ensure_ascii=False),
-        'chart_rates': json.dumps([round(row['rate'] or 0, 1) for row in sports[:10]]),
+        'chart_labels': json.dumps(chart_labels, ensure_ascii=False),
+        'chart_rates': json.dumps(chart_rates),
         'application_rows': application_rows, 'latest_period': latest_period,
         'shows_synthetic': shows_synthetic,
-        'recent_uploads': UploadBatch.objects.all()[:5],
+        'using_demo_applications': using_demo_applications,
     })
     return render(request, 'analytics/dashboard.html', context)
-
-
-def upload_data(request):
-    if request.method == 'POST':
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            uploaded = form.cleaned_data['file']
-            batch = UploadBatch.objects.create(
-                dataset_type=form.cleaned_data['dataset_type'], original_filename=uploaded.name,
-                temporary_file=uploaded, sheet_name=form.cleaned_data['sheet_name'],
-            )
-            try:
-                result = preview(batch.temporary_file.path, batch.sheet_name, batch.dataset_type)
-                batch.dataset_type = result['dataset_type']
-                batch.encoding = result['encoding']
-                batch.row_count = result['row_count']
-                batch.columns = result['columns']
-                batch.missing_counts = result['missing_counts']
-                batch.preview_rows = result['preview_rows']
-                batch.field_mapping = result['suggested_mapping']
-                batch.save()
-                return redirect('analytics:upload_mapping', batch_id=batch.pk)
-            except (ValueError, OSError) as exc:
-                batch.status = UploadBatch.Status.FAILED
-                batch.errors = [{'row': '', 'message': str(exc)}]
-                batch.save(update_fields=['status', 'errors'])
-                messages.error(request, str(exc))
-    else:
-        form = UploadForm()
-    return render(request, 'analytics/upload.html', {'form': form, 'uploads': UploadBatch.objects.all()[:20]})
-
-
-def map_upload(request, batch_id):
-    batch = get_object_or_404(UploadBatch, pk=batch_id)
-    suggested = batch.field_mapping or suggest_mapping(batch.dataset_type, batch.columns)
-    if request.method == 'POST':
-        form = MappingForm(request.POST, dataset_type=batch.dataset_type, columns=batch.columns, suggested=suggested)
-        if form.is_valid():
-            allow_invalid = form.cleaned_data.pop('allow_invalid', False)
-            mapping = {key: value for key, value in form.cleaned_data.items() if value}
-            try:
-                import_batch(batch, mapping, allow_invalid=allow_invalid)
-            except ImportValidationError as exc:
-                batch.refresh_from_db()
-                batch.status = UploadBatch.Status.FAILED
-                batch.failure_count = len(exc.errors)
-                batch.errors = exc.errors[:10000]
-                batch.field_mapping = mapping
-                batch.save(update_fields=['status', 'failure_count', 'errors', 'field_mapping'])
-                messages.error(request, str(exc))
-            except (ValueError, OSError) as exc:
-                batch.status = UploadBatch.Status.FAILED
-                batch.errors = [{'row': '', 'message': str(exc)}]
-                batch.save(update_fields=['status', 'errors'])
-                messages.error(request, str(exc))
-            else:
-                messages.success(request, f'{batch.success_count:,}개 행을 안전하게 처리했습니다. 오류 제외 {batch.failure_count:,}건')
-                return redirect('analytics:upload')
-    else:
-        form = MappingForm(dataset_type=batch.dataset_type, columns=batch.columns, suggested=suggested)
-    missing_rows = [{'column': column, 'count': batch.missing_counts.get(column, 0)} for column in batch.columns]
-    return render(request, 'analytics/upload_mapping.html', {
-        'batch': batch, 'form': form, 'field_labels': FIELD_LABELS[batch.dataset_type], 'missing_rows': missing_rows,
-    })
-
-
-def download_errors(request, batch_id):
-    batch = get_object_or_404(UploadBatch, pk=batch_id)
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = f'attachment; filename="upload-errors-{batch.pk}.csv"'
-    response.write('\ufeff')
-    writer = csv.writer(response)
-    writer.writerow(['행', '오류 내용'])
-    for error in batch.errors:
-        writer.writerow([error.get('row', ''), error.get('message', '')])
-    return response
 
 
 def instructor_status(request):
