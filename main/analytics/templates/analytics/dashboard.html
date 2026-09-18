@@ -2,7 +2,7 @@
 {% block title %}대시보드 | 스포츠 데이터 분석{% endblock %}
 {% block content %}
 <div class="mb-4"><h1 class="h3 mb-1">스포츠 데이터 대시보드</h1><p class="text-secondary mb-0">기존 자격·운영 데이터와 시연용 신청 현황을 함께 보여줍니다.</p></div>
-<div class="alert alert-warning demo-notice" role="alert"><strong>시연 데이터 안내</strong><br>정원 및 신청 현황은 서비스 기능 시연을 위해 생성한 합성 데이터이며, 실제 기관의 운영 실적이 아닙니다.{% if using_demo_applications %} (현재 실제 신청 데이터가 없어 <code>dashboard_demo_applications.csv</code> 예시 값을 보여주고 있습니다.){% endif %}</div>
+<div class="alert alert-warning demo-notice" role="alert"><strong>시연 데이터 안내</strong><br>정원 및 신청 현황은 서비스 기능 시연을 위해 생성한 합성 데이터이며, 실제 기관의 운영 실적이 아닙니다.</div>
 {% include 'analytics/_filters.html' %}
 <div class="row g-3 mb-4">
   <div class="col-xl-2 col-md-4"><div class="metric-card"><span>전체 정원 <span class="badge text-bg-info d-inline">시뮬레이션</span></span><strong>{{ metrics.capacity_total|floatformat:'0g' }}</strong></div></div>

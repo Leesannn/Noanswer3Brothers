@@ -1,6 +1,8 @@
+from tempfile import TemporaryDirectory
+
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from analytics.models import ApplicationStatus, Institution, Program, QualificationAggregate, UploadBatch
 from analytics.services.analytics import application_rate, demand_status, sport_analysis
@@ -34,6 +36,14 @@ class AnalyticsTests(TestCase):
 
 
 class ImporterTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temporary_media = TemporaryDirectory()
+        self.media_override = override_settings(MEDIA_ROOT=self.temporary_media.name)
+        self.media_override.enable()
+        self.addCleanup(self.temporary_media.cleanup)
+        self.addCleanup(self.media_override.disable)
+
     def make_batch(self, content, dataset_type='program', name='sample.csv'):
         batch = UploadBatch(dataset_type=dataset_type, original_filename=name)
         batch.temporary_file.save(name, ContentFile(content), save=False)
