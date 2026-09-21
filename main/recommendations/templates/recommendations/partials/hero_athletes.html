@@ -1,52 +1,37 @@
 {% load static %}
-<div class="athlete-stage" data-athlete-stage data-veil-shape="slide" aria-hidden="true">
+<div class="athlete-stage" data-athlete-stage aria-hidden="true">
   <canvas class="trajectory-canvas" data-trajectory-canvas></canvas>
 
   <div class="athlete-figure-wrap">
-    <img class="athlete-figure is-active" data-athlete-image="running"
+    <img class="athlete-figure is-active" data-athlete-image="running" data-enter-from="top"
          src="{% static 'recommendations/images/athletes/web/runner-blue.webp' %}"
          width="900" height="1350" alt="" fetchpriority="high">
-    <img class="athlete-figure" data-athlete-image="tennis"
+    <img class="athlete-figure" data-athlete-image="tennis" data-enter-from="right"
          src="{% static 'recommendations/images/athletes/web/tennis-red.webp' %}"
          width="720" height="1080" alt="" loading="lazy">
-    <img class="athlete-figure" data-athlete-image="swimming"
+    <img class="athlete-figure" data-athlete-image="swimming" data-enter-from="bottom"
          src="{% static 'recommendations/images/athletes/web/swimmer-black.webp' %}"
          width="1000" height="500" alt="" loading="lazy">
-    <img class="athlete-figure" data-athlete-image="basketball"
+    <img class="athlete-figure" data-athlete-image="basketball" data-enter-from="left"
          src="{% static 'recommendations/images/athletes/web/basketball-yellow.webp' %}"
          width="720" height="1080" alt="" loading="lazy">
-    <img class="athlete-figure" data-athlete-image="football"
+    <img class="athlete-figure" data-athlete-image="football" data-enter-from="top"
          src="{% static 'recommendations/images/athletes/web/football-black.webp' %}"
          width="720" height="1080" alt="" loading="lazy">
   </div>
 
-  <img class="stage-float stage-float-swim" data-stage-float="swim"
-       src="{% static 'recommendations/images/athletes/web/swimmer-black.webp' %}"
-       width="1000" height="500" alt="" loading="lazy">
-  <img class="stage-float stage-float-basketball" data-stage-float="basketball"
-       src="{% static 'recommendations/images/athletes/web/basketball-yellow.webp' %}"
-       width="720" height="1080" alt="" loading="lazy">
-
   <div class="stage-card card-sport" data-stage-card="sport">
-    <small>종목<span class="card-index">01</span></small>
-    <p>TENNIS<br>SWIMMING<br>BASKETBALL<br>ETC.</p>
+    <img src="{% static 'recommendations/images/athletes/poster-sport.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
   <div class="stage-card card-region" data-stage-card="region">
-    <small><i class="card-pin"></i>지역</small>
-    <p>SEOUL<br>BUSAN<br>DAEGU<br>GWANGJU<br>ETC.</p>
+    <img src="{% static 'recommendations/images/athletes/poster-region.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
   <div class="stage-card card-qual" data-stage-card="qual">
-    <small>자격</small>
-    <p>SPORTS<br>INSTRUCTOR<br>CERTIFICATION</p>
+    <img src="{% static 'recommendations/images/athletes/poster-qualification.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
   <div class="stage-card card-org" data-stage-card="org">
-    <small>기관</small>
-    <p>SPORTS CENTER<br>PUBLIC INSTITUTION<br>SCHOOL<br>PRIVATE ACADEMY<br>ETC.</p>
+    <img src="{% static 'recommendations/images/athletes/poster-institution.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
 
   <div class="stage-badge" data-stage-badge>나만의<br>커리어<br>레시피</div>
-
-  <span class="stage-note note-top">PLAY<br>LEARN<br>TEACH<br>GROW</span>
-  <span class="stage-note note-mid">EXPERIENCE TO<br>OPPORTUNITY</span>
-  <span class="stage-note note-bottom">GOOD SPORTS<br>A BRIGHTER<br>TOMORROW</span>
 </div>

@@ -79,67 +79,53 @@
   }
 
   /* ---------------------------------------------------------------- */
-  /* Athlete switcher                                                   */
+  /* Athlete auto-rotation: 이전 동작이 잔상처럼 흐려지며 사라진다         */
   /* ---------------------------------------------------------------- */
   function initAthleteSwitcher() {
     if (!stage) return;
-    const buttons = Array.from(root.querySelectorAll('[data-sport-select]'));
     const images = Array.from(stage.querySelectorAll('[data-athlete-image]'));
-    if (!buttons.length || !images.length) return;
+    if (images.length < 2) return;
+    const wrap = stage.querySelector('.athlete-figure-wrap');
 
-    let veil = stage.querySelector('.switch-veil');
-    if (!veil) {
-      veil = document.createElement('div');
-      veil.className = 'switch-veil';
-      veil.setAttribute('aria-hidden', 'true');
-      stage.appendChild(veil);
-    }
+    let index = Math.max(0, images.findIndex((img) => img.classList.contains('is-active')));
 
-    let switching = false;
-
-    function activate(sport, button) {
-      if (switching || button.classList.contains('is-active')) return;
-      const targetImage = images.find((img) => img.dataset.athleteImage === sport);
-      if (!targetImage) return;
-
-      buttons.forEach((btn) => {
-        const isTarget = btn === button;
-        btn.classList.toggle('is-active', isTarget);
-        btn.setAttribute('aria-pressed', isTarget ? 'true' : 'false');
+    function spawnGhost(sourceImage) {
+      if (!wrap) return;
+      const ghost = sourceImage.cloneNode(true);
+      ghost.removeAttribute('data-athlete-image');
+      ghost.className = 'figure-ghost';
+      ghost.style.objectPosition = window.getComputedStyle(sourceImage).objectPosition;
+      ghost.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(ghost);
+      // 클래스를 바로 붙이면 브라우저가 시작 상태를 못 보고 전환을 건너뛸 수 있어
+      // 한 프레임 쉬었다가 붙인다.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => ghost.classList.add('is-fading'));
       });
-
-      const shape = button.dataset.veilShape || 'slide';
-      const color = button.dataset.veilColor || 'var(--editorial-blue)';
-      stage.style.setProperty('--veil-color', color);
-      stage.dataset.veilShape = shape;
-
-      if (reduceMotion.matches) {
-        images.forEach((img) => img.classList.toggle('is-active', img === targetImage));
-        return;
-      }
-
-      switching = true;
-      stage.classList.add('is-switching');
-      const current = images.find((img) => img.classList.contains('is-active'));
-      current?.classList.add('is-leaving');
-
-      const swapDelay = 260;
-      const endDelay = 620;
-      timeouts.push(window.setTimeout(() => {
-        images.forEach((img) => {
-          img.classList.remove('is-leaving');
-          img.classList.toggle('is-active', img === targetImage);
-        });
-      }, swapDelay));
-      timeouts.push(window.setTimeout(() => {
-        stage.classList.remove('is-switching');
-        switching = false;
-      }, endDelay));
+      timeouts.push(window.setTimeout(() => ghost.remove(), 800));
     }
 
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => activate(button.dataset.sportSelect, button), { signal });
-    });
+    function activate(nextIndex) {
+      const targetImage = images[nextIndex];
+      if (!targetImage) return;
+      index = nextIndex;
+
+      const current = images.find((img) => img.classList.contains('is-active'));
+      if (current && current !== targetImage && !reduceMotion.matches) {
+        spawnGhost(current);
+      }
+      images.forEach((img) => img.classList.toggle('is-active', img === targetImage));
+    }
+
+    if (reduceMotion.matches) return;
+
+    const cycleMs = 4500;
+    const autoTimer = window.setInterval(() => {
+      if (!pageVisible) return;
+      activate((index + 1) % images.length);
+    }, cycleMs);
+
+    signal.addEventListener('abort', () => window.clearInterval(autoTimer), { once: true });
   }
 
   /* ---------------------------------------------------------------- */
@@ -153,7 +139,6 @@
       ['[data-stage-card="sport"]', '[data-stage-card="region"]'],
       ['[data-stage-card="region"]', '[data-stage-card="qual"]'],
       ['[data-stage-card="qual"]', '[data-stage-card="org"]'],
-      ['[data-stage-card="qual"]', '[data-stage-float="basketball"]'],
       ['[data-stage-badge]', '[data-stage-card="org"]'],
     ];
 
@@ -312,27 +297,12 @@
     if (reduceMotion.matches) document.body.classList.add('is-intro-reduced');
   }
 
-  function initLeaveTransition() {
-    root.querySelectorAll('[data-transition-link]').forEach((link) => {
-      link.addEventListener('click', (event) => {
-        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || reduceMotion.matches) return;
-        const url = link.href;
-        if (!url) return;
-        event.preventDefault();
-        root.dataset.leaveTarget = link.dataset.target || 'qualification';
-        root.classList.add('is-leaving');
-        window.setTimeout(() => window.location.assign(url), 340);
-      }, { signal });
-    });
-  }
-
   try {
     initReducedMotion();
     initIntroMotion();
     initAthleteSwitcher();
     initCanvasTrajectories();
     initPointerParallax();
-    initLeaveTransition();
 
     window.addEventListener('pagehide', () => {
       clearTimeline();
@@ -344,4 +314,127 @@
     for (let i = 1; i <= 7; i += 1) document.body.classList.add(`is-intro-scene-${i}`);
     document.body.classList.add('is-intro-settled');
   }
+})();
+
+/* ---------------------------------------------------------------- */
+/* Iris clip-path preview / page transition (recommend panels)       */
+/* ---------------------------------------------------------------- */
+(() => {
+  'use strict';
+
+  const panels = document.querySelectorAll('.recommend-panel[data-iris-target]');
+  if (!panels.length) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const PEEK_RADIUS = 250;
+
+  panels.forEach((panel) => {
+    const layer = document.querySelector(`.iris-layer[data-iris-layer="${panel.dataset.irisTarget}"]`);
+    const preview = panel.querySelector('[data-panel-preview]');
+    const frame = preview ? preview.querySelector('[data-iris-frame]') : null;
+    const coverFrame = layer ? layer.querySelector('[data-iris-cover-frame]') : null;
+    const brand = layer ? layer.querySelector('.iris-layer-brand') : null;
+    if (!layer) return;
+
+    let navigating = false;
+
+    function loadFrame(el) {
+      if (!el || el.dataset.loaded) return;
+      el.dataset.loaded = '1';
+      el.src = el.dataset.src;
+    }
+
+    // The peek circle is positioned with percentages ("at 50% 50%") relative
+    // to the button's own box, which .recommend-panel's overflow: hidden also
+    // clips — so it can never bleed past the button edge, and it stays put
+    // on scroll without any JS position tracking.
+    function setPeek(active) {
+      if (!preview || reduceMotion.matches || navigating) return;
+      if (active) { loadFrame(frame); loadFrame(coverFrame); }
+      preview.classList.add('is-active');
+      preview.style.clipPath = `circle(${active ? PEEK_RADIUS : 0}px at 50% 50%)`;
+    }
+
+    panel.addEventListener('mouseenter', () => setPeek(true));
+    panel.addEventListener('mouseleave', () => setPeek(false));
+    panel.addEventListener('focus', () => setPeek(true));
+    panel.addEventListener('blur', () => setPeek(false));
+
+    panel.addEventListener('click', (event) => {
+      if (reduceMotion.matches || navigating) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      const href = panel.getAttribute('href');
+      if (!href) return;
+
+      event.preventDefault();
+      navigating = true;
+      if (preview) {
+        preview.style.transition = 'none';
+        preview.style.clipPath = 'circle(0px at 50% 50%)';
+        void preview.offsetWidth;
+        preview.style.transition = '';
+      }
+      loadFrame(coverFrame);
+
+      // Anchor at the same point the hover-peek circle used (the button's own
+      // center — that's what "at 50% 50%" resolves to on .panel-preview), not
+      // the raw click position, so the click-expand continues from exactly
+      // where the peek circle already was instead of jumping to the cursor.
+      const rect = panel.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const fullRadius = Math.hypot(window.innerWidth, window.innerHeight);
+
+      // Snap the full-screen layer to the exact same size/position the peek
+      // circle was already at, with no transition — otherwise this element
+      // (starting from the class's default circle(0px)) would itself animate
+      // 0 → PEEK_RADIUS under the .85s transition below, growing "from
+      // nothing" at the same time the peek circle collapses. That double
+      // motion at the same spot is what reads as a stutter/cut. Only after
+      // this instant handoff do we turn the transition on for the real
+      // PEEK_RADIUS → fullRadius expansion.
+      layer.style.transition = 'none';
+      layer.style.clipPath = `circle(${PEEK_RADIUS}px at ${x}px ${y}px)`;
+      void layer.offsetWidth;
+      layer.style.transition = '';
+      layer.classList.add('is-transitioning-cover');
+      if (brand) brand.classList.add('is-loading');
+
+      const goToTarget = () => { window.location.href = href; };
+      let settled = false;
+      function onTransitionEnd(transitionEvent) {
+        if (transitionEvent.propertyName !== 'clip-path' || settled) return;
+        settled = true;
+        layer.removeEventListener('transitionend', onTransitionEnd);
+        goToTarget();
+      }
+      layer.addEventListener('transitionend', onTransitionEnd);
+      // Fallback in case transitionend never fires (e.g. layout thrash mid-transition).
+      window.setTimeout(() => { if (!settled) { settled = true; goToTarget(); } }, 1000);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { layer.style.clipPath = `circle(${fullRadius}px at ${x}px ${y}px)`; });
+      });
+    });
+
+    // A page a user reaches via Back/Forward after we navigated away mid-transition
+    // may be served from bfcache with the circle still frozen mid-expansion — reset it.
+    window.addEventListener('pageshow', (event) => {
+      if (!event.persisted) return;
+      navigating = false;
+      if (preview) { preview.classList.remove('is-active'); preview.style.removeProperty('clip-path'); }
+      if (brand) brand.classList.remove('is-loading');
+      layer.classList.remove('is-transitioning-cover');
+      layer.style.transition = 'none';
+      layer.style.removeProperty('clip-path');
+      void layer.offsetWidth;
+      layer.style.transition = '';
+      [frame, coverFrame].forEach((el) => {
+        if (!el) return;
+        el.removeAttribute('src');
+        el.src = 'about:blank';
+        delete el.dataset.loaded;
+      });
+    });
+  });
 })();

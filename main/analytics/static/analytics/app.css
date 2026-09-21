@@ -90,3 +90,8 @@ form.card .form-select,form.card .form-control{border-radius:9px;border-color:#d
 .table-scroll-y thead th{position:sticky;top:0;background:#f8fafc;z-index:1}
 .chart-scroll-x{overflow-x:auto;overflow-y:hidden}
 .chart-scroll-inner{height:100%}
+
+/* 프로그램 현황 - 신청 현황 표 세로 스크롤(약 10행 분량만 보이고 나머지는 스크롤) */
+.application-table-scroll{max-height:520px;overflow-y:auto}
+.application-table-scroll table{margin-bottom:0}
+.application-table-scroll thead th{position:sticky;top:0;background:#f8fafc;z-index:1}
