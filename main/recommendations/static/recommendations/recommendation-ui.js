@@ -23,4 +23,19 @@
   });
 
   window.addEventListener('pagehide', () => controller.abort(), { once: true });
+
+  // A page reached via Back/Forward after a submit navigated away can be
+  // served from bfcache with the submit button frozen in its loading state
+  // (disabled, spinning forever) — reset it. Not bound to `signal`: pagehide
+  // above already aborts that controller before the page freezes into
+  // bfcache, so a signal-bound listener here would already be gone by the
+  // time this fires on restore.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    document.querySelectorAll('[data-loading-form] button[type="submit"]').forEach((button) => {
+      button.classList.remove('is-loading');
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+    });
+  });
 })();

@@ -8,8 +8,8 @@
 <noscript><style>
 .editorial-home .editorial-header,.editorial-home .hero-kicker,.editorial-home .hero-title .title-line>span,
 .editorial-home .hero-subcopy,.editorial-home .hero-actions,.editorial-home .hero-meta,.editorial-home .hero-stats,
-.editorial-home .sport-switch,.editorial-home .stage-card,.editorial-home .stage-badge,.editorial-home .stage-float,
-.editorial-home .stage-note,.editorial-home .athlete-figure.is-active { opacity: 1 !important; transform: none !important; }
+.editorial-home .stage-card,.editorial-home .stage-badge,
+.editorial-home .athlete-figure.is-active { opacity: 1 !important; transform: none !important; }
 .editorial-home .hero-highlight { background-size: 100% 100% !important; }
 .editorial-home .intro-controls { display: none !important; }
 </style></noscript>
@@ -38,16 +38,8 @@
     <p class="hero-subcopy">지도자 자격 취득 현황과 기관 프로그램 데이터를 연결합니다.</p>
 
     <div class="hero-actions">
-      <a class="hero-btn hero-btn-dark" data-transition-link data-target="qualification" href="{% url 'recommendations:unlicensed_recommendation_form' %}">자격증 추천받기 <span aria-hidden="true">→</span></a>
-      <a class="hero-btn hero-btn-blue" data-transition-link data-target="opportunity" href="{% url 'recommendations:licensed_recommendation_form' %}">활동 기관 찾아보기 <span aria-hidden="true">→</span></a>
-    </div>
-
-    <div class="sport-switch" role="group" aria-label="선수 이미지 종목 선택">
-      <button type="button" class="sport-switch-btn is-active" data-sport-select="running" data-veil-shape="slide" data-veil-color="#2457f5" aria-pressed="true">러닝</button>
-      <button type="button" class="sport-switch-btn" data-sport-select="tennis" data-veil-shape="block" data-veil-color="#f04a32" aria-pressed="false">테니스</button>
-      <button type="button" class="sport-switch-btn" data-sport-select="swimming" data-veil-shape="wave" data-veil-color="#111111" aria-pressed="false">수영</button>
-      <button type="button" class="sport-switch-btn" data-sport-select="basketball" data-veil-shape="circle" data-veil-color="#f3cc4b" aria-pressed="false">농구</button>
-      <button type="button" class="sport-switch-btn" data-sport-select="football" data-veil-shape="diagonal" data-veil-color="#111111" aria-pressed="false">축구</button>
+      <a class="hero-btn hero-btn-dark" href="{% url 'recommendations:unlicensed_recommendation_form' %}">자격증 추천받기 <span aria-hidden="true">→</span></a>
+      <a class="hero-btn hero-btn-blue" href="{% url 'recommendations:licensed_recommendation_form' %}">활동 기관 찾아보기 <span aria-hidden="true">→</span></a>
     </div>
 
     <p class="hero-meta">

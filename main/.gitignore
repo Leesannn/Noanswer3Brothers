@@ -9,6 +9,9 @@ __pycache__/
 
 # CSV data files
 *.csv
+!data/application_demo.csv
+!/data/kspo_license_grades.csv
+!/data/kspo_license_eligibility_paths.csv
 
 # 자격제도안내는 DB가 아닌 CSV로만 보관한다 (crawl_license_info로 생성).
 # exam_info 화면이 이 두 파일을 못 읽으면 "정보를 아직 불러오지 못했습니다"로 표시된다.

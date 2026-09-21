@@ -40,8 +40,9 @@ FIELD_LABELS = {
         'status': '운영 상태',
     },
     'application': {
-        'institution': '기관명', 'program': '프로그램명', 'sport': '종목', 'reference_date': '기준일/모집 연도',
-        'capacity': '정원', 'applicants': '신청 인원', 'waitlist': '대기 인원',
+        'institution': '기관명', 'region': '지역', 'program': '프로그램명', 'sport': '종목',
+        'reference_date': '기준일/모집 연도', 'capacity': '정원', 'applicants': '신청 인원',
+        'waitlist': '대기 인원', 'is_synthetic': '시연 데이터 여부',
     },
 }
 
@@ -73,6 +74,7 @@ ALIASES = {
     'reference_date': ('기준일', '모집연도', '모집년도'),
     'applicants': ('신청인원', '접수인원', '등록인원'),
     'waitlist': ('대기인원', '대기자'),
+    'is_synthetic': ('시연데이터', '합성데이터', '더미데이터', 'is_synthetic'),
 }
 
 
@@ -203,6 +205,17 @@ def _integer(value, required=False):
     if number < 0:
         raise ValueError('음수는 사용할 수 없습니다.')
     return number
+
+
+def _boolean(value):
+    value = normalized_key(value)
+    if not value:
+        return False
+    if value in {'true', '1', 'yes', 'y', '예', '사용'}:
+        return True
+    if value in {'false', '0', 'no', 'n', '아니오', '미사용'}:
+        return False
+    raise ValueError(f'참/거짓으로 변환할 수 없습니다: {value}')
 
 
 def _date(value):
@@ -418,10 +431,21 @@ def _import_applications(rows, mapping, batch, errors, allow_invalid=False):
             values = {field: _value(row, mapping, field) for field in FIELD_LABELS['application']}
             reference_date = _date(values['reference_date'])
             institution_name = values['institution'] or '기관 미상'
-            institution = _institution('', institution_name, {}, batch, institutions)
             normalized_program = normalized_key(values['program'])
-            program = Program.objects.filter(institution=institution, normalized_name=normalized_program).first()
+            program_query = Program.objects.filter(
+                institution__normalized_name=normalized_key(normalize_institution(institution_name)),
+                normalized_name=normalized_program,
+            )
+            normalized_region = normalized_key(normalize_region(values['region']))
+            if normalized_region:
+                program_query = program_query.filter(
+                    institution__normalized_region=normalized_region,
+                )
+            program = program_query.order_by('pk').first()
             if not program:
+                institution = _institution(
+                    values['region'], institution_name, {}, batch, institutions,
+                )
                 key = _source_key(institution.normalized_name, values['program'], '', '', '')
                 program, _ = Program.objects.get_or_create(
                     source_key=key,
@@ -436,7 +460,8 @@ def _import_applications(rows, mapping, batch, errors, allow_invalid=False):
             applications[key] = ApplicationStatus(
                 program=program, source_key=key, reference_date=reference_date,
                 capacity=capacity, applicants=applicants,
-                waitlist=_integer(values['waitlist']), is_synthetic=False,
+                waitlist=_integer(values['waitlist']),
+                is_synthetic=_boolean(values['is_synthetic']),
             )
             valid_rows += 1
         except ValueError as exc:

@@ -71,6 +71,30 @@ class ImporterTests(TestCase):
         self.assertEqual(Program.objects.count(), 0)
         self.assertEqual(Institution.objects.count(), 0)
 
+    def test_application_csv_links_existing_program_and_marks_demo_data(self):
+        institution = Institution.objects.create(
+            name='행복센터', normalized_name='행복센터',
+            region='서울', normalized_region='서울',
+        )
+        program = Program.objects.create(
+            institution=institution, source_key='existing-program',
+            name='아침수영', normalized_name='아침수영',
+            sport='수영', normalized_sport='수영', capacity=20,
+        )
+        content = (
+            '기관명,지역,프로그램명,종목,기준일,정원,신청인원,대기인원,시연데이터\n'
+            '행복센터,서울,아침수영,수영,2026-09-01,20,22,2,true\n'
+        ).encode('utf-8')
+        batch = self.make_batch(content, dataset_type='application')
+        result = preview(batch.temporary_file.path, requested_type='application')
+        import_batch(batch, result['suggested_mapping'])
+
+        self.assertEqual(Program.objects.count(), 1)
+        application = ApplicationStatus.objects.get()
+        self.assertEqual(application.program, program)
+        self.assertTrue(application.is_synthetic)
+        self.assertEqual(application.applicants, 22)
+
     def test_xlsx_reading(self):
         try:
             from openpyxl import Workbook

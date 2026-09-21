@@ -13,7 +13,8 @@ from .models import (
 from .selectors import apply_filters, exam_schedule_fetch_status, filter_options, group_exam_schedule
 from .services.analytics import sport_analysis, summary
 from .services.dummy_dashboard import (
-    dummy_application_rows, dummy_dashboard_metrics, dummy_latest_period, dummy_sport_chart,
+    dummy_application_rows, dummy_dashboard_metrics, dummy_filtered_rows, dummy_grouped_rates,
+    dummy_has_data, dummy_latest_period, dummy_ranked_application_rows,
 )
 from .services.kspo_grades import GRADES
 from .services.license_info import get_disqualification_text, get_eligibility_paths, get_license_grades
@@ -89,29 +90,38 @@ def dashboard(request):
         metrics['institution_total'] = current_programs.values(
             'program__institution_id',
         ).distinct().count()
-    sports, thresholds = sport_analysis(qualifications, programs, dashboard_applications)
     application_rows = list(dashboard_applications.order_by()[:100])
     _attach_synthetic_insights([item.program for item in application_rows])
-    chart_labels = [row['sport'] for row in sports[:10]]
-    chart_rates = [round(row['rate'] or 0, 1) for row in sports[:10]]
 
     # 실제 신청 현황이 전혀 없으면 DB에 쓰지 않고 CSV 더미 데이터로만 화면을 채운다.
+    # 검색 옵션(지역·종목·기관·검색어)은 지표 카드·프로그램별 신청 현황 표에 그대로 반영한다.
     using_demo_applications = False
-    if not applications.exists():
-        demo_metrics = dummy_dashboard_metrics()
-        if demo_metrics:
-            using_demo_applications = True
-            metrics.update(demo_metrics)
-            chart_labels, chart_rates = dummy_sport_chart()
-            application_rows = dummy_application_rows()
-            latest_period = dummy_latest_period()
-            shows_synthetic = True
+    if not applications.exists() and dummy_has_data():
+        using_demo_applications = True
+        institution_id = request.GET.get('institution', '').strip()
+        institution_name = ''
+        if institution_id.isdigit():
+            institution_name = Institution.objects.filter(pk=int(institution_id)).values_list(
+                'name', flat=True,
+            ).first() or ''
+        demo_rows = dummy_filtered_rows(
+            region=request.GET.get('region', ''),
+            sport=request.GET.get('sport', ''),
+            institution_name=institution_name,
+            search=request.GET.get('q', ''),
+        )
+        metrics.update(dummy_dashboard_metrics(demo_rows) or {
+            'capacity_total': 0, 'applicant_total': 0,
+            'average_rate': None, 'full_program_total': 0,
+        })
+        # 더미 CSV가 수십만 건 규모라 화면에는 앞부분 표본만 나열한다. 집계(metrics)는 전체 기준이다.
+        application_rows = dummy_application_rows(demo_rows, limit=100)
+        latest_period = dummy_latest_period(demo_rows) or dummy_latest_period()
+        shows_synthetic = True
 
     context = _base_context(request)
     context.update({
-        'metrics': metrics, 'sports': sports[:15], 'thresholds': thresholds,
-        'chart_labels': json.dumps(chart_labels, ensure_ascii=False),
-        'chart_rates': json.dumps(chart_rates),
+        'metrics': metrics,
         'application_rows': application_rows, 'latest_period': latest_period,
         'shows_synthetic': shows_synthetic,
         'using_demo_applications': using_demo_applications,
@@ -213,6 +223,14 @@ def program_status(request):
     })
     page_obj = _page(request, programs)
     _attach_synthetic_insights(page_obj.object_list)
+
+    # 실제 신청 현황이 전혀 없으면 프로그램 목록 옆에 CSV 더미 신청 현황을 참고용으로 보여준다.
+    using_demo_applications = False
+    demo_application_rows = []
+    if not ApplicationStatus.objects.exists():
+        demo_application_rows = dummy_application_rows(limit=100)
+        using_demo_applications = bool(demo_application_rows)
+
     context = _base_context(request)
     context.update({
         'page_obj': page_obj, 'by_sport': by_sport, 'by_region': by_region,
@@ -220,6 +238,8 @@ def program_status(request):
         'chart_labels': json.dumps([row['sport'] or '미분류' for row in by_sport], ensure_ascii=False),
         'chart_values': json.dumps([row['total'] for row in by_sport]),
         'match_stats': match_stats, 'match_grade': match_grade,
+        'demo_application_rows': demo_application_rows,
+        'using_demo_applications': using_demo_applications,
     })
     return render(request, 'analytics/programs.html', context)
 
@@ -281,13 +301,32 @@ def application_status(request):
     page_obj = _page(request, applications)
     page_items = list(page_obj.object_list)
     _attach_synthetic_insights([item.program for item in page_items])
+    top_items = rated.order_by('-calculated_rate')[:10]
+    bottom_items = rated.order_by('calculated_rate')[:10]
+    full_items = rated.filter(applicants__gte=F('capacity')).order_by('-reference_date')[:20]
+
+    # 실제 신청 현황이 전혀 없으면 DB에 쓰지 않고 CSV 더미 데이터로만 화면을 채운다.
+    # 더미 CSV가 수십만 건 규모라, 페이지네이션은 원본 dict로 먼저 자르고 표시용 dict는
+    # 현재 페이지 분량만 만든다.
+    using_demo_applications = False
+    if not applications.exists():
+        demo_raw_rows = dummy_filtered_rows()
+        if demo_raw_rows:
+            using_demo_applications = True
+            top_items, bottom_items, full_items = dummy_ranked_application_rows()
+            by_sport = dummy_grouped_rates('sport')
+            by_institution = dummy_grouped_rates('institution')
+            page_obj = _page(request, demo_raw_rows)
+            page_obj.object_list = dummy_application_rows(list(page_obj.object_list))
+
     context = _base_context(request)
     context.update({
         'page_obj': page_obj,
-        'top_items': rated.order_by('-calculated_rate')[:10],
-        'bottom_items': rated.order_by('calculated_rate')[:10],
-        'full_items': rated.filter(applicants__gte=F('capacity')).order_by('-reference_date')[:20],
+        'top_items': top_items,
+        'bottom_items': bottom_items,
+        'full_items': full_items,
         'by_sport': by_sport, 'by_institution': by_institution,
+        'using_demo_applications': using_demo_applications,
     })
     return render(request, 'analytics/applications.html', context)
 

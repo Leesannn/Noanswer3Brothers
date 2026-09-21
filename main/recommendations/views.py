@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 
 from analytics.models import CanonicalSport, Institution, ProgramCleanup
 
@@ -28,6 +29,7 @@ def recommendation_start(request):
     })
 
 
+@xframe_options_sameorigin
 def licensed_recommendation_form(request):
     initial = request.session.get('licensed_recommendation_input', {})
     if request.method == 'POST':
@@ -80,6 +82,7 @@ def licensed_recommendation_results(request):
     })
 
 
+@xframe_options_sameorigin
 def unlicensed_recommendation_form(request):
     initial = request.session.get('unlicensed_recommendation_input', {})
     if request.method == 'POST':

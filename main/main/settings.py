@@ -84,10 +84,7 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        # 별도 DB를 만들거나 점검할 때 기존 운영 DB를 덮어쓰지 않고 경로만 바꾼다.
-        'NAME': Path(os.environ.get(
-            'DJANGO_DB_PATH', BASE_DIR / 'sports_service_202607.sqlite3',
-        )),
+        'NAME': BASE_DIR / 'sports_service_202607.sqlite3',
     },
     'community': {
         'ENGINE': 'django.db.backends.postgresql',

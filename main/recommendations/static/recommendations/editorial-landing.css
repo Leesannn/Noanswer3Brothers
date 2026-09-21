@@ -60,11 +60,6 @@ body.editorial-home { margin: 0; background: var(--editorial-bg); color: var(--e
 .hero-btn-dark { color: #fff; background: var(--editorial-line); }
 .hero-btn-blue { color: #fff; background: var(--editorial-blue); border-color: var(--editorial-blue); }
 
-.sport-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; }
-.sport-switch-btn { padding: 8px 16px; color: var(--editorial-text); background: transparent; border: 1.5px solid rgba(17,17,17,.28); border-radius: 999px; font-size: .8rem; font-weight: 700; cursor: pointer; transition: background .18s ease, color .18s ease, border-color .18s ease; }
-.sport-switch-btn:hover { border-color: var(--editorial-line); }
-.sport-switch-btn.is-active { color: #fff; background: var(--editorial-line); border-color: var(--editorial-line); }
-
 .hero-meta { display: flex; align-items: center; gap: 16px; margin: 40px 0 0; color: var(--editorial-muted); }
 .hero-meta span:first-child { font: 800 .68rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .1em; }
 .hero-meta i { width: 42px; height: 1px; background: rgba(17,17,17,.28); }
@@ -80,50 +75,50 @@ body.editorial-home { margin: 0; background: var(--editorial-bg); color: var(--e
 .trajectory-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
 
 .athlete-figure-wrap { position: absolute; inset: 6% 4% 0 8%; z-index: 2; display: grid; place-items: end center; }
-.athlete-figure { position: absolute; inset: 0; width: auto; height: 100%; max-width: 100%; margin: 0 auto; object-fit: contain; object-position: bottom; opacity: 0; transform: translateX(26px) scale(.98); transition: opacity .5s var(--editorial-ease), transform .5s var(--editorial-ease), clip-path .5s var(--editorial-ease); will-change: transform, opacity; }
-.athlete-figure.is-active { opacity: 1; transform: translateX(0) scale(1); }
+/* 종목이 바뀔 때 색 도형으로 화면을 덮지 않고, 이전 동작이 흐려지며 잔상처럼 사라지는
+   동안 새 동작은 각자 정해진 방향(위·아래·좌·우)에서 들어오며 초점이 맞는다. */
+.athlete-figure { position: absolute; inset: 0; z-index: 2; width: auto; height: 100%; max-width: 100%; margin: 0 auto; object-fit: contain; object-position: bottom; opacity: 0; filter: blur(6px); transform: scale(1.03); transition: opacity .5s ease, filter .5s ease, transform .7s var(--editorial-ease); will-change: opacity, filter, transform; }
+.athlete-figure[data-enter-from="top"] { transform: scale(1.03) translateY(-48px); }
+.athlete-figure[data-enter-from="right"] { transform: scale(1.03) translateX(48px); }
+.athlete-figure[data-enter-from="bottom"] { transform: scale(1.03) translateY(48px); }
+.athlete-figure[data-enter-from="left"] { transform: scale(1.03) translateX(-48px); }
+.athlete-figure.is-active { opacity: 1; filter: blur(0); transform: scale(1) translate(0, 0); }
+/* 수영 이미지는 가로로 넓고 얇아서(1000x500) 다른 세로형 이미지처럼 하단 기준으로 두면
+   위쪽에 빈 공간이 많이 남는다. 세로 중앙에 맞춘다. */
+.athlete-figure[data-athlete-image="swimming"] { object-position: center; }
 
-.athlete-stage[data-veil-shape="circle"].is-switching .athlete-figure.is-leaving { animation: figure-fade-circle .5s var(--editorial-ease) both; }
-.athlete-stage[data-veil-shape="block"].is-switching .athlete-figure.is-leaving,
-.athlete-stage[data-veil-shape="diagonal"].is-switching .athlete-figure.is-leaving,
-.athlete-stage[data-veil-shape="wave"].is-switching .athlete-figure.is-leaving { opacity: 0; transform: translateX(-18px) scale(.97); }
+/* 방금까지 보이던 동작의 잔상. JS가 전환 시작 시 현재 이미지를 복제해 넣고
+   바로 뒤이어 is-fading을 붙여 흐려지며 사라지게 한다. */
+.figure-ghost { position: absolute; inset: 0; z-index: 1; width: auto; height: 100%; max-width: 100%; margin: 0 auto; object-fit: contain; opacity: .5; filter: blur(3px); transform: scale(1.01); transition: opacity .75s ease, filter .75s ease, transform .75s ease; pointer-events: none; }
+.figure-ghost.is-fading { opacity: 0; filter: blur(18px); transform: scale(1.1); }
 
-.switch-veil { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: var(--veil-color, var(--editorial-blue)); opacity: 0; }
-.athlete-stage.is-switching .switch-veil { animation-duration: .6s; animation-timing-function: var(--editorial-ease); animation-fill-mode: both; }
-.athlete-stage[data-veil-shape="slide"].is-switching .switch-veil { animation-name: veil-slide; }
-.athlete-stage[data-veil-shape="block"].is-switching .switch-veil { animation-name: veil-block; }
-.athlete-stage[data-veil-shape="wave"].is-switching .switch-veil { animation-name: veil-wave; }
-.athlete-stage[data-veil-shape="circle"].is-switching .switch-veil { animation-name: veil-circle; }
-.athlete-stage[data-veil-shape="diagonal"].is-switching .switch-veil { animation-name: veil-diagonal; }
+.stage-card { position: absolute; z-index: 5; opacity: 0; transform: translateY(18px); transition: opacity .55s var(--editorial-ease), transform .55s var(--editorial-ease); }
+.stage-card img { display: block; width: 100%; height: auto; border-radius: 4px; box-shadow: 7px 9px 0 rgba(17,17,17,.14), 0 16px 30px rgba(17,17,17,.22); }
 
-@keyframes veil-slide { 0% { opacity: 0; clip-path: inset(0 100% 0 0); } 45% { opacity: .9; clip-path: inset(0 0 0 0); } 100% { opacity: 0; clip-path: inset(0 0 0 100%); } }
-@keyframes veil-block { 0% { opacity: 0; clip-path: inset(0 0 100% 0); } 45% { opacity: 1; clip-path: inset(0 0 0 0); } 100% { opacity: 0; clip-path: inset(100% 0 0 0); } }
-@keyframes veil-wave { 0% { opacity: 0; clip-path: inset(50% 100% 50% 0 round 60px); } 45% { opacity: .92; clip-path: inset(0 0 0 0 round 0); } 100% { opacity: 0; clip-path: inset(50% 0 50% 100% round 60px); } }
-@keyframes veil-circle { 0% { opacity: 0; clip-path: circle(0% at 50% 55%); } 45% { opacity: 1; clip-path: circle(85% at 50% 55%); } 100% { opacity: 0; clip-path: circle(120% at 50% 55%); } }
-@keyframes veil-diagonal { 0% { opacity: 0; clip-path: polygon(-20% 0, 0 0, -20% 100%, -40% 100%); } 45% { opacity: 1; clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%); } 100% { opacity: 0; clip-path: polygon(120% 0, 140% 0, 120% 100%, 100% 100%); } }
-@keyframes figure-fade-circle { to { opacity: 0; transform: scale(.9); } }
+/* 카드가 완전히 정지해 보이지 않도록, 기울기를 유지한 채 위성처럼 둥글게 한 바퀴
+   떠다니게 한다. 회전은 카드마다 다르게(--card-rotate) 주고 애니메이션도 서로 다른
+   박자로 어긋나게 돈다. */
+@keyframes stage-card-float {
+  0% { transform: rotate(var(--card-rotate, 0deg)) translate(0, 0); }
+  25% { transform: rotate(var(--card-rotate, 0deg)) translate(8px, -8px); }
+  50% { transform: rotate(var(--card-rotate, 0deg)) translate(0, -14px); }
+  75% { transform: rotate(var(--card-rotate, 0deg)) translate(-8px, -8px); }
+  100% { transform: rotate(var(--card-rotate, 0deg)) translate(0, 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stage-card img { animation: stage-card-float 6s ease-in-out infinite; }
+}
 
-.stage-card { position: absolute; z-index: 5; padding: 16px 18px; border: 1.5px solid var(--editorial-line); border-radius: 2px; opacity: 0; transform: translateY(18px); transition: opacity .55s var(--editorial-ease), transform .55s var(--editorial-ease); }
-.stage-card small { display: flex; align-items: center; gap: 6px; font: 800 .78rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .04em; }
-.stage-card .card-index { margin-left: auto; font-size: .95rem; }
-.stage-card p { margin: 10px 0 0; font: 700 .68rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .02em; }
-.stage-card .card-pin { display: inline-block; width: 8px; height: 8px; border-radius: 50% 50% 50% 0; border: 2px solid currentColor; transform: rotate(-45deg); }
-
-.card-sport { top: 4%; right: 20%; width: 172px; background: var(--editorial-red); color: #fff; }
-.card-region { top: 16%; right: 0; width: 190px; background: var(--editorial-yellow); color: var(--editorial-text); }
-.card-qual { top: 42%; left: 44%; width: 148px; background: var(--editorial-blue); color: #fff; }
-.card-org { bottom: 6%; right: 2%; width: 210px; background: var(--editorial-red); color: #fff; }
+.card-sport { top: -2%; left: 2%; width: 150px; }
+.card-sport img { --card-rotate: -5deg; animation-duration: 5.5s; }
+.card-region { top: 16%; right: 0; width: 164px; }
+.card-region img { --card-rotate: 3deg; animation-duration: 6.5s; animation-delay: -1.6s; }
+.card-qual { bottom: 2%; left: 0; width: 128px; }
+.card-qual img { --card-rotate: -3deg; animation-duration: 5s; animation-delay: -3.1s; }
+.card-org { bottom: 6%; right: 2%; width: 178px; }
+.card-org img { --card-rotate: 4deg; animation-duration: 6s; animation-delay: -4.4s; }
 
 .stage-badge { position: absolute; z-index: 6; top: 0; right: 12%; display: grid; place-items: center; width: 128px; height: 128px; border-radius: 50%; background: var(--editorial-line); color: #fff; text-align: center; font-weight: 900; font-size: .92rem; line-height: 1.3; opacity: 0; transform: scale(.7); transition: opacity .5s var(--editorial-ease), transform .5s var(--editorial-ease); }
-
-.stage-float { position: absolute; z-index: 3; height: auto; opacity: 0; transition: opacity .6s var(--editorial-ease), transform .6s var(--editorial-ease); filter: drop-shadow(0 8px 18px rgba(17,17,17,.12)); }
-.stage-float-swim { top: 34%; right: -2%; width: 220px; transform: rotate(-4deg) translateY(14px); }
-.stage-float-basketball { bottom: 2%; left: 36%; width: 128px; transform: translateY(14px); }
-
-.stage-note { position: absolute; z-index: 5; color: var(--editorial-muted); font: 800 .62rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .1em; opacity: 0; transition: opacity .6s ease; }
-.note-top { top: -2%; left: 6%; }
-.note-mid { top: 46%; left: -2%; text-align: right; }
-.note-bottom { bottom: 18%; left: 30%; }
 
 /* ------------------------------------------------------------------ */
 /* Intro motion timeline (progressive reveal, cumulative)              */
@@ -134,14 +129,13 @@ body.is-intro-scene-2 .hero-title .title-line > span { transform: none; }
 body.is-intro-scene-3 .hero-highlight { background-size: 100% 100%; }
 body.is-intro-scene-3 .hero-subcopy { opacity: 1; transform: none; }
 body.is-intro-scene-4 .athlete-figure.is-active { opacity: 1; transform: none; }
-body.is-intro-scene-5 .stage-card,body.is-intro-scene-5 .stage-badge,body.is-intro-scene-5 .stage-float { opacity: 1; transform: none; }
+body.is-intro-scene-5 .stage-card,body.is-intro-scene-5 .stage-badge { opacity: 1; transform: none; }
 body.is-intro-scene-5 .card-region { transition-delay: .08s; }
 body.is-intro-scene-5 .card-qual { transition-delay: .16s; }
 body.is-intro-scene-5 .card-org { transition-delay: .24s; }
 body.is-intro-scene-5 .stage-badge { transition-delay: .3s; }
-body.is-intro-scene-6 .stage-note { opacity: 1; }
 body.is-intro-scene-7 .hero-actions { opacity: 1; transform: none; }
-body.is-intro-scene-7 .hero-meta,body.is-intro-scene-7 .hero-stats,body.is-intro-scene-7 .sport-switch { opacity: 1; }
+body.is-intro-scene-7 .hero-meta,body.is-intro-scene-7 .hero-stats { opacity: 1; }
 
 body.is-intro-settled .hero-title .title-line > span,
 body.is-intro-skipped .hero-title .title-line > span { transform: none; }
@@ -161,11 +155,8 @@ body.is-intro-reduced .hero-subcopy,
 body.is-intro-reduced .hero-actions,
 body.is-intro-reduced .hero-meta,
 body.is-intro-reduced .hero-stats,
-body.is-intro-reduced .sport-switch,
 body.is-intro-reduced .stage-card,
 body.is-intro-reduced .stage-badge,
-body.is-intro-reduced .stage-float,
-body.is-intro-reduced .stage-note,
 body.is-intro-reduced .athlete-figure.is-active,
 body.is-intro-reduced .hero-title .title-line > span { opacity: 1; transform: none; }
 body.is-intro-reduced .hero-highlight { background-size: 100% 100%; }
@@ -175,8 +166,19 @@ body.is-intro-reduced .hero-highlight { background-size: 100% 100%; }
 /* ------------------------------------------------------------------ */
 .recommend-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--editorial-line); }
 .recommend-panel { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; min-height: 320px; padding: clamp(28px, 4vw, 56px); color: #fff; overflow: hidden; }
-.recommend-panel-blue { background: var(--editorial-blue); }
-.recommend-panel-yellow { background: var(--editorial-yellow); color: var(--editorial-text); }
+.recommend-panel-blue {
+  background:
+    linear-gradient(100deg, var(--editorial-blue) 0%, var(--editorial-blue) 42%, rgba(36, 87, 245, .65) 58%, rgba(36, 87, 245, 0) 82%),
+    url('images/athletes/hero-runner.png') right center / cover no-repeat,
+    var(--editorial-blue);
+}
+.recommend-panel-yellow {
+  color: var(--editorial-text);
+  background:
+    linear-gradient(100deg, var(--editorial-yellow) 0%, var(--editorial-yellow) 42%, rgba(243, 204, 75, .65) 58%, rgba(243, 204, 75, 0) 82%),
+    url('images/athletes/hero-stadium.png') right center / cover no-repeat,
+    var(--editorial-yellow);
+}
 .panel-index { font: 800 1rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; opacity: .8; }
 .recommend-panel h3 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 900; line-height: 1.16; word-break: keep-all; }
 .recommend-panel p { margin: 0; max-width: 42ch; font-size: .95rem; line-height: 1.7; opacity: .92; word-break: keep-all; }
@@ -186,12 +188,108 @@ body.is-intro-reduced .hero-highlight { background-size: 100% 100%; }
 .recommend-panel:hover .panel-cta i,.recommend-panel:focus-visible .panel-cta i { transform: translate(4px, -4px); }
 
 /* ------------------------------------------------------------------ */
-/* Page transition wipe on CTA click                                   */
+/* Hover peek: confined to the button's own box (overflow: hidden on   */
+/* .recommend-panel clips it — the circle can never bleed past the     */
+/* button edge, it just gets cut off there).                           */
 /* ------------------------------------------------------------------ */
-.editorial-hero.is-leaving { pointer-events: none; }
-.editorial-hero.is-leaving::after { content: ""; position: absolute; z-index: 50; inset: 0; background: var(--editorial-blue); animation: leave-wipe .36s var(--editorial-ease) both; }
-.editorial-hero.is-leaving[data-leave-target="opportunity"]::after { background: var(--editorial-line); }
-@keyframes leave-wipe { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+.panel-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  clip-path: circle(0px at 50% 50%);
+  pointer-events: none;
+}
+.panel-preview.is-active { transition: clip-path .28s var(--editorial-ease); }
+/* Live destination page, blurred into a soft backdrop rather than shown raw. */
+.panel-preview-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--editorial-bg); filter: blur(11px) saturate(1.05) brightness(.94); transform: scale(1.08); }
+.panel-preview-scrim { position: absolute; inset: 0; background: rgba(10, 10, 10, .28); }
+.panel-preview-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: 200px;
+  padding: 20px 24px;
+  border-radius: 18px;
+  background: rgba(17, 17, 17, .45);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, .3);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .28);
+  color: #fff;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+.panel-preview-icon { width: 30px; height: 30px; }
+.panel-preview-icon svg { width: 100%; height: 100%; }
+.panel-preview-eyebrow { font: 800 .68rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .14em; opacity: .85; }
+.panel-preview-card strong { font-size: 1rem; font-weight: 800; word-break: keep-all; }
+
+/* ------------------------------------------------------------------ */
+/* Iris clip-path page transition (click): expands full-screen, so it  */
+/* intentionally lives outside the button in a fixed, viewport overlay */
+/* ------------------------------------------------------------------ */
+.iris-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  clip-path: circle(0px at 50% 50%);
+  will-change: clip-path;
+}
+.iris-layer.is-transitioning-cover { transition: clip-path .85s var(--editorial-ease); }
+/* Fallback fill shown only for the instant before the destination page's
+   blurred iframe has painted (e.g. click with no prior hover to preload it). */
+.iris-layer-blue { background: var(--editorial-blue); }
+.iris-layer-yellow { background: var(--editorial-yellow); }
+.iris-layer-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--editorial-bg); filter: blur(20px) saturate(1.05) brightness(.9); transform: scale(1.12); }
+.iris-layer-scrim { position: absolute; inset: 0; background: rgba(10, 10, 10, .38); }
+.iris-layer-brand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+.iris-layer-mark-wrap { position: relative; flex: 0 0 auto; }
+.iris-layer-brand .brand-mark { position: relative; display: block; width: 46px; height: 46px; }
+.iris-layer-brand .brand-mark::before,
+.iris-layer-brand .brand-mark::after { content: ""; position: absolute; border-radius: 50%; }
+.iris-layer-brand .brand-mark::before { inset: 0; border: 2.5px solid #fff; }
+.iris-layer-brand .brand-mark::after { top: 6px; left: 6px; width: 15px; height: 15px; background: var(--editorial-blue); }
+.iris-layer-brand .brand-text { display: flex; flex-direction: column; gap: 5px; line-height: 1.2; }
+.iris-layer-brand .brand-text strong { font-size: 1.25rem; font-weight: 900; letter-spacing: -.01em; }
+.iris-layer-brand .brand-text small { font-size: .7rem; font-weight: 800; letter-spacing: .12em; opacity: .88; transition: opacity .5s ease; }
+
+/* Loading cue while the destination page is actually fetching, shown only
+   once the click-transition is underway (.iris-layer-brand.is-loading). */
+.iris-layer-spinner {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  opacity: 0;
+}
+.iris-layer-brand.is-loading .iris-layer-spinner {
+  opacity: 1;
+  border-top-color: var(--editorial-blue);
+  border-right-color: rgba(255, 255, 255, .55);
+  animation: iris-spin .9s linear infinite;
+}
+.iris-layer-brand.is-loading .brand-text small { animation: iris-pulse 1.4s ease-in-out infinite; }
+@keyframes iris-spin { to { transform: rotate(360deg); } }
+@keyframes iris-pulse { 0%, 100% { opacity: .88; } 50% { opacity: .35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-preview,.iris-layer { display: none; }
+}
 
 /* ------------------------------------------------------------------ */
 /* Responsive                                                          */
@@ -212,8 +310,8 @@ body.is-intro-reduced .hero-highlight { background-size: 100% 100%; }
   .athlete-stage { display: flex; flex-direction: column; gap: 10px; height: auto; min-height: 0; margin-top: 8px; }
   .athlete-figure-wrap { position: relative; inset: auto; width: 100%; height: 260px; }
   .card-sport,.card-region,.card-qual,.card-org { position: static; width: auto; margin: 0; display: block; }
+  .card-sport img,.card-region img,.card-qual img,.card-org img { max-width: 200px; margin: 0 auto; animation: none; transform: none; box-shadow: 5px 6px 0 rgba(17,17,17,.14), 0 12px 22px rgba(17,17,17,.2); }
   .stage-badge { position: static; margin: 0 auto; width: 96px; height: 96px; font-size: .78rem; }
-  .stage-float,.stage-note { display: none; }
   .trajectory-canvas { display: none; }
   .recommend-split { grid-template-columns: 1fr; }
   .intro-controls { top: 10px; right: 14px; }

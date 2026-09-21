@@ -1,0 +1,28 @@
+/* Site-wide "fade" page-transition: a plain opacity crossfade.
+   The outgoing page fades opacity 1 -> 0 right before it unloads, and the
+   incoming page fades opacity 0 -> 1 on load. Because a full navigation
+   replaces the whole document, the two can't literally sit stacked with
+   opacity animating on both at once — this is the closest a classic
+   multi-page site can get: the fade-out plays on THIS page just before it
+   leaves, and the fade-in plays on the NEXT page's load. Classes/values are
+   toggled by page-transitions.js and the inline snippet at the top of
+   <body> (avoids a flash on first paint); this file supplies the timing
+   and stacking. */
+
+body {
+  position: relative;
+  z-index: 2;
+}
+
+body.is-fade-entering,
+body.is-fade-leaving {
+  transition: opacity 450ms ease;
+}
+
+body.is-fade-leaving {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body { opacity: 1 !important; transition: none !important; }
+}

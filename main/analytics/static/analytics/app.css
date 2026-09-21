@@ -28,6 +28,13 @@ html{scroll-behavior:smooth}body{min-height:100vh;background:#f7f9fc}.app-main{m
 /* 페이지 공통 UI 리뉴얼 (홈 화면 제외) */
 .app-main h1.h3{color:#0f172a;font-weight:850;letter-spacing:-.02em}
 .app-main>.mb-4>p.text-secondary,.app-main p.text-secondary{line-height:1.7}
+.year-trend-scroll{height:340px;overflow-y:scroll;scrollbar-gutter:stable;border:1px solid var(--line);border-radius:10px}
+.year-trend-scroll .table{margin-bottom:0}
+.year-trend-scroll thead th{position:sticky;top:0;z-index:1}
+.year-trend-scroll::-webkit-scrollbar{width:10px}
+.year-trend-scroll::-webkit-scrollbar-track{background:rgba(148,163,184,.08)}
+.year-trend-scroll::-webkit-scrollbar-thumb{background:#64748b;border:2px solid transparent;border-radius:999px;background-clip:padding-box}
+@media(max-width:768px){.year-trend-scroll{height:280px}}
 .card-body h2.h5{margin-bottom:1.1rem;color:#0f172a;font-weight:800;letter-spacing:-.01em}
 .card{border:1px solid var(--line)}
 .metric-card{transition:transform .15s ease,box-shadow .15s ease}
@@ -83,3 +90,8 @@ form.card .form-select,form.card .form-control{border-radius:9px;border-color:#d
 .table-scroll-y thead th{position:sticky;top:0;background:#f8fafc;z-index:1}
 .chart-scroll-x{overflow-x:auto;overflow-y:hidden}
 .chart-scroll-inner{height:100%}
+
+/* 프로그램 현황 - 신청 현황 표 세로 스크롤(약 10행 분량만 보이고 나머지는 스크롤) */
+.application-table-scroll{max-height:520px;overflow-y:auto}
+.application-table-scroll table{margin-bottom:0}
+.application-table-scroll thead th{position:sticky;top:0;background:#f8fafc;z-index:1}

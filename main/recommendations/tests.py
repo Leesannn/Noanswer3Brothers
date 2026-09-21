@@ -152,9 +152,9 @@ class RecommendationTests(TestCase):
             fetch_redirect_response=False,
         )
         home = self.client.get(reverse('recommendations:recommendation_start'))
-        self.assertContains(home, '스포츠 지도자의 다음 기회')
+        self.assertContains(home, '다음 기회가 된다.')
         self.assertContains(home, 'href="/recommendations/"', count=None)
-        self.assertContains(home, 'href="/static/analytics/app.css"')
+        self.assertContains(home, 'href="/static/analytics/app.css')
         self.assertNotContains(home, '/recommendations/static/analytics/app.css')
 
     def test_order_is_deterministic_for_same_input(self):
