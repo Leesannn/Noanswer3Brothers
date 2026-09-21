@@ -4,4 +4,4 @@ from django.apps import AppConfig
 class CommunityConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'community'
-    verbose_name = '커뮤니티'
+    verbose_name = '게시판'

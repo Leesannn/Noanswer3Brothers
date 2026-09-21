@@ -149,7 +149,7 @@ class Command(BaseCommand):
         from substitutes.services.tokens import generate_management_token
         for posting in management_links:
             token = generate_management_token(posting.pk)
-            self.stdout.write(f'  /substitutes/postings/{posting.pk}/manage/{token}/  ({posting})')
+            self.stdout.write(f'  /community/substitutes/postings/{posting.pk}/manage/{token}/  ({posting})')
 
     def _seed_reputation(self, rng, identity, manager, total, no_show, complaint, positive, recent, mid, old):
         if total == 0:
