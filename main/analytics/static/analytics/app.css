@@ -82,6 +82,11 @@ form.card .form-select,form.card .form-control{border-radius:9px;border-color:#d
 .milestone-cell span{display:block;margin-bottom:5px;color:#64748b;font-size:.74rem;font-weight:800}
 .milestone-cell strong{display:block;color:#1e293b;font-weight:600;font-size:.86rem;line-height:1.55;white-space:pre-line}
 .milestone-cell.is-upcoming{border-color:#f59e0b;background:#fffbeb}
+
+/* 시험정보 상단 요약은 항목이 3개이므로 빈 네 번째 칸 없이 3등분한다. */
+.fact-grid.fact-grid-exam{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.fact-grid.fact-grid-exam{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.fact-grid.fact-grid-exam{grid-template-columns:1fr}}
 @media(max-width:700px){.exam-path-grid{grid-template-columns:1fr}}
 
 /* 지도자 현황 - 세로/가로 스크롤 */
@@ -95,3 +100,11 @@ form.card .form-select,form.card .form-control{border-radius:9px;border-color:#d
 .application-table-scroll{max-height:520px;overflow-y:auto}
 .application-table-scroll table{margin-bottom:0}
 .application-table-scroll thead th{position:sticky;top:0;background:#f8fafc;z-index:1}
+
+/* KSPO 콜라보 배지 (내비게이션 + 푸터) */
+.collab-badge{display:inline-flex;align-items:center;margin-left:20px}
+.collab-badge .collab-logo{display:block;height:42px;width:auto}
+.collab-badge-footer{margin:14px 0 0 0}
+.collab-badge-footer .collab-logo{height:34px}
+@media(max-width:991px){.app-nav .collab-badge .collab-logo{height:32px}}
+@media(max-width:700px){.app-nav .collab-badge{display:none}}

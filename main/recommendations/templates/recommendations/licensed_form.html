@@ -1,24 +1,65 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
 {% block title %}보유 자격 조건 입력{% endblock %}
-{% block body_class %}recommendation-page{% endblock %}
+{% block body_class %}recommendation-page recommendation-form-motion motion-variant-licensed{% endblock %}
 {% block main_class %}recommendation-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}?v=20260921-1">
+<link rel="stylesheet" href="{% static 'recommendations/recommendation-form-motion.css' %}?v=20260921-7">
+<script>document.documentElement.classList.add('recommend-motion-js');</script>
+{% endblock %}
 {% block content %}
-<div class="recommend-shell form-shell">
-  {% include 'recommendations/_steps.html' with current=2 %}
-  <div class="form-heading">
-    <a href="{% url 'recommendations:recommendation_start' %}" class="back-link">← 자격 여부 다시 선택</a>
-    <span class="eyebrow">자격증 보유자</span>
-    <h1>어떤 활동 기회를 찾고 있나요?</h1>
-    <p>종목과 지역은 꼭 선택하고, 나머지는 원하는 만큼 알려주세요.</p>
-  </div>
-  <form method="post" class="recommend-form" novalidate data-loading-form>
-    {% include 'recommendations/_form_fields.html' %}
-    <div class="form-actions">
-      <button class="primary-action" type="submit"><i class="button-spinner" aria-hidden="true"></i><span class="button-label">내 조건으로 기관 찾기 →</span></button>
+<div class="recommendation-form-page" data-motion-root>
+  <div class="recommend-shell form-shell">
+    <div class="form-heading">
+      <a href="{% url 'recommendations:recommendation_start' %}" class="back-link">← 자격 여부 다시 선택</a>
+      <span class="eyebrow">자격증 보유자</span>
+      <h1 class="motion-heading">
+        <span class="heading-line">어떤</span>
+        <span class="heading-line"><span class="heading-highlight">활동 기회를</span></span>
+        <span class="heading-line">찾고 있나요?</span>
+      </h1>
+      <p>종목과 지역은 꼭 선택하고, 나머지는 원하는 만큼 알려주세요.</p>
+
+      <div class="motion-collage" aria-hidden="true" data-motion-collage>
+        <span class="collage-kicker">PEOPLE<br>SPORTS<br>OPPORTUNITY</span>
+
+        <img class="hero-texture" src="{% static 'recommendations/images/recommendation/licensed-hero-texture-block-blue.png' %}" alt="" aria-hidden="true" width="1448" height="1086" decoding="async">
+
+        <img class="hero-trajectory" src="{% static 'recommendations/images/recommendation/hero-trajectory-line.png' %}" alt="" aria-hidden="true" width="1983" height="793" decoding="async">
+        <span class="hero-dot hero-dot-red" aria-hidden="true"></span>
+        <span class="hero-dot hero-dot-yellow" aria-hidden="true"></span>
+
+        <img class="hero-runner-red" src="{% static 'recommendations/images/recommendation/licensed-hero-badminton-red.png' %}" alt="" aria-hidden="true" width="1024" height="1536" decoding="async">
+
+        <img class="hero-brush-leg" src="{% static 'recommendations/images/recommendation/licensed-hero-brush-leg-yellow.png' %}" alt="" aria-hidden="true" width="1448" height="1086" decoding="async">
+
+        <span class="hero-runner-blue-wrap" data-collage-runner>
+          <img class="hero-runner-blue" src="{% static 'recommendations/images/recommendation/licensed-hero-taekwondo-mono.png' %}" alt="" aria-hidden="true" width="1024" height="1536" decoding="async">
+        </span>
+
+        <span class="collage-tag">MOVE<br>YOUR<br>NEXT</span>
+      </div>
     </div>
-  </form>
+    <form method="post" class="recommend-form" novalidate data-loading-form>
+      <div class="form-card-head" aria-hidden="true">
+        <span class="form-step-label">STEP 02</span>
+        <span class="form-card-rule"></span>
+        <span class="form-kicker">SPORTS CAREER COMPASS</span>
+      </div>
+      {% include 'recommendations/_form_fields.html' %}
+      <div class="form-actions">
+        <button class="primary-action" type="submit" data-motion-cta><i class="button-spinner" aria-hidden="true"></i><span class="button-label">내 조건으로 기관 찾기</span><span class="cta-arrow" aria-hidden="true">→</span></button>
+      </div>
+    </form>
+  </div>
+  <div class="motion-controls" data-motion-controls>
+    <button type="button" class="motion-control-btn" data-motion-skip>모션 건너뛰기</button>
+    <button type="button" class="motion-control-btn" data-motion-replay hidden>모션 다시 보기</button>
+  </div>
 </div>
 {% endblock %}
-{% block scripts %}<script src="{% static 'recommendations/recommendation-ui.js' %}" defer></script>{% endblock %}
+{% block scripts %}
+<script src="{% static 'recommendations/recommendation-ui.js' %}" defer></script>
+<script src="{% static 'recommendations/recommendation-form-motion.js' %}?v=20260921-4" defer></script>
+{% endblock %}
