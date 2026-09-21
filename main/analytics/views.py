@@ -131,6 +131,14 @@ def dashboard(request):
 
 def instructor_status(request):
     qualifications, _, _ = apply_filters(request.GET)
+    instructor_metrics = qualifications.aggregate(
+        acquisition_total=Sum('acquisition_count'),
+        sport_total=Count('sport', distinct=True),
+        region_total=Count('region', distinct=True),
+        qualification_total=Count('qualification_type', distinct=True),
+        latest_year=Max('acquisition_year'),
+    )
+    instructor_metrics['acquisition_total'] = instructor_metrics['acquisition_total'] or 0
     sort_map = {'year': 'acquisition_year', '-year': '-acquisition_year', 'sport': 'sport', '-sport': '-sport', 'count': 'acquisition_count', '-count': '-acquisition_count'}
     qualifications = qualifications.order_by(sort_map.get(request.GET.get('sort'), '-acquisition_year'))
     by_sport = list(qualifications.values('sport').annotate(total=Sum('acquisition_count')).order_by('-total')[:20])
@@ -141,6 +149,7 @@ def instructor_status(request):
     context.update({
         'page_obj': _page(request, qualifications), 'by_sport': by_sport, 'by_year': by_year,
         'by_qualification': by_qualification, 'by_region': by_region,
+        'instructor_metrics': instructor_metrics,
         'chart_labels': json.dumps([row['sport'] or '미분류' for row in by_sport], ensure_ascii=False),
         'chart_values': json.dumps([row['total'] for row in by_sport]),
     })
