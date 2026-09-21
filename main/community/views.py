@@ -8,6 +8,20 @@ from .forms import CommentForm, PasswordConfirmForm, PostEditForm, PostForm
 from .models import Post
 
 
+def job_postings(request):
+    return render(request, 'community/coming_soon.html', {
+        'page_title': '일자리 공고',
+        'page_description': '일자리 공고 서비스는 준비 중입니다.',
+    })
+
+
+def mentoring(request):
+    return render(request, 'community/coming_soon.html', {
+        'page_title': '멘토·멘티',
+        'page_description': '멘토·멘티 서비스는 준비 중입니다.',
+    })
+
+
 def post_list(request):
     posts = selectors.apply_post_filters(request.GET)
     page_obj = Paginator(posts, 20).get_page(request.GET.get('page'))
