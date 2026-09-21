@@ -52,9 +52,22 @@
         <a class="nav-link" href="{% url 'analytics:dashboard' %}">프로그램 현황</a>
         <a class="nav-link" href="{% url 'analytics:instructors' %}">지도자 현황</a>
         <a class="nav-link" href="{% url 'analytics:exam_info' %}">시험정보</a>
-        <a class="nav-link" href="{% url 'substitutes:posting_list' %}">단기 대타 구하기</a>
-        <a class="nav-link" href="{% url 'community:post_list' %}">커뮤니티</a>
-        <a class="nav-link" href="{% url 'analytics:demand_supply' %}">수요·공급 분석</a>
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">커뮤니티</a>
+          <ul class="dropdown-menu dropdown-menu-end app-dropdown">
+            <li><a class="dropdown-item" href="{% url 'community:post_list' %}">게시판</a></li>
+            <li><a class="dropdown-item" href="{% url 'substitutes:posting_list' %}">단기 대타</a></li>
+            <li><a class="dropdown-item" href="{% url 'community:job_postings' %}">일자리 공고</a></li>
+            <li><a class="dropdown-item" href="{% url 'community:mentoring' %}">멘토·멘티</a></li>
+          </ul>
+        </div>
+        <div class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">더보기</a>
+          <ul class="dropdown-menu dropdown-menu-end app-dropdown">
+            <li><a class="dropdown-item" href="{% url 'analytics:current_programs' %}">현재 프로그램</a></li>
+            <li><a class="dropdown-item" href="{% url 'analytics:demand_supply' %}">수요·공급 분석</a></li>
+          </ul>
+        </div>
         <a class="nav-link nav-recommend" href="{% url 'recommendations:recommendation_start' %}">맞춤 추천 시작</a>
       </div>
     </div>
