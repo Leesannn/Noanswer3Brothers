@@ -162,7 +162,7 @@ PROGRAM_CLEANUP_REFERENCE_DATE = '2026-07-31'
 # 기관 상세 페이지 지도 표시에 사용하는 카카오맵 JavaScript 키.
 # https://developers.kakao.com 에서 발급받은 후 사용 중인 도메인(localhost 포함)을
 # 플랫폼 설정에 등록해야 지도가 표시된다. 환경 변수로 주입하는 것을 권장한다.
-KAKAO_MAP_APP_KEY = os.environ.get('KAKAO_MAP_APP_KEY', '')
+KAKAO_MAP_APP_KEY = os.environ.get('KAKAO_MAP_APP_KEY', '129c607de79331da0987833fe62bb1a7')
 
 
 # Email
