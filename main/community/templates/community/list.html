@@ -1,47 +1,119 @@
 {% extends 'analytics/base.html' %}
+{% load static %}
 {% block title %}게시판 | 스포츠 커리어 나침반{% endblock %}
+{% block body_class %}community-board-page{% endblock %}
+{% block main_class %}community-board-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'community/community-board.css' %}?v=20260922-1">{% endblock %}
+
 {% block content %}
-<div class="mb-4 d-flex flex-wrap justify-content-between align-items-end gap-3">
-  <div><h1 class="h3 mb-1">게시판</h1><p class="text-secondary mb-0">시험정보·기출문제·꿀팁을 익명으로 자유롭게 공유하는 공간입니다.</p></div>
-  <a class="btn btn-primary" href="{% url 'community:post_create' %}">글쓰기</a>
-</div>
+<div class="community-board">
+  <section class="board-hero" aria-labelledby="board-page-title">
+    <div class="board-hero-copy">
+      <p class="board-kicker"><span aria-hidden="true"></span> SPORTS CAREER COMPASS</p>
+      <div class="board-title-lockup">
+        <h1 id="board-page-title">커뮤니티<br><em>게시판</em></h1>
+        <div class="board-index" aria-hidden="true"><strong>06</strong><span>COMMUNITY<br>BOARD</span></div>
+      </div>
+      <p class="board-lead">시험정보부터 현장 노하우까지,<br>서로의 경험이 다음 도전을 돕는 공간입니다.</p>
+      <a class="board-write-link" href="{% url 'community:post_create' %}"><span>새 글 작성</span><strong aria-hidden="true">↗</strong></a>
+    </div>
 
-<div class="mb-3 d-flex flex-wrap gap-2">
-  <a class="btn btn-sm {% if not current.category %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'community:post_list' %}">전체</a>
-  {% for value, label in category_choices %}
-  <a class="btn btn-sm {% if current.category == value %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?category={{ value }}">{{ label }}</a>
-  {% endfor %}
-</div>
+    <div class="board-hero-art" aria-hidden="true">
+      <div class="board-art-grid"></div>
+      <div class="board-art-card board-art-card-back"><span>SHARE</span></div>
+      <div class="board-art-card board-art-card-main">
+        <small>COMMUNITY NOTE</small>
+        <strong>함께 묻고<br>함께 답하다</strong>
+        <i></i><i></i><i></i>
+      </div>
+      <div class="board-art-sticker">OPEN<br>FORUM</div>
+    </div>
+  </section>
 
-<form method="get" class="mb-3 d-flex gap-2">
-  {% if current.category %}<input type="hidden" name="category" value="{{ current.category }}">{% endif %}
-  <input type="text" name="q" class="form-control" placeholder="제목·내용 검색" value="{{ current.q }}">
-  <button class="btn btn-outline-secondary text-nowrap">검색</button>
-</form>
+  <section class="board-filter" aria-labelledby="board-filter-title">
+    <header class="board-filter-head">
+      <span>EXPLORE</span>
+      <strong id="board-filter-title">게시글 찾기</strong>
+    </header>
 
-<div class="card border-0 shadow-sm">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead><tr><th style="width:110px">게시판</th><th>제목</th><th style="width:110px">닉네임</th><th class="text-end" style="width:90px">조회</th><th class="text-end" style="width:130px">작성일</th></tr></thead>
-      <tbody>
-        {% for post in page_obj %}
-        <tr>
-          <td><span class="badge text-bg-light border">{{ post.get_category_display }}</span></td>
-          <td>
-            {% if post.is_notice %}<span class="badge text-bg-warning me-1">공지</span>{% endif %}
-            <a class="text-decoration-none" href="{% url 'community:post_detail' post.pk %}">{{ post.title }}</a>
-            {% if post.comments.count %}<span class="text-secondary small">[{{ post.comments.count }}]</span>{% endif %}
-          </td>
-          <td>{{ post.nickname }}</td>
-          <td class="text-end">{{ post.view_count }}</td>
-          <td class="text-end text-secondary small">{{ post.created_at|date:'Y-m-d' }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5" class="text-center text-secondary py-4">등록된 글이 없습니다. 첫 글을 남겨보세요.</td></tr>
+    <div class="board-filter-body">
+      <nav class="board-categories" aria-label="게시판 분류">
+        <a class="board-category{% if not current.category %} is-active{% endif %}" href="{% url 'community:post_list' %}{% if current.q %}?q={{ current.q|urlencode }}{% endif %}"{% if not current.category %} aria-current="page"{% endif %}>전체</a>
+        {% for value, label in category_choices %}
+        <a class="board-category{% if current.category == value %} is-active{% endif %}" href="?category={{ value|urlencode }}{% if current.q %}&amp;q={{ current.q|urlencode }}{% endif %}"{% if current.category == value %} aria-current="page"{% endif %}>{{ label }}</a>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </nav>
+
+      <form method="get" class="board-search" role="search">
+        {% if current.category %}<input type="hidden" name="category" value="{{ current.category }}">{% endif %}
+        <label for="board-search-input">SEARCH</label>
+        <div class="board-search-field">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+          <input id="board-search-input" type="search" name="q" placeholder="제목·내용 검색" value="{{ current.q }}">
+        </div>
+        <button type="submit">검색</button>
+        {% if current.q or current.category %}<a class="board-filter-reset" href="{% url 'community:post_list' %}" aria-label="검색 조건 초기화">초기화</a>{% endif %}
+      </form>
+    </div>
+  </section>
+
+  <section class="board-posts" aria-labelledby="board-list-title">
+    <header class="board-section-head">
+      <div>
+        <p>COMMUNITY POSTS</p>
+        <h2 id="board-list-title">최근 게시글</h2>
+      </div>
+      <div class="board-list-meta">
+        <span>총 <strong>{{ page_obj.paginator.count }}</strong>건</span>
+        <span><strong>{{ page_obj.number }}</strong> / {{ page_obj.paginator.num_pages|default:1 }} PAGE</span>
+      </div>
+    </header>
+
+    <div class="board-table-wrap">
+      <table class="board-table">
+        <thead>
+          <tr>
+            <th scope="col">분류</th>
+            <th scope="col">제목</th>
+            <th scope="col">닉네임</th>
+            <th scope="col">조회</th>
+            <th scope="col">작성일</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in page_obj %}
+          <tr{% if post.is_notice %} class="is-notice"{% endif %}>
+            <td><span class="board-category-tag">{{ post.get_category_display }}</span></td>
+            <td class="board-title-cell">
+              {% if post.is_notice %}<span class="board-notice-tag">공지</span>{% endif %}
+              <a href="{% url 'community:post_detail' post.pk %}">{{ post.title }}</a>
+              {% if post.comments.count %}<span class="board-comment-count" aria-label="댓글 {{ post.comments.count }}개">+{{ post.comments.count }}</span>{% endif %}
+            </td>
+            <td>{{ post.nickname }}</td>
+            <td class="board-number">{{ post.view_count }}</td>
+            <td class="board-date">{{ post.created_at|date:'Y.m.d' }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="board-empty">
+              <strong>NO POSTS YET</strong>
+              <span>조건에 맞는 게시글이 없습니다. 첫 이야기를 남겨보세요.</span>
+              <a href="{% url 'community:post_create' %}">글 작성하기 ↗</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="board-pagination">{% include 'analytics/_pagination.html' %}</div>
+
+  <aside class="board-note" aria-label="커뮤니티 안내">
+    <strong>좋은 커뮤니티는 서로의 경험으로 완성됩니다.</strong>
+    <span>개인정보를 포함한 게시글이나 타인을 비방하는 내용은 삼가 주세요.</span>
+  </aside>
+
+  <footer class="board-page-footer"><span>SPORTS CAREER COMPASS</span><span>ASK · SHARE · GROW</span></footer>
 </div>
-{% include 'analytics/_pagination.html' %}
 {% endblock %}
