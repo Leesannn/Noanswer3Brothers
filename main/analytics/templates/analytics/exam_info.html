@@ -3,7 +3,7 @@
 {% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}exam-editorial-page{% endblock %}
 {% block main_class %}exam-editorial-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260921-4">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260922-9">{% endblock %}
 {% block content %}
 <div class="exam-editorial">
   <section class="exam-hero" aria-labelledby="exam-page-title">
@@ -11,7 +11,7 @@
       <div class="exam-title-lockup">
         <div>
           <p class="exam-kicker">SPORTS CAREER COMPASS</p>
-          <h1 id="exam-page-title">자격 시험<br>정보</h1>
+          <h1 id="exam-page-title">자격 시험 정보</h1>
         </div>
         <div class="exam-index" aria-hidden="true"><strong>04</strong><span>EXAM<br>GUIDE</span></div>
       </div>
@@ -30,15 +30,6 @@
       {% endfor %}
     </div>
   </nav>
-
-  {% if fetch_status.last_error %}
-  <div class="exam-fetch-notice is-warning" role="alert">
-    <strong>!</strong>
-    <p><b>최신 정보를 불러오지 못했습니다.</b><br>{% if fetch_status.last_success_at %}마지막 성공 갱신일 {{ fetch_status.last_success_at|date:'Y-m-d H:i' }} 기준 일정을 표시합니다.{% else %}아직 한 번도 갱신에 성공하지 못했습니다.{% endif %}</p>
-  </div>
-  {% elif fetch_status.last_success_at %}
-  <div class="exam-fetch-notice"><strong>↻</strong><p>연간일정계획 마지막 갱신 <b>{{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</b></p></div>
-  {% endif %}
 
   <section class="exam-panel exam-license-panel" aria-labelledby="license-guide-title">
     <header class="exam-section-head">
@@ -156,6 +147,15 @@
       {% endif %}
     </div>
   </section>
+
+  {% if fetch_status.last_error %}
+  <div class="exam-fetch-notice is-warning" role="alert">
+    <strong>!</strong>
+    <p><b>최신 정보를 불러오지 못했습니다.</b><br>{% if fetch_status.last_success_at %}마지막 성공 갱신일 {{ fetch_status.last_success_at|date:'Y-m-d H:i' }} 기준 일정을 표시합니다.{% else %}아직 한 번도 갱신에 성공하지 못했습니다.{% endif %}</p>
+  </div>
+  {% elif fetch_status.last_success_at %}
+  <div class="exam-fetch-notice"><strong>↻</strong><p>연간일정계획 마지막 갱신 <b>{{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</b></p></div>
+  {% endif %}
 
   <footer class="exam-page-footer"><span>SPORTS CAREER COMPASS</span><span>PREPARE TODAY · LEAD TOMORROW</span></footer>
 </div>
