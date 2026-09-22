@@ -1,108 +1,161 @@
 {% extends 'analytics/base.html' %}
-{% block title %}시험정보 | 스포츠 데이터 분석{% endblock %}
+{% load static %}
+{% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
+{% block body_class %}exam-editorial-page{% endblock %}
+{% block main_class %}exam-editorial-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260922-10">{% endblock %}
 {% block content %}
-<div class="mb-4"><h1 class="h3 mb-1">자격 시험 정보</h1><p class="text-secondary">국민체육진흥공단 체육지도자 자격검정 사이트(sqms.kspo.or.kr)의 연간일정계획·자격제도안내를 그대로 가져와 보여드립니다.</p></div>
-
-<div class="mb-3 d-flex flex-wrap gap-2">
-  {% for code, name in grades %}
-  <a class="btn btn-sm {% if code == grade_code %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?grade={{ code }}">{{ name }}</a>
-  {% endfor %}
-</div>
-
-{% if fetch_status.last_error %}
-<div class="alert alert-warning demo-notice" role="alert">
-  <strong>최신 정보를 불러오지 못했습니다.</strong>
-  {% if fetch_status.last_success_at %}마지막으로 성공한 갱신({{ fetch_status.last_success_at|date:'Y-m-d H:i' }}) 기준 일정을 보여드리고 있습니다.{% else %}아직 한 번도 갱신에 성공하지 못했습니다.{% endif %}
-</div>
-{% elif fetch_status.last_success_at %}
-<p class="text-secondary small mb-3">연간일정계획 마지막 갱신: {{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</p>
-{% endif %}
-
-<div class="card border-0 shadow-sm mb-4"><div class="card-body">
-  <h2 class="h5 mb-3">자격제도안내 <span class="text-secondary fw-normal">— {{ license.grade_name|default:'' }}</span></h2>
-  {% if license %}
-    {% if license.definition %}
-    <div class="exam-info-block">
-      <h4>자격정의</h4>
-      <p>{{ license.definition }}</p>
-    </div>
-    {% endif %}
-
-    <div class="fact-grid mb-3">
-      <div><span>필기시험 검정기관</span><strong>{{ license.exam_agency|default:'-' }}</strong></div>
-      <div><span>연수기관</span><strong>{{ license.training_agency|default:'-' }}</strong></div>
-      <div><span>필기시험과목</span><strong>{{ license.written_subjects|default:'-' }}</strong></div>
-    </div>
-
-    {% if license.sport_events_summary %}
-    <div class="exam-info-block">
-      <h4>자격종목</h4>
-      <p>{{ license.sport_events_summary }}</p>
-    </div>
-    {% endif %}
-
-    {% if license.pass_criteria %}
-    <div class="exam-info-block">
-      <h4>합격 및 연수 이수기준</h4>
-      <p>{{ license.pass_criteria }}</p>
-    </div>
-    {% endif %}
-
-    {% if license.legal_basis %}
-    <div class="exam-info-block exam-info-block-muted mb-4">
-      <h4>관련근거</h4>
-      <p>{{ license.legal_basis }}</p>
-    </div>
-    {% endif %}
-
-    <h3 class="h6 mb-3">응시자격 · 취득절차 <span class="text-secondary small fw-normal">({{ eligibility_paths|length }}개 경로)</span></h3>
-    {% for path in eligibility_paths %}
-    <div class="exam-path-card">
-      <div class="path-head"><span class="badge text-bg-primary">{{ path.display_label }}</span></div>
-      <div class="path-eligibility">{{ path.eligibility }}</div>
-      <div class="exam-path-grid">
-        <div><span>취득절차</span><strong>{{ path.acquisition_process }}</strong></div>
-        <div><span>제출서류(인정요건)</span><strong>{{ path.submitted_documents }}</strong></div>
+<div class="exam-editorial">
+  <section class="exam-hero" aria-labelledby="exam-page-title" data-exam-reveal>
+    <div class="exam-hero-copy">
+      <div class="exam-title-lockup">
+        <div>
+          <p class="exam-kicker">SPORTS CAREER COMPASS</p>
+          <h1 id="exam-page-title">자격 시험 정보</h1>
+        </div>
+        <div class="exam-index" aria-hidden="true"><strong>04</strong><span>EXAM<br>GUIDE</span></div>
       </div>
+      <p class="exam-lead">체육지도자의 시작을 위한 자격제도와 연간 시험 일정을 한눈에 확인하세요.</p>
     </div>
-    {% empty %}
-    <div class="empty-state">응시자격 정보가 없습니다.</div>
-    {% endfor %}
-  {% else %}
-    <div class="empty-state">자격제도안내 정보를 아직 불러오지 못했습니다.</div>
-  {% endif %}
-</div></div>
+    <div class="exam-hero-art" aria-hidden="true"></div>
+  </section>
 
-<div class="card border-0 shadow-sm mb-4"><div class="card-body">
-  <h2 class="h5 mb-3">연간일정계획 <span class="text-secondary fw-normal">— {{ license.grade_name|default:'' }}</span></h2>
-  {% if schedule_sections %}
-    {% for section in schedule_sections %}
-    <h3 class="h6 exam-phase-tit">{{ section.phase }}{% if section.season %} <span class="text-secondary fw-normal">- {{ section.season }}</span>{% endif %}</h3>
-    {% for course in section.courses %}
-    <div class="exam-schedule-course">
-      {% if course.course_type %}<span class="course-label">{{ course.course_type }}</span>{% endif %}
-      <div class="milestone-grid">
-        {% for m in course.milestones %}
-        <div class="milestone-cell {% if m.is_upcoming %}is-upcoming{% endif %}">
-          <span>{{ m.label }}{% if m.is_upcoming %} <span class="badge text-bg-warning">임박</span>{% endif %}</span>
-          <strong>{{ m.text }}</strong>
+  <nav class="exam-grade-selector" aria-label="자격 등급 선택" data-exam-reveal>
+    <div class="exam-selector-label"><span>SELECT</span><strong>자격 등급</strong></div>
+    <div class="exam-grade-list">
+      {% for code, name in grades %}
+      <a class="exam-grade-chip{% if code == grade_code %} is-active{% endif %}" href="?grade={{ code }}"{% if code == grade_code %} aria-current="page"{% endif %}>{{ name }}</a>
+      {% endfor %}
+    </div>
+  </nav>
+
+  <section class="exam-panel exam-license-panel" aria-labelledby="license-guide-title" data-exam-reveal>
+    <header class="exam-section-head">
+      <div class="exam-section-index">01</div>
+      <div><span>QUALIFICATION SYSTEM</span><h2 id="license-guide-title">자격제도안내</h2></div>
+      <p>{{ license.grade_name|default:'자격 등급을 선택해 주세요.' }}</p>
+    </header>
+
+    <div class="exam-panel-body">
+      {% if license %}
+        {% if license.definition %}
+        <div class="exam-definition">
+          <span>자격정의</span>
+          <p>{{ license.definition }}</p>
+        </div>
+        {% endif %}
+
+        <div class="fact-grid fact-grid-exam mb-3">
+          <div><span>필기시험 검정기관</span><strong>{{ license.exam_agency|default:'-' }}</strong></div>
+          <div><span>연수기관</span><strong>{{ license.training_agency|default:'-' }}</strong></div>
+          <div><span>필기시험과목</span><strong>{{ license.written_subjects|default:'-' }}</strong></div>
+        </div>
+
+        <div class="exam-info-columns">
+          {% if license.sport_events_summary %}
+          <div class="exam-info-block">
+            <h4>자격종목</h4>
+            <p>{{ license.sport_events_summary }}</p>
+          </div>
+          {% endif %}
+
+          {% if license.pass_criteria %}
+          <div class="exam-info-block exam-info-accent">
+            <h4>합격 및 연수 이수기준</h4>
+            <p>{{ license.pass_criteria }}</p>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if license.legal_basis %}
+        <div class="exam-info-block exam-info-block-muted">
+          <h4>관련근거</h4>
+          <p>{{ license.legal_basis }}</p>
+        </div>
+        {% endif %}
+
+        <div class="exam-subhead">
+          <span>PATHWAYS</span>
+          <h3>응시자격 · 취득절차</h3>
+          <b>{{ eligibility_paths|length|stringformat:'02d' }}</b>
+        </div>
+        <div class="exam-path-list">
+          {% for path in eligibility_paths %}
+          <article class="exam-path-card">
+            <div class="path-head"><span>{{ forloop.counter|stringformat:'02d' }}</span><b>{{ path.display_label }}</b></div>
+            <div class="path-eligibility">{{ path.eligibility }}</div>
+            <div class="exam-path-grid">
+              <div><span>취득절차</span><strong>{{ path.acquisition_process }}</strong></div>
+              <div><span>제출서류 · 인정요건</span><strong>{{ path.submitted_documents }}</strong></div>
+            </div>
+          </article>
+          {% empty %}
+          <div class="empty-state">응시자격 정보가 없습니다.</div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">자격제도안내 정보를 아직 불러오지 못했습니다.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="exam-panel exam-schedule-panel" aria-labelledby="annual-schedule-title" data-exam-reveal>
+    <header class="exam-section-head">
+      <div class="exam-section-index">02</div>
+      <div><span>ANNUAL SCHEDULE</span><h2 id="annual-schedule-title">연간일정계획</h2></div>
+      <p>{{ license.grade_name|default:'-' }}</p>
+    </header>
+    <div class="exam-panel-body">
+      {% if schedule_sections %}
+        {% for section in schedule_sections %}
+        <div class="exam-phase-group">
+          <h3 class="exam-phase-tit"><span>{{ forloop.counter|stringformat:'02d' }}</span>{{ section.phase }}{% if section.season %} <small>{{ section.season }}</small>{% endif %}</h3>
+          {% for course in section.courses %}
+          <div class="exam-schedule-course">
+            {% if course.course_type %}<span class="course-label">{{ course.course_type }}</span>{% endif %}
+            <div class="milestone-grid">
+              {% for m in course.milestones %}
+              <div class="milestone-cell{% if m.is_upcoming %} is-upcoming{% endif %}">
+                <span>{{ m.label }}{% if m.is_upcoming %} <b>임박</b>{% endif %}</span>
+                <strong>{{ m.text }}</strong>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
         </div>
         {% endfor %}
-      </div>
+      {% else %}
+        <div class="empty-state">연간일정계획 정보를 아직 불러오지 못했습니다.</div>
+      {% endif %}
     </div>
-    {% endfor %}
-    {% endfor %}
-  {% else %}
-    <div class="empty-state">연간일정계획 정보를 아직 불러오지 못했습니다.</div>
-  {% endif %}
-</div></div>
+  </section>
 
-<div class="card border-0 shadow-sm"><div class="card-body">
-  <h2 class="h5 mb-3">체육지도자 결격사유 <span class="text-secondary small fw-normal">(국민체육진흥법 제11조의5, 제12조 — 9개 등급 공통)</span></h2>
-  {% if disqualification_text %}
-    <div class="exam-info-block exam-info-block-muted mb-0"><p>{{ disqualification_text }}</p></div>
-  {% else %}
-    <div class="empty-state">결격사유 정보를 아직 불러오지 못했습니다.</div>
+  <section class="exam-panel exam-caution-panel" aria-labelledby="disqualification-title" data-exam-reveal>
+    <header class="exam-section-head">
+      <div class="exam-section-index">!</div>
+      <div><span>BEFORE YOU APPLY</span><h2 id="disqualification-title">체육지도자 결격사유</h2></div>
+      <p>국민체육진흥법 제11조의5 · 제12조 / 9개 등급 공통</p>
+    </header>
+    <div class="exam-panel-body">
+      {% if disqualification_text %}
+      <div class="exam-disqualification"><p>{{ disqualification_text }}</p></div>
+      {% else %}
+      <div class="empty-state">결격사유 정보를 아직 불러오지 못했습니다.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if fetch_status.last_error %}
+  <div class="exam-fetch-notice is-warning" role="alert">
+    <strong>!</strong>
+    <p><b>최신 정보를 불러오지 못했습니다.</b><br>{% if fetch_status.last_success_at %}마지막 성공 갱신일 {{ fetch_status.last_success_at|date:'Y-m-d H:i' }} 기준 일정을 표시합니다.{% else %}아직 한 번도 갱신에 성공하지 못했습니다.{% endif %}</p>
+  </div>
+  {% elif fetch_status.last_success_at %}
+  <div class="exam-fetch-notice"><strong>↻</strong><p>연간일정계획 마지막 갱신 <b>{{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</b></p></div>
   {% endif %}
-</div></div>
+
+  <aside class="exam-side-note" aria-hidden="true"><strong>SPORTS<br>LICENSE<br>EXAM<br>GUIDE</strong><span></span><p>PREPARE<br>TODAY<br>LEAD<br>TOMORROW</p></aside>
+</div>
 {% endblock %}
+{% block footer %}<footer class="exam-footer"><span>SPORTS CAREER COMPASS</span><i></i><span>PREPARE TODAY · LEAD TOMORROW</span></footer>{% endblock %}

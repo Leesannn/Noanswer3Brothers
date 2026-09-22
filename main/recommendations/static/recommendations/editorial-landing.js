@@ -67,7 +67,14 @@
     root.querySelector('[data-intro-replay]')?.addEventListener('click', playIntro, { signal });
 
     document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; }, { signal });
-    window.addEventListener('pageshow', (event) => { if (event.persisted) settle('settled'); }, { signal });
+    window.addEventListener('pageshow', (event) => {
+      pageVisible = !document.hidden;
+      if (event.persisted) {
+        settle('settled');
+        root.querySelectorAll('.figure-ghost').forEach((ghost) => ghost.remove());
+        window.dispatchEvent(new CustomEvent('editorial:canvasReady'));
+      }
+    }, { signal });
 
     if (reduceMotion.matches) {
       body.classList.add('is-intro-reduced');
@@ -304,11 +311,14 @@
     initCanvasTrajectories();
     initPointerParallax();
 
-    window.addEventListener('pagehide', () => {
+    window.addEventListener('pagehide', (event) => {
       clearTimeline();
       window.clearTimeout(resizeTimer);
-      controller.abort();
-    }, { once: true });
+      // 뒤로가기 캐시에 저장되는 페이지는 같은 JS 인스턴스가 그대로
+      // 복원된다. 이때 이벤트까지 abort하면 다시 보기와 자동 모션이
+      // 영구적으로 사라지므로 실제 폐기되는 경우에만 정리한다.
+      if (!event.persisted) controller.abort();
+    });
   } catch (error) {
     clearTimeline();
     for (let i = 1; i <= 7; i += 1) document.body.classList.add(`is-intro-scene-${i}`);

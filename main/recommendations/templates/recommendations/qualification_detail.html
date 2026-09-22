@@ -1,19 +1,43 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
 {% block title %}{{ sport.name }} 자격·활동 상세{% endblock %}
-{% block body_class %}recommendation-page{% endblock %}
-{% block main_class %}recommendation-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block body_class %}qualification-detail-page{% endblock %}
+{% block main_class %}qualification-detail-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'recommendations/qualification-detail.css' %}?v=20260922-1">{% endblock %}
 {% block content %}
-<div class="recommend-shell detail-shell">
-  <a class="back-link" href="{% url 'recommendations:unlicensed_recommendation_results' %}">← 추천 결과로 돌아가기</a>
-  <header class="detail-heading"><span class="eyebrow">자격·활동 상세</span><h1>{{ sport.name }}</h1><p>현재 보유 데이터에서 확인되는 자격 종류와 활동을 살펴볼 기관입니다.</p></header>
-  {% if synthetic_data_used %}{% include 'recommendations/_synthetic_notice.html' %}{% endif %}
-  {% if used_national_fallback %}<p class="missing-note">{{ region_label }} 데이터가 부족해 전체 지역 기준 기관을 표시합니다.</p>{% endif %}
-  <div class="detail-grid">
-    <section class="detail-panel"><h2>연결된 자격 정보</h2>{% if qualifications %}<ul class="qualification-list">{% for item in qualifications %}<li><div><strong>{{ item.qualification_type }}</strong>{% if item.grade %}<span>{{ item.grade }}</span>{% endif %}</div><b>{{ item.total }}건</b></li>{% endfor %}</ul>{% else %}<p>정확히 연결된 자격 명칭이 없습니다. 보유 데이터에서 확인이 필요합니다.</p>{% endif %}</section>
-    <section class="detail-panel"><h2>활동을 살펴볼 기관</h2>{% if institutions %}<ol class="institution-list">{% for item in institutions %}<li><div><a href="{% url 'analytics:institution_detail' item.institution.pk %}">{{ item.institution.name }}</a><span>{{ item.institution.region }} · 관련 프로그램 {{ item.program_count }}개</span></div><strong>{% if item.average_rate is not None %}{{ item.average_rate|floatformat:1 }}%{% else %}신청률 없음{% endif %}</strong></li>{% endfor %}</ol>{% else %}<p>현재 조건에서 안내할 기관 데이터가 없습니다.</p>{% endif %}</section>
-  </div>
-  <p class="legal-note">자격 명칭과 취득 규모는 보유 집계 데이터 기준입니다. 실제 응시 요건과 발급 정보는 공식 자격 안내에서 확인해 주세요.</p>
-</div>
+<a class="qd-back" href="{% url 'recommendations:unlicensed_recommendation_results' %}">← 추천 결과로 돌아가기</a>
+
+<section class="qd-hero" data-qd-reveal>
+  <p class="qd-kicker">자격·활동 상세</p>
+  <h1>{{ sport.name }}</h1>
+  <p class="qd-lead">현재 보유 데이터에서 확인되는 자격 종류와 활동을 살펴볼 기관입니다.</p>
+</section>
+
+{% if synthetic_data_used %}{% include 'recommendations/_synthetic_notice.html' %}{% endif %}
+{% if used_national_fallback %}<p class="missing-note">{{ region_label }} 데이터가 부족해 전체 지역 기준 기관을 표시합니다.</p>{% endif %}
+
+<section class="qd-grid" data-qd-reveal>
+  <article class="qd-panel">
+    <div class="qd-panel-head"><h2>연결된 자격 정보</h2></div>
+    <div class="qd-panel-body">
+      {% if qualifications %}
+      <ul class="qd-qual-list">
+        {% for item in qualifications %}<li><div><strong>{{ item.qualification_type }}</strong>{% if item.grade %}<span>{{ item.grade }}</span>{% endif %}</div><b>{{ item.total }}건</b></li>{% endfor %}
+      </ul>
+      {% else %}<p class="qd-muted">정확히 연결된 자격 명칭이 없습니다. 보유 데이터에서 확인이 필요합니다.</p>{% endif %}
+    </div>
+  </article>
+  <article class="qd-panel">
+    <div class="qd-panel-head"><h2>활동을 살펴볼 기관</h2></div>
+    <div class="qd-panel-body">
+      {% if institutions %}
+      <ol class="qd-inst-list">
+        {% for item in institutions %}<li><div><a href="{% url 'analytics:institution_detail' item.institution.pk %}">{{ item.institution.name }}</a><span>{{ item.institution.region }} · 관련 프로그램 {{ item.program_count }}개</span></div><strong>{% if item.average_rate is not None %}{{ item.average_rate|floatformat:1 }}%{% else %}신청률 없음{% endif %}</strong></li>{% endfor %}
+      </ol>
+      {% else %}<p class="qd-muted">현재 조건에서 안내할 기관 데이터가 없습니다.</p>{% endif %}
+    </div>
+  </article>
+</section>
+
+<p class="qd-legal">자격 명칭과 취득 규모는 보유 집계 데이터 기준입니다. 실제 응시 요건과 발급 정보는 공식 자격 안내에서 확인해 주세요.</p>
 {% endblock %}

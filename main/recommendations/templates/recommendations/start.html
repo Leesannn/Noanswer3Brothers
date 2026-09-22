@@ -4,7 +4,7 @@
 {% block body_class %}editorial-home motion-landing-page{% endblock %}
 {% block main_class %}editorial-main{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}">
+<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}?v=20260922-12">
 <noscript><style>
 .editorial-home .editorial-header,.editorial-home .hero-kicker,.editorial-home .hero-title .title-line>span,
 .editorial-home .hero-subcopy,.editorial-home .hero-actions,.editorial-home .hero-meta,.editorial-home .hero-stats,
@@ -16,10 +16,11 @@
 {% endblock %}
 {% block header %}
 <header class="editorial-header">
-  <a class="editorial-brand" href="{% url 'recommendations:recommendation_start' %}" aria-label="스포츠 커리어 나침반 홈">
-    <span class="brand-mark" aria-hidden="true"></span>
-    <span class="brand-text"><strong>스포츠 커리어 나침반</strong><small>SPORTS CREATES NEXT CAREERS</small></span>
-  </a>
+  <div class="editorial-brand-group">
+    <a class="editorial-brand" href="{% url 'recommendations:recommendation_start' %}" aria-label="나침 홈">
+      <img class="editorial-brand-logo" src="{% static 'analytics/images/nachim-logo.png' %}?v=2" alt="나침">
+    </a>
+  </div>
   <nav class="editorial-nav" aria-label="랜딩 페이지 메뉴">
     <a href="{% url 'analytics:dashboard' %}">서비스</a>
     <a href="{% url 'analytics:demand_supply' %}">데이터 이야기</a>
@@ -65,4 +66,4 @@
 {% include 'recommendations/partials/service_paths.html' %}
 {% endblock %}
 {% block footer %}{% endblock %}
-{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}" defer></script>{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}?v=20260921-1" defer></script>{% endblock %}

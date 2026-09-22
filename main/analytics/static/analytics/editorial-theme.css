@@ -4,8 +4,9 @@
  * their existing selectors/custom properties rather than restyling markup,
  * so every page built on those two stylesheets (dashboard, forms, results,
  * tables, exam info, substitutes, community...) picks up the same ivory /
- * blue / red / yellow tone as the landing page. The top nav and footer are
- * intentionally left on their original dark styling as bookends.
+ * blue / red / yellow tone as the landing page. The top nav was later
+ * relit to match (see the .app-nav block below); the footer is still left
+ * on its original dark styling as the one remaining bookend.
  * Landing page (.motion-landing-page) is untouched: it uses separate
  * --editorial-* custom properties and its own stylesheet.
  */
@@ -41,6 +42,21 @@
 /* service-ui.css: patch the hardcoded (non-variable) dark colors      */
 /* ------------------------------------------------------------------ */
 .app-shell-page:not(.motion-landing-page)::before { background-image: none !important; }
+
+.app-shell-page:not(.motion-landing-page) .app-nav {
+  background: #e8e2d2;
+  border-bottom: 1px solid rgba(17, 17, 17, .12);
+  box-shadow: 0 2px 12px rgba(17, 17, 17, .08);
+  backdrop-filter: none;
+}
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link { color: #3a382f !important; }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link:hover,
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link:focus { color: #111111 !important; background: rgba(17, 17, 17, .06); }
+.app-shell-page:not(.motion-landing-page) .app-nav .navbar-toggler { border-color: rgba(17, 17, 17, .2); }
+.app-shell-page:not(.motion-landing-page) .app-nav .navbar-toggler-icon { filter: invert(1); }
+@media (max-width: 991px) {
+  .app-shell-page:not(.motion-landing-page) .app-nav .navbar-collapse { background: #e8e2d2; }
+}
 
 .app-shell-page:not(.motion-landing-page) a { color: var(--service-accent); }
 .app-shell-page:not(.motion-landing-page) a:hover { color: #111111; }

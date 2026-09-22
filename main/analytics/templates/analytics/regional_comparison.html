@@ -1,19 +1,65 @@
 {% extends 'analytics/base.html' %}
-{% block title %}지역별 프로그램·자격증 비교 | 스포츠 데이터 분석{% endblock %}
+{% load static %}
+{% block title %}수요·공급 분석 | 스포츠 커리어 나침반{% endblock %}
+{% block body_class %}demand-supply-page{% endblock %}
+{% block main_class %}demand-supply-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/demand-supply.css' %}?v=20260922-1">{% endblock %}
 {% block content %}
-<div class="mb-4"><h1 class="h3 mb-1">지역별 운영 프로그램·자격증 비교</h1><p class="text-secondary">기존 지역·자격증 집계는 유지하고, 분석 가능한 현재 운영 프로그램만 비교합니다.</p></div>
-<form method="get" class="card border-0 shadow-sm mb-4"><div class="card-body"><div class="row g-3 align-items-end">
-  <div class="col-md-3"><label class="form-label">자격 취득 연도</label><select name="year" class="form-select"><option value="">전체</option>{% for value in years %}<option value="{{ value }}" {% if current.year == value|stringformat:'s' %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></div>
-  <div class="col-md-3"><label class="form-label">지역</label><select name="region" class="form-select"><option value="">전체</option>{% for key,label in region_options %}<option value="{{ key }}" {% if current.region == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-  <div class="col-md-3"><label class="form-label">상위 종목</label><select name="sport" class="form-select"><option value="">전체</option>{% for key,label in sport_options %}<option value="{{ key }}" {% if current.sport == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-  <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary flex-fill">조회</button><a class="btn btn-outline-secondary" href="{% url 'analytics:demand_supply' %}">초기화</a></div>
-</div></div></form>
-<div class="row g-3 mb-4">
-  <div class="col-md"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">현재 운영·사용 프로그램</div><div class="h4 mb-0">{{ comparison_summary.usable|floatformat:'0g' }}</div></div></div></div>
-  <div class="col-md"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">자격 취득 건수</div><div class="h4 mb-0">{{ comparison_summary.qualification_count|floatformat:'0g' }}</div></div></div></div>
-  <div class="col-md"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">운영 미확인</div><div class="h4 mb-0">{{ comparison_summary.unknown|floatformat:'0g' }}</div></div></div></div>
-  <div class="col-md"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">복수 종목 제외</div><div class="h4 mb-0">{{ comparison_summary.multi_sport|floatformat:'0g' }}</div></div></div></div>
-  <div class="col-md"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">미매칭 제외</div><div class="h4 mb-0">{{ comparison_summary.unmatched|floatformat:'0g' }}</div></div></div></div>
-</div>
-<div class="card border-0 shadow-sm"><div class="card-body"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>지역</th><th>상위 종목</th><th class="text-end">운영 프로그램 수</th><th class="text-end">자격 취득 건수</th><th class="text-end">프로그램당 자격 취득</th></tr></thead><tbody>{% for row in page_obj %}<tr><td>{{ row.region }}</td><td>{{ row.sport }}</td><td class="text-end">{{ row.program_count|floatformat:'0g' }}</td><td class="text-end">{{ row.qualification_count|floatformat:'0g' }}</td><td class="text-end">{% if row.supply_per_program is not None %}{{ row.supply_per_program|floatformat:2 }}{% else %}<span class="text-secondary">계산 불가(프로그램 0)</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="5">표시할 비교 데이터가 없습니다.</td></tr>{% endfor %}</tbody></table></div>{% include 'analytics/_pagination.html' %}</div></div>
+<section class="ds-hero" data-ds-reveal>
+  <div class="ds-hero-copy">
+    <div class="ds-title-lockup">
+      <div>
+        <p class="ds-kicker">SPORTS CAREER COMPASS</p>
+        <h1>수요·공급 분석</h1>
+      </div>
+      <div class="ds-index" aria-hidden="true"><strong>05</strong><span>DEMAND<br>SUPPLY</span></div>
+    </div>
+    <p class="ds-lead">지역·종목별 운영 프로그램과 자격 취득 현황을 비교해 공급이 수요를 따라가는지 확인합니다.</p>
+  </div>
+  <div class="ds-hero-art" aria-hidden="true"></div>
+</section>
+
+<form method="get" class="ds-filter" id="ds-filters" data-ds-reveal>
+  <div class="ds-filter-head">
+    <strong>FILTER 01</strong>
+    <span>조건을 선택해 지역별 공급 현황을 비교하세요.</span>
+  </div>
+  <div class="ds-filter-grid">
+    <div class="ds-field"><label for="ds-year">자격 취득 연도</label><select id="ds-year" name="year"><option value="">전체</option>{% for value in years %}<option value="{{ value }}" {% if current.year == value|stringformat:'s' %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></div>
+    <div class="ds-field"><label for="ds-region">지역</label><select id="ds-region" name="region"><option value="">전체</option>{% for key,label in region_options %}<option value="{{ key }}" {% if current.region == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="ds-field"><label for="ds-sport">상위 종목</label><select id="ds-sport" name="sport"><option value="">전체</option>{% for key,label in sport_options %}<option value="{{ key }}" {% if current.sport == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <button class="ds-apply" type="submit">조회</button>
+    <a class="ds-reset" href="{% url 'analytics:demand_supply' %}">초기화</a>
+  </div>
+</form>
+
+<section class="ds-metrics" aria-label="요약 통계" data-ds-reveal>
+  <article class="ds-metric is-total"><span>현재 운영·사용 프로그램</span><strong data-ds-count="{{ comparison_summary.usable|default:0 }}">0</strong></article>
+  <article class="ds-metric"><span>자격 취득 건수</span><strong data-ds-count="{{ comparison_summary.qualification_count|default:0 }}">0</strong></article>
+  <article class="ds-metric"><span>운영 미확인</span><strong data-ds-count="{{ comparison_summary.unknown|default:0 }}">0</strong></article>
+  <article class="ds-metric"><span>복수 종목 제외</span><strong data-ds-count="{{ comparison_summary.multi_sport|default:0 }}">0</strong></article>
+  <article class="ds-metric"><span>미매칭 제외</span><strong data-ds-count="{{ comparison_summary.unmatched|default:0 }}">0</strong></article>
+</section>
+
+<section class="ds-table-card" data-ds-reveal>
+  <div class="ds-table-head">
+    <h2>지역별 운영 프로그램·자격 취득 비교</h2>
+    <span class="ds-chip">공급 대비 수요</span>
+  </div>
+  <div class="ds-table-scroll">
+    <table>
+      <thead><tr><th>지역</th><th>상위 종목</th><th>운영 프로그램 수</th><th>자격 취득 건수</th><th>프로그램당 자격 취득</th></tr></thead>
+      <tbody>{% for row in page_obj %}<tr><td>{{ row.region }}</td><td>{{ row.sport }}</td><td>{{ row.program_count|floatformat:'0g' }}</td><td>{{ row.qualification_count|floatformat:'0g' }}</td><td>{% if row.supply_per_program is not None %}{{ row.supply_per_program|floatformat:2 }}{% else %}<span class="ds-muted">계산 불가(프로그램 0)</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="5" class="ds-table-empty">표시할 비교 데이터가 없습니다.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="ds-pager" aria-label="페이지">
+    {% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">‹ 이전</a>{% else %}<span class="is-disabled">‹ 이전</span>{% endif %}
+    <em>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</em>
+    {% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">다음 ›</a>{% else %}<span class="is-disabled">다음 ›</span>{% endif %}
+  </nav>
+  {% endif %}
+</section>
 {% endblock %}
+{% block footer %}<footer class="ds-footer"><span>SPORTS CAREER COMPASS</span><i></i><span>스포츠가 만드는 더 나은 오늘</span></footer>{% endblock %}
+{% block scripts %}<script src="{% static 'analytics/demand-supply.js' %}?v=20260921-1"></script>{% endblock %}

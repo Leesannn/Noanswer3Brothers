@@ -1,16 +1,18 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
 {% block title %}기관 추천 결과{% endblock %}
-{% block body_class %}recommendation-page{% endblock %}
+{% block body_class %}recommendation-page results-editorial{% endblock %}
 {% block main_class %}recommendation-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}?v=20260921-1">
+<link rel="stylesheet" href="{% static 'recommendations/institution-results-editorial.css' %}?v=2">
+{% endblock %}
 {% block content %}
 <div class="recommend-shell result-shell">
-  {% include 'recommendations/_steps.html' with current=3 %}
   <header class="result-heading">
     <div>
       <span class="eyebrow">{{ sport.name }} · {{ region_label }}</span>
-      <h1>활동 기회를 살펴볼 만한 기관</h1>
+      <h1>활동 기회를 살펴볼 만한 <span class="hl">기관</span></h1>
       <p>선택 종목을 운영하는 기관을 규칙 기반 점수로 비교했습니다. 실제 채용을 의미하지 않습니다.</p>
     </div>
     <a class="secondary-action" href="{% url 'recommendations:licensed_recommendation_form' %}">조건 수정하기</a>
@@ -23,7 +25,7 @@
       <article class="recommend-card">
         <div class="rank-column">
           <span class="rank-badge">{{ forloop.counter }}위</span>
-          <div class="score-ring"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
+          <div class="score-ring" style="--score: {{ result.total_score }};"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
           {% if result.synthetic_data_used %}<span class="synthetic-badge">합성 데이터 기반</span>{% endif %}
         </div>
         <div class="result-main">

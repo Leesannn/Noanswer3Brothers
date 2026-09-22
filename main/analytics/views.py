@@ -131,6 +131,14 @@ def dashboard(request):
 
 def instructor_status(request):
     qualifications, _, _ = apply_filters(request.GET)
+    instructor_metrics = qualifications.aggregate(
+        acquisition_total=Sum('acquisition_count'),
+        sport_total=Count('sport', distinct=True),
+        region_total=Count('region', distinct=True),
+        qualification_total=Count('qualification_type', distinct=True),
+        latest_year=Max('acquisition_year'),
+    )
+    instructor_metrics['acquisition_total'] = instructor_metrics['acquisition_total'] or 0
     sort_map = {'year': 'acquisition_year', '-year': '-acquisition_year', 'sport': 'sport', '-sport': '-sport', 'count': 'acquisition_count', '-count': '-acquisition_count'}
     qualifications = qualifications.order_by(sort_map.get(request.GET.get('sort'), '-acquisition_year'))
     by_sport = list(qualifications.values('sport').annotate(total=Sum('acquisition_count')).order_by('-total')[:20])
@@ -141,6 +149,7 @@ def instructor_status(request):
     context.update({
         'page_obj': _page(request, qualifications), 'by_sport': by_sport, 'by_year': by_year,
         'by_qualification': by_qualification, 'by_region': by_region,
+        'instructor_metrics': instructor_metrics,
         'chart_labels': json.dumps([row['sport'] or '미분류' for row in by_sport], ensure_ascii=False),
         'chart_values': json.dumps([row['total'] for row in by_sport]),
     })
@@ -187,61 +196,6 @@ def exam_info(request):
         'schedule_sections': group_exam_schedule(grade_code),
         'fetch_status': exam_schedule_fetch_status(grade_code),
     })
-
-
-def program_status(request):
-    _, programs, _ = apply_filters(request.GET)
-    stats_programs = programs
-    match_grade = request.GET.get('match_grade', '').strip()
-    if match_grade in dict(Program.MatchGrade.choices):
-        programs = programs.filter(match_grade=match_grade)
-    sort_map = {'institution': 'institution__name', '-institution': '-institution__name', 'name': 'name', '-name': '-name', 'sport': 'sport', '-sport': '-sport', 'capacity': 'capacity', '-capacity': '-capacity'}
-    programs = programs.order_by(sort_map.get(request.GET.get('sort'), 'institution__name'), 'name')
-    by_sport = list(programs.values('sport').annotate(total=Count('id')).order_by('-total')[:20])
-    by_region = programs.values('institution__region').annotate(total=Count('id')).order_by('-total')[:15]
-    by_target = programs.exclude(target='').values('target').annotate(total=Count('id')).order_by('-total')[:15]
-    by_hour = programs.exclude(start_time=None).annotate(hour=ExtractHour('start_time')).values('hour').annotate(total=Count('id')).order_by('hour')
-    match_stats = stats_programs.aggregate(
-        total=Count('id'),
-        exact=Count('id', filter=Q(match_grade=Program.MatchGrade.EXACT)),
-        similar=Count('id', filter=Q(match_grade=Program.MatchGrade.SIMILAR)),
-        review=Count('id', filter=Q(match_grade=Program.MatchGrade.REVIEW)),
-        unmatched=Count('id', filter=Q(match_grade=Program.MatchGrade.UNMATCHED)),
-    )
-    total = match_stats['total'] or 0
-    match_stats['rows'] = [
-        {'key': key, 'label': label, 'count': match_stats[key], 'rate': match_stats[key] / total * 100 if total else 0}
-        for key, label in Program.MatchGrade.choices
-    ]
-    taxonomy_keys = CanonicalSport.objects.filter(is_active=True).values_list('normalized_name', flat=True)
-    baseline = stats_programs.filter(normalized_sport__in=taxonomy_keys).count()
-    automatic = match_stats['exact'] + match_stats['similar']
-    match_stats.update({
-        'baseline_count': baseline, 'baseline_rate': baseline / total * 100 if total else 0,
-        'automatic_count': automatic, 'automatic_rate': automatic / total * 100 if total else 0,
-        'improvement': (automatic - baseline) / total * 100 if total else 0,
-    })
-    page_obj = _page(request, programs)
-    _attach_synthetic_insights(page_obj.object_list)
-
-    # 실제 신청 현황이 전혀 없으면 프로그램 목록 옆에 CSV 더미 신청 현황을 참고용으로 보여준다.
-    using_demo_applications = False
-    demo_application_rows = []
-    if not ApplicationStatus.objects.exists():
-        demo_application_rows = dummy_application_rows(limit=100)
-        using_demo_applications = bool(demo_application_rows)
-
-    context = _base_context(request)
-    context.update({
-        'page_obj': page_obj, 'by_sport': by_sport, 'by_region': by_region,
-        'by_target': by_target, 'by_hour': by_hour,
-        'chart_labels': json.dumps([row['sport'] or '미분류' for row in by_sport], ensure_ascii=False),
-        'chart_values': json.dumps([row['total'] for row in by_sport]),
-        'match_stats': match_stats, 'match_grade': match_grade,
-        'demo_application_rows': demo_application_rows,
-        'using_demo_applications': using_demo_applications,
-    })
-    return render(request, 'analytics/programs.html', context)
 
 
 def current_programs(request):

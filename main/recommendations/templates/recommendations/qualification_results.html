@@ -1,16 +1,18 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
 {% block title %}자격 취득 방향 추천{% endblock %}
-{% block body_class %}recommendation-page{% endblock %}
+{% block body_class %}recommendation-page results-editorial{% endblock %}
 {% block main_class %}recommendation-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}?v=20260921-1">
+<link rel="stylesheet" href="{% static 'recommendations/institution-results-editorial.css' %}?v=2">
+{% endblock %}
 {% block content %}
 <div class="recommend-shell result-shell">
-  {% include 'recommendations/_steps.html' with current=3 %}
   <header class="result-heading">
     <div>
       <span class="eyebrow">{{ region_label }} · {% for item in selected_sports %}{{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
-      <h1>취득을 고려할 수 있는 자격 방향</h1>
+      <h1>취득을 고려할 수 있는 <span class="hl">자격 방향</span></h1>
       <p>관심 종목과 지역의 프로그램 수요를 함께 비교했습니다. 자격 취득을 보장하거나 강제하는 결과가 아닙니다.</p>
     </div>
     <a class="secondary-action" href="{% url 'recommendations:unlicensed_recommendation_form' %}">조건 수정하기</a>
@@ -23,7 +25,7 @@
       <article class="recommend-card">
         <div class="rank-column">
           <span class="rank-badge">{{ forloop.counter }}위</span>
-          <div class="score-ring"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
+          <div class="score-ring" style="--score: {{ result.total_score }};"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
           {% if result.synthetic_data_used %}<span class="synthetic-badge">합성 데이터 기반</span>{% endif %}
         </div>
         <div class="result-main">
