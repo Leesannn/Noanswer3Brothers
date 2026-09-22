@@ -3,7 +3,7 @@
 {% block title %}수요·공급 분석 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}demand-supply-page{% endblock %}
 {% block main_class %}demand-supply-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/demand-supply.css' %}?v=20260921-1">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/demand-supply.css' %}?v=20260922-1">{% endblock %}
 {% block content %}
 <section class="ds-hero" data-ds-reveal>
   <div class="ds-hero-copy">
@@ -17,48 +17,7 @@
     <p class="ds-lead">지역·종목별 운영 프로그램과 자격 취득 현황을 비교해 공급이 수요를 따라가는지 확인합니다.</p>
   </div>
   <div class="ds-hero-art" aria-hidden="true">
-    <span>SEE THE NEED<br>READ THE TREND</span>
-    <svg viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="체크리스트, 돋보기로 보는 상승 그래프, 상승 추세 화살표, 농구공 아이콘">
-      <defs>
-        <linearGradient id="dsLensFill" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#4d74ff"/>
-          <stop offset="1" stop-color="#0d1c56"/>
-        </linearGradient>
-        <clipPath id="dsLensClip"><circle cx="300" cy="150" r="76"/></clipPath>
-      </defs>
-
-      <path d="M46,332 L146,244 L118,222 L252,104" stroke="#2f5dff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <polygon points="238,112 300,66 282,138" fill="#2f5dff" stroke="#0b0d16" stroke-width="6" stroke-linejoin="round"/>
-
-      <rect x="14" y="46" width="150" height="196" rx="10" fill="#fffefe" stroke="#0b0d16" stroke-width="7"/>
-      <rect x="58" y="32" width="62" height="24" rx="6" fill="#fffefe" stroke="#0b0d16" stroke-width="7"/>
-      <g stroke="#0b0d16" stroke-width="4">
-        <rect x="34" y="86" width="18" height="18" rx="4" fill="#2f5dff"/>
-        <path d="M37,95 L42,101 L50,88" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="62" y1="95" x2="140" y2="95"/>
-        <rect x="34" y="130" width="18" height="18" rx="4" fill="#2f5dff"/>
-        <path d="M37,139 L42,145 L50,132" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="62" y1="139" x2="140" y2="139"/>
-        <rect x="34" y="174" width="18" height="18" rx="4" fill="#2f5dff"/>
-        <path d="M37,183 L42,189 L50,176" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="62" y1="183" x2="140" y2="183"/>
-      </g>
-
-      <circle cx="300" cy="150" r="86" fill="#0d1c56" stroke="#0b0d16" stroke-width="9"/>
-      <circle cx="300" cy="150" r="76" fill="url(#dsLensFill)"/>
-      <g clip-path="url(#dsLensClip)">
-        <rect x="238" y="176" width="18" height="40" fill="#dbe6ff"/>
-        <rect x="264" y="156" width="18" height="60" fill="#dbe6ff"/>
-        <rect x="290" y="136" width="18" height="80" fill="#dbe6ff"/>
-        <rect x="316" y="112" width="18" height="104" fill="#dbe6ff"/>
-        <polyline points="244,180 273,158 299,138 325,108" fill="none" stroke="#f4d23f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="325" cy="108" r="8" fill="#f4d23f" stroke="#0b0d16" stroke-width="3"/>
-      </g>
-      <rect x="356" y="200" width="30" height="96" rx="12" fill="#0d1c56" stroke="#0b0d16" stroke-width="8" transform="rotate(42 356 200)"/>
-
-      <circle cx="70" cy="328" r="30" fill="#2f5dff" stroke="#0b0d16" stroke-width="6"/>
-      <path d="M70,298 L70,358 M40,328 L100,328 M48,306 Q70,328 48,350 M92,306 Q70,328 92,350" stroke="#0b0d16" stroke-width="3.5" fill="none"/>
-    </svg>
+    <img src="{% static 'analytics/images/kspo-logo.png' %}" alt="" width="650" height="290">
   </div>
 </section>
 
@@ -77,7 +36,7 @@
 </form>
 
 <section class="ds-metrics" aria-label="요약 통계" data-ds-reveal>
-  <article class="ds-metric"><span>현재 운영·사용 프로그램</span><strong data-ds-count="{{ comparison_summary.usable|default:0 }}">0</strong></article>
+  <article class="ds-metric is-total"><span>현재 운영·사용 프로그램</span><strong data-ds-count="{{ comparison_summary.usable|default:0 }}">0</strong></article>
   <article class="ds-metric"><span>자격 취득 건수</span><strong data-ds-count="{{ comparison_summary.qualification_count|default:0 }}">0</strong></article>
   <article class="ds-metric"><span>운영 미확인</span><strong data-ds-count="{{ comparison_summary.unknown|default:0 }}">0</strong></article>
   <article class="ds-metric"><span>복수 종목 제외</span><strong data-ds-count="{{ comparison_summary.multi_sport|default:0 }}">0</strong></article>
