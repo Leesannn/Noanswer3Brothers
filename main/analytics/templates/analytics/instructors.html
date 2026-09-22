@@ -3,7 +3,7 @@
 {% block title %}지도자 자격 취득 현황 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}instructor-status-page{% endblock %}
 {% block main_class %}instructor-status-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/instructor-status.css' %}?v=20260921-1">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/instructor-status.css' %}?v=20260921-4">{% endblock %}
 {% block content %}
 <section class="instructor-hero" data-instructor-reveal>
   <div class="instructor-hero-copy">
@@ -17,29 +17,30 @@
     <p class="instructor-lead">개인 식별자와 시험 점수는 제외하고 종목·지역·연도 단위로 집계한 결과입니다.</p>
   </div>
   <div class="instructor-hero-art" aria-hidden="true">
-    <img src="{% static 'analytics/images/instructor-license-hero.png' %}" alt="">
-    <span>BUILD EXPERTISE<br>LEAD THE FUTURE</span>
+    <img src="{% static 'analytics/images/kspo-logo.png' %}" alt="" width="650" height="290">
   </div>
 </section>
 
-<section class="instructor-note" role="note" data-instructor-reveal>
-  <div class="instructor-note-title"><i aria-hidden="true">i</i><strong>집계 데이터 안내</strong></div>
-  <p>자격 취득 현황은 개인을 식별할 수 없도록 종목·지역·연도 단위로 집계해 제공합니다.</p>
-  <span class="instructor-chip">비식별 집계</span>
-  <span class="instructor-note-slogan" aria-hidden="true">LEARN<br>LEAD<br>GROW</span>
-</section>
-
-<section class="instructor-filter" data-instructor-reveal>
-  <div class="instructor-filter-head"><strong>FILTER 02</strong><span>조건을 선택하여 지도자 자격 취득 현황을 확인하세요.</span></div>
-  {% include 'analytics/_filters.html' %}
-</section>
+<form method="get" class="instructor-filter" id="instructor-filters" data-instructor-reveal>
+  <div class="instructor-filter-head">
+    <strong>FILTER 02</strong>
+    <span>조건을 선택해 지도자 자격 취득 현황을 확인하세요.</span>
+  </div>
+  <div class="instructor-filter-grid">
+    <div class="instructor-field"><label for="instructor-year">연도</label><select id="instructor-year" name="year"><option value="">전체</option>{% for value in years %}<option value="{{ value }}" {% if current.year == value|stringformat:'s' %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></div>
+    <div class="instructor-field"><label for="instructor-region">지역</label><select id="instructor-region" name="region"><option value="">전체</option>{% for key,label in region_options %}<option value="{{ key }}" {% if current.region == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="instructor-field"><label for="instructor-sport">종목</label><select id="instructor-sport" name="sport"><option value="">전체</option>{% for key,label in sport_options %}<option value="{{ key }}" {% if current.sport == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <button class="instructor-apply" type="submit">조회</button>
+    <a class="instructor-reset" href="{% url 'analytics:instructors' %}">초기화</a>
+  </div>
+</form>
 
 <section class="instructor-metrics" aria-label="자격 취득 요약" data-instructor-reveal>
-  <article class="instructor-metric is-blue"><span>전체 취득 건수</span><strong data-instructor-count="{{ instructor_metrics.acquisition_total }}">{{ instructor_metrics.acquisition_total|floatformat:'0g' }}</strong><small>QUALIFIED<br>SPORTS LEADERS</small></article>
-  <article class="instructor-metric"><span>집계 종목 수</span><strong data-instructor-count="{{ instructor_metrics.sport_total }}">{{ instructor_metrics.sport_total|floatformat:'0g' }}</strong><small>SPORT<br>CATEGORIES</small></article>
-  <article class="instructor-metric is-yellow"><span>집계 지역 수</span><strong data-instructor-count="{{ instructor_metrics.region_total }}">{{ instructor_metrics.region_total|floatformat:'0g' }}</strong><small>REGIONS<br>CONNECTED</small></article>
-  <article class="instructor-metric is-red"><span>자격 종류 수</span><strong data-instructor-count="{{ instructor_metrics.qualification_total }}">{{ instructor_metrics.qualification_total|floatformat:'0g' }}</strong><small>LIFELONG<br>EXPERTISE</small></article>
-  <article class="instructor-metric is-year"><span>최신 집계 연도</span><strong>{% if instructor_metrics.latest_year %}{{ instructor_metrics.latest_year }}{% else %}-{% endif %}</strong><small>LATEST<br>DATA YEAR</small></article>
+  <article class="instructor-metric is-total"><span>전체 취득 건수</span><strong data-instructor-count="{{ instructor_metrics.acquisition_total }}">{{ instructor_metrics.acquisition_total|floatformat:'0g' }}</strong></article>
+  <article class="instructor-metric"><span>집계 종목 수</span><strong data-instructor-count="{{ instructor_metrics.sport_total }}">{{ instructor_metrics.sport_total|floatformat:'0g' }}</strong></article>
+  <article class="instructor-metric"><span>집계 지역 수</span><strong data-instructor-count="{{ instructor_metrics.region_total }}">{{ instructor_metrics.region_total|floatformat:'0g' }}</strong></article>
+  <article class="instructor-metric"><span>자격 종류 수</span><strong data-instructor-count="{{ instructor_metrics.qualification_total }}">{{ instructor_metrics.qualification_total|floatformat:'0g' }}</strong></article>
+  <article class="instructor-metric"><span>최신 집계 연도</span><strong>{% if instructor_metrics.latest_year %}{{ instructor_metrics.latest_year }}{% else %}-{% endif %}</strong></article>
 </section>
 
 <section class="instructor-overview-grid" data-instructor-reveal>
@@ -65,9 +66,22 @@
 </section>
 
 <section class="instructor-panel instructor-raw-panel" data-instructor-reveal>
-  <header><div><span>DATA TABLE</span><h2>원본 기준 집계표</h2></div><p>열 제목을 눌러 정렬할 수 있습니다.</p></header>
-  <div class="instructor-raw-scroll"><table><thead><tr><th><a href="{% querystring sort='-year' page=None %}">연도</a></th><th>지역</th><th><a href="{% querystring sort='sport' page=None %}">종목</a></th><th>자격 종류</th><th>등급</th><th><a href="{% querystring sort='-count' page=None %}">취득 건수</a></th><th>출처</th></tr></thead><tbody>{% for row in page_obj %}<tr><td>{{ row.acquisition_year|default:'-' }}</td><td>{{ row.region|default:'-' }}</td><td>{{ row.sport }}</td><td>{{ row.qualification_type }}</td><td>{{ row.grade|default:'-' }}</td><td>{{ row.acquisition_count|floatformat:'0g' }}</td><td>{{ row.source_filename }}</td></tr>{% empty %}<tr><td colspan="7">표시할 데이터가 없습니다.</td></tr>{% endfor %}</tbody></table></div>
-  <div class="instructor-pagination">{% include 'analytics/_pagination.html' %}</div>
+  <header><div><span>DATA TABLE</span><h2>원본 기준 집계표</h2></div></header>
+  <div class="instructor-raw-scroll"><table><thead><tr><th>연도</th><th>지역</th><th>종목</th><th>자격 종류</th><th>등급</th><th>취득 건수</th></tr></thead><tbody>{% for row in page_obj %}<tr><td>{{ row.acquisition_year|default:'-' }}</td><td>{{ row.region|default:'-' }}</td><td>{{ row.sport }}</td><td>{{ row.qualification_type }}</td><td>{{ row.grade|default:'-' }}</td><td>{{ row.acquisition_count|floatformat:'0g' }}</td></tr>{% empty %}<tr><td colspan="6">표시할 데이터가 없습니다.</td></tr>{% endfor %}</tbody></table></div>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="instructor-pager" aria-label="페이지">
+    {% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">‹ 이전</a>{% else %}<span class="is-disabled">‹ 이전</span>{% endif %}
+    <em>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</em>
+    {% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">다음 ›</a>{% else %}<span class="is-disabled">다음 ›</span>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+
+<section class="instructor-note" role="note" data-instructor-reveal>
+  <div class="instructor-note-title"><i aria-hidden="true">i</i><strong>집계 데이터 안내</strong></div>
+  <p>자격 취득 현황은 개인을 식별할 수 없도록 종목·지역·연도 단위로 집계해 제공합니다.</p>
+  <span class="instructor-chip">비식별 집계</span>
+  <span class="instructor-note-slogan" aria-hidden="true">LEARN<br>LEAD<br>GROW</span>
 </section>
 
 <aside class="instructor-side-note" aria-hidden="true"><strong>COACHES<br>LICENSES<br>SPORTS<br>DATA</strong><span></span><p>KNOWLEDGE<br>IN MOTION</p></aside>

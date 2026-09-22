@@ -17,16 +17,8 @@
     <p class="program-lead">기존 자격·운영 데이터와 시연용 신청 현황을 함께 보여줍니다.</p>
   </div>
   <div class="program-hero-art" aria-hidden="true">
-    <img src="{% static 'analytics/images/program-swimmer.png' %}" alt="">
-    <span>MORE PEOPLE<br>BRIGHTER SPORTS</span>
+    <img src="{% static 'analytics/images/kspo-logo.png' %}" alt="" width="650" height="290">
   </div>
-</section>
-
-<section class="program-notice" role="note" data-program-reveal>
-  <div class="program-notice-title"><i aria-hidden="true">!</i><strong>시연 데이터 안내</strong></div>
-  <p>정원 및 신청 현황은 서비스 기능 시연을 위해 생성한 합성 데이터이며, 실제 기관의 운영 실적이 아닙니다.{% if using_demo_applications %} 현재 실제 신청 데이터가 없어 예시 값을 보여주고 있습니다.{% endif %}</p>
-  <span class="program-chip">시뮬레이션</span>
-  <span class="program-notice-slogan" aria-hidden="true">SPORTS<br>CHANGES<br>LIVES</span>
 </section>
 
 <form method="get" class="program-filter" id="program-filters" data-program-reveal>
@@ -46,12 +38,12 @@
 </form>
 
 <section class="program-metrics" aria-label="요약 통계" data-program-reveal>
-  <article class="program-metric is-blue"><div><span>전체 정원</span><em>시뮬레이션</em></div><strong data-program-count="{{ metrics.capacity_total|default:0 }}">{{ metrics.capacity_total|floatformat:'0g' }}</strong><small>SPORTS PROGRAM FOR ALL</small></article>
-  <article class="program-metric"><div><span>전체 신청 인원</span><em>시뮬레이션</em></div><strong data-program-count="{{ metrics.applicant_total|default:0 }}">{{ metrics.applicant_total|floatformat:'0g' }}</strong></article>
-  <article class="program-metric is-yellow"><div><span>평균 신청률</span><em>시뮬레이션</em></div>{% if metrics.average_rate is not None %}<strong data-program-count="{{ metrics.average_rate }}" data-program-decimals="1" data-program-suffix="%">{{ metrics.average_rate|floatformat:1 }}%</strong>{% else %}<strong class="is-empty">데이터 부족</strong>{% endif %}<small>HIGHER PARTICIPATION<br>BRIGHTER TOMORROW</small></article>
-  <article class="program-metric"><div><span>정원 마감 프로그램</span><em>시뮬레이션</em></div><strong data-program-count="{{ metrics.full_program_total|default:0 }}">{{ metrics.full_program_total|floatformat:'0g' }}</strong></article>
-  <article class="program-metric is-red"><div><span>기관 수</span></div><strong data-program-count="{{ metrics.institution_total|default:0 }}">{{ metrics.institution_total|floatformat:'0g' }}</strong><small>MORE INSTITUTIONS<br>STRONGER SPORTS</small></article>
-  <article class="program-metric"><div><span>프로그램 수</span></div><strong data-program-count="{{ metrics.program_total|default:0 }}">{{ metrics.program_total|floatformat:'0g' }}</strong></article>
+  <article class="program-metric"><span>전체 정원</span><strong data-program-count="{{ metrics.capacity_total|default:0 }}">{{ metrics.capacity_total|floatformat:'0g' }}</strong></article>
+  <article class="program-metric"><span>전체 신청 인원</span><strong data-program-count="{{ metrics.applicant_total|default:0 }}">{{ metrics.applicant_total|floatformat:'0g' }}</strong></article>
+  <article class="program-metric is-rate"><span>평균 신청률</span>{% if metrics.average_rate is not None %}<strong data-program-count="{{ metrics.average_rate }}" data-program-decimals="1" data-program-suffix="%">{{ metrics.average_rate|floatformat:1 }}%</strong>{% else %}<strong class="is-empty">데이터 부족</strong>{% endif %}</article>
+  <article class="program-metric"><span>정원 마감 프로그램</span><strong data-program-count="{{ metrics.full_program_total|default:0 }}">{{ metrics.full_program_total|floatformat:'0g' }}</strong></article>
+  <article class="program-metric"><span>기관 수</span><strong data-program-count="{{ metrics.institution_total|default:0 }}">{{ metrics.institution_total|floatformat:'0g' }}</strong></article>
+  <article class="program-metric"><span>프로그램 수</span><strong data-program-count="{{ metrics.program_total|default:0 }}">{{ metrics.program_total|floatformat:'0g' }}</strong></article>
 </section>
 
 {% if not metrics.program_total %}<div class="program-empty"><h2>아직 분석할 데이터가 없습니다.</h2><p><code>python manage.py import_sports_file</code>로 원본 데이터를 먼저 불러와 주세요.</p></div>{% endif %}
@@ -59,15 +51,20 @@
 <section class="program-table-card" data-program-reveal>
   <div class="program-table-head">
     <h2>프로그램별 신청 현황</h2>
-    <span class="program-chip">시뮬레이션</span>
     <time>{{ latest_period|date:'Y년 n월' }}</time>
   </div>
   <div class="program-table-scroll">
     <table>
       <thead><tr><th>기관</th><th>프로그램</th><th>종목</th><th>정원</th><th>신청 인원</th><th>대기 인원</th><th>신청률</th><th>상태</th></tr></thead>
-      <tbody>{% for row in application_rows %}<tr><td>{{ row.program.institution.name }}</td><td class="program-name-cell"><div>{{ row.program.name }} {% if row.is_synthetic %}<span class="program-chip">시뮬레이션</span>{% endif %}</div>{% if row.program.synthetic_analysis %}<small>{{ row.program.synthetic_analysis }}</small>{% endif %}</td><td>{{ row.program.sport|default:'-' }}</td><td>{{ row.capacity }}</td><td>{{ row.applicants }}</td><td>{{ row.waitlist|default:0 }}</td><td>{{ row.application_rate|floatformat:1 }}%</td><td><span class="program-status">{{ row.demand_status }}</span></td></tr>{% empty %}<tr><td colspan="8" class="program-table-empty">표시할 신청 현황이 없습니다. <code>data/dashboard_demo_applications.csv</code>를 확인하세요.</td></tr>{% endfor %}</tbody>
+      <tbody>{% for row in application_rows %}<tr><td>{{ row.program.institution.name }}</td><td class="program-name-cell"><div>{{ row.program.name }}</div>{% if row.program.synthetic_analysis %}<small>{{ row.program.synthetic_analysis }}</small>{% endif %}</td><td>{{ row.program.sport|default:'-' }}</td><td>{{ row.capacity }}</td><td>{{ row.applicants }}</td><td>{{ row.waitlist|default:0 }}</td><td>{{ row.application_rate|floatformat:1 }}%</td><td><span class="program-status">{{ row.demand_status }}</span></td></tr>{% empty %}<tr><td colspan="8" class="program-table-empty">표시할 신청 현황이 없습니다. <code>data/dashboard_demo_applications.csv</code>를 확인하세요.</td></tr>{% endfor %}</tbody>
     </table>
   </div>
+</section>
+
+<section class="program-notice" role="note" data-program-reveal>
+  <div class="program-notice-title"><i aria-hidden="true">!</i><strong>시연 데이터 안내</strong></div>
+  <p>정원 및 신청 현황은 서비스 기능 시연을 위해 생성한 합성 데이터이며, 실제 기관의 운영 실적이 아닙니다.{% if using_demo_applications %} 현재 실제 신청 데이터가 없어 예시 값을 보여주고 있습니다.{% endif %}</p>
+  <span class="program-notice-slogan" aria-hidden="true">SPORTS<br>CHANGES<br>LIVES</span>
 </section>
 
 <aside class="program-side-note" aria-hidden="true"><strong>SPORTS<br>PEOPLE<br>PROGRAMS<br>DATA</strong><span></span><p>A HEALTHIER<br>TOMORROW<br>THROUGH<br>SPORTS</p></aside>
