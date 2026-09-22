@@ -70,7 +70,7 @@ body.editorial-home { margin: 0; background: var(--editorial-bg); color: var(--e
 /* Athlete stage (collage)                                             */
 /* ------------------------------------------------------------------ */
 .athlete-stage { position: relative; min-height: 640px; height: clamp(560px, 62vw, 720px); }
-.trajectory-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+.trajectory-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
 .athlete-figure-wrap { position: absolute; inset: 6% 4% 0 8%; z-index: 2; display: grid; place-items: end center; }
 /* 종목이 바뀔 때 색 도형으로 화면을 덮지 않고, 이전 동작이 흐려지며 잔상처럼 사라지는
