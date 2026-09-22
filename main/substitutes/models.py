@@ -9,14 +9,16 @@ POSITIVE_TAG_CHOICES = ['성실함', '시간엄수', '전문성', '친절함']
 
 
 class PhoneIdentity(models.Model):
-    """PASS 인증으로 확인된 전화번호의 평판 기준 신원.
+    """전화번호를 기준으로 신청 이력·평판을 누적하는 신원.
 
-    원문 전화번호는 저장하지 않는다. PASS 인증 콜백 처리 시점에만 원문을
-    잠깐 사용해 해시·마스킹 값을 만들고 그 값만 영구 보관한다.
+    원문 전화번호는 저장하지 않는다. 신청 처리 시점에만 원문을 잠깐 사용해
+    해시·마스킹 값을 만들고 그 값만 영구 보관한다. 같은 번호로 다시 신청할
+    때는 최초 등록 시 설정한 비밀번호로 본인 확인을 한다.
     """
 
     phone_hash = models.CharField(max_length=64, unique=True, editable=False)
     phone_masked = models.CharField(max_length=20)
+    password_hash = models.CharField(max_length=128, editable=False, default='')
     first_seen_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -28,10 +30,15 @@ class PhoneIdentity(models.Model):
 
 
 class CenterContact(models.Model):
-    """단기 대타 공고를 등록할 수 있는, 휴대폰 인증을 마친 센터 담당자."""
+    """단기 대타 공고를 등록할 수 있는 센터 담당자.
+
+    휴대폰 번호로 담당자를 식별하고, 비밀번호로 본인 확인을 한다. 같은
+    번호로 다시 공고를 등록하려면 최초 등록 시 설정한 비밀번호가 필요하다.
+    """
 
     phone_hash = models.CharField(max_length=64, unique=True, editable=False)
     phone_masked = models.CharField(max_length=20)
+    password_hash = models.CharField(max_length=128, editable=False, default='')
     institution = models.ForeignKey(
         Institution, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='substitute_contacts',

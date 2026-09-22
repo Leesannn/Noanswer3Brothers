@@ -13,8 +13,6 @@
   color: var(--instructor-ink);
   overflow-x: hidden;
   background-color: var(--instructor-paper) !important;
-  background-image: radial-gradient(rgba(17,17,17,.075) .6px, transparent .7px) !important;
-  background-size: 5px 5px !important;
 }
 .instructor-status-page::before { display: none; }
 .instructor-status-page button,

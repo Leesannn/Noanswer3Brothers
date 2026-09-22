@@ -12,8 +12,6 @@
 .institution-detail-page {
   color: var(--inst-ink);
   background-color: var(--inst-paper) !important;
-  background-image: radial-gradient(rgba(17,17,17,.075) .6px, transparent .7px) !important;
-  background-size: 5px 5px !important;
   overflow-x: hidden;
 }
 .institution-detail-page::before { display: none; }

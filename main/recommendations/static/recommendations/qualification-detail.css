@@ -12,8 +12,6 @@
 .qualification-detail-page {
   color: var(--qd-ink);
   background-color: var(--qd-paper) !important;
-  background-image: radial-gradient(rgba(17,17,17,.075) .6px, transparent .7px) !important;
-  background-size: 5px 5px !important;
   overflow-x: hidden;
 }
 .qualification-detail-page::before { display: none; }

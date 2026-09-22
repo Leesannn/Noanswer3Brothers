@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.hashers import check_password, make_password
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +11,6 @@ from analytics.services.normalizers import normalize_region
 from . import selectors
 from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingForm
 from .models import Application, CenterContact, PhoneIdentity, Posting, ReputationRecord
-from .services import pass_auth
 from .services.certification import has_required_certification
 from .services.phone import hash_phone, mask_phone
 from .services.tokens import generate_management_token, verify_management_token
@@ -41,27 +41,28 @@ def application_apply(request, pk):
     if request.method == 'POST':
         form = ApplyForm(request.POST)
         if form.is_valid():
-            identity = pass_auth.verify_pass_result(form.cleaned_data['name'], form.cleaned_data['phone'])
-            if identity is None:
-                form.add_error(None, 'PASS 본인인증에 실패했습니다. 다시 시도해주세요.')
+            phone_hash = hash_phone(form.cleaned_data['phone'])
+            phone_masked = mask_phone(form.cleaned_data['phone'])
+            password = form.cleaned_data['password']
+            existing = PhoneIdentity.objects.filter(phone_hash=phone_hash).first()
+            if existing and not check_password(password, existing.password_hash):
+                form.add_error('password', '이전에 이 번호로 신청할 때 등록한 비밀번호와 일치하지 않습니다.')
+            elif not has_required_certification(phone_hash, posting.required_certifications):
+                messages.error(request, '이 공고에 필요한 자격증 보유자만 신청할 수 있습니다.')
+            elif Application.objects.filter(posting=posting, phone_identity__phone_hash=phone_hash).exists():
+                messages.error(request, '이미 신청한 공고입니다.')
             else:
-                phone_hash = hash_phone(identity.phone)
-                phone_masked = mask_phone(identity.phone)
-                if not has_required_certification(phone_hash, posting.required_certifications):
-                    messages.error(request, '이 공고에 필요한 자격증 보유자만 신청할 수 있습니다.')
-                elif Application.objects.filter(posting=posting, phone_identity__phone_hash=phone_hash).exists():
-                    messages.error(request, '이미 신청한 공고입니다.')
-                else:
-                    phone_identity, _ = PhoneIdentity.objects.get_or_create(
-                        phone_hash=phone_hash, defaults={'phone_masked': phone_masked},
-                    )
-                    application = Application.objects.create(
-                        posting=posting, phone_identity=phone_identity,
-                        phone_masked=phone_masked, certification_verified=True,
-                    )
-                    return render(request, 'substitutes/apply_complete.html', {
-                        'posting': posting, 'application': application,
-                    })
+                phone_identity = existing or PhoneIdentity.objects.create(
+                    phone_hash=phone_hash, phone_masked=phone_masked,
+                    password_hash=make_password(password),
+                )
+                application = Application.objects.create(
+                    posting=posting, phone_identity=phone_identity,
+                    phone_masked=phone_masked, certification_verified=True,
+                )
+                return render(request, 'substitutes/apply_complete.html', {
+                    'posting': posting, 'application': application,
+                })
     else:
         form = ApplyForm()
     return render(request, 'substitutes/apply.html', {'posting': posting, 'form': form})
@@ -77,19 +78,19 @@ def posting_create(request):
         if request.method == 'POST':
             verify_form = ManagerVerifyForm(request.POST)
             if verify_form.is_valid():
-                identity = pass_auth.verify_pass_result(
-                    verify_form.cleaned_data['institution_name'], verify_form.cleaned_data['phone'],
-                )
-                if identity is None:
-                    verify_form.add_error(None, '휴대폰 인증에 실패했습니다. 다시 시도해주세요.')
+                phone_hash = hash_phone(verify_form.cleaned_data['phone'])
+                password = verify_form.cleaned_data['password']
+                existing = CenterContact.objects.filter(phone_hash=phone_hash).first()
+                if existing and not check_password(password, existing.password_hash):
+                    verify_form.add_error('password', '이전에 이 번호로 등록한 비밀번호와 일치하지 않습니다.')
                 else:
-                    phone_hash = hash_phone(identity.phone)
                     manager, _ = CenterContact.objects.update_or_create(
                         phone_hash=phone_hash,
                         defaults={
-                            'phone_masked': mask_phone(identity.phone),
+                            'phone_masked': mask_phone(verify_form.cleaned_data['phone']),
                             'institution_name': verify_form.cleaned_data['institution_name'],
                             'business_reg_no': verify_form.cleaned_data['business_reg_no'],
+                            'password_hash': existing.password_hash if existing else make_password(password),
                             'verified_at': timezone.now(),
                         },
                     )

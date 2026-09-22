@@ -3,18 +3,18 @@
 {% block content %}
 <div class="recommend-shell form-shell">
   <h1 class="text-center mb-1">대타 공고 등록</h1>
-  <p class="text-secondary text-center mb-4">담당자 인증 후 공고 정보를 입력하면 바로 게시됩니다</p>
+  <p class="text-secondary text-center mb-4">담당자 확인 후 공고 정보를 입력하면 바로 게시됩니다</p>
   <nav class="recommend-steps" aria-label="공고 등록 진행 단계">
-    <span class="is-active"><b>✓</b> 담당자 인증</span>
+    <span class="is-active"><b>✓</b> 담당자 확인</span>
     <i></i>
     <span class="is-active"><b>2</b> 공고 정보 입력</span>
   </nav>
   <div class="card border-0 shadow-sm mb-3"><div class="card-body d-flex align-items-center justify-content-between">
     <div>
-      <div class="fw-bold">{{ manager.phone_masked }} 인증 완료</div>
+      <div class="fw-bold">{{ manager.phone_masked }} 확인 완료</div>
       <div class="text-secondary small">{{ manager.institution_name }} 담당자로 확인되었습니다</div>
     </div>
-    <span class="badge text-bg-success">인증완료</span>
+    <span class="badge text-bg-success">확인완료</span>
   </div></div>
   <form method="post" class="recommend-form" novalidate>
     {% include 'substitutes/_form_fields.html' %}

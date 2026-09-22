@@ -7,8 +7,6 @@
   --board-ink: #101010;
   --board-muted: #68665f;
   background-color: var(--board-paper);
-  background-image: radial-gradient(rgba(16, 16, 16, .09) .7px, transparent .7px);
-  background-size: 5px 5px;
   color: var(--board-ink);
 }
 

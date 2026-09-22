@@ -26,8 +26,8 @@
   </div>
 
   {% if posting.status == 'recruiting' %}
-  <a href="{% url 'substitutes:application_apply' posting.pk %}" class="primary-action">PASS 인증으로 신청하기</a>
-  <p class="text-center text-secondary small mt-2">회원가입 없이 본인인증만으로 신청됩니다</p>
+  <a href="{% url 'substitutes:application_apply' posting.pk %}" class="primary-action">신청하기</a>
+  <p class="text-center text-secondary small mt-2">회원가입 없이 이름·연락처·비밀번호만으로 신청됩니다</p>
   {% else %}
   <div class="empty-state">이미 마감되었거나 완료된 공고입니다.</div>
   {% endif %}

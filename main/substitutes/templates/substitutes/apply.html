@@ -1,16 +1,16 @@
 {% extends 'analytics/base.html' %}
-{% block title %}PASS 본인인증 | 스포츠 커리어 나침반{% endblock %}
+{% block title %}대타 신청 | 스포츠 커리어 나침반{% endblock %}
 {% block content %}
 <div class="recommend-shell form-shell">
   <div class="form-heading text-center">
     <a href="{% url 'substitutes:posting_detail' posting.pk %}" class="back-link">← 공고로 돌아가기</a>
-    <span class="eyebrow">PASS 본인인증</span>
+    <span class="eyebrow">대타 신청</span>
     <h1>{{ posting.manager.institution_name }} 대타 신청</h1>
-    <p>본인인증이 완료되면 이 번호로 신청 이력과 평판이 누적됩니다. 필요 자격증 보유 여부는 인증 직후 자동으로 대조합니다.</p>
+    <p>이 번호로 신청 이력과 평판이 누적됩니다. 다음에 같은 번호로 신청할 때는 지금 입력하는 비밀번호가 필요합니다. 필요 자격증 보유 여부는 신청 직후 자동으로 대조합니다.</p>
   </div>
   <form method="post" class="recommend-form" novalidate>
     {% include 'substitutes/_form_fields.html' %}
-    <div class="form-actions"><button class="primary-action" type="submit">PASS 인증 진행</button></div>
+    <div class="form-actions"><button class="primary-action" type="submit">신청하기</button></div>
   </form>
 </div>
 {% endblock %}

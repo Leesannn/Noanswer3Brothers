@@ -12,8 +12,6 @@
 .demand-supply-page {
   color: var(--ds-ink);
   background-color: var(--ds-paper) !important;
-  background-image: radial-gradient(rgba(17,17,17,.075) .6px, transparent .7px) !important;
-  background-size: 5px 5px !important;
   overflow-x: hidden;
 }
 
