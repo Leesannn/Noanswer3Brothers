@@ -3,10 +3,10 @@
 {% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}exam-editorial-page{% endblock %}
 {% block main_class %}exam-editorial-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260922-9">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260922-10">{% endblock %}
 {% block content %}
 <div class="exam-editorial">
-  <section class="exam-hero" aria-labelledby="exam-page-title">
+  <section class="exam-hero" aria-labelledby="exam-page-title" data-exam-reveal>
     <div class="exam-hero-copy">
       <div class="exam-title-lockup">
         <div>
@@ -22,7 +22,7 @@
     </div>
   </section>
 
-  <nav class="exam-grade-selector" aria-label="자격 등급 선택">
+  <nav class="exam-grade-selector" aria-label="자격 등급 선택" data-exam-reveal>
     <div class="exam-selector-label"><span>SELECT</span><strong>자격 등급</strong></div>
     <div class="exam-grade-list">
       {% for code, name in grades %}
@@ -31,7 +31,7 @@
     </div>
   </nav>
 
-  <section class="exam-panel exam-license-panel" aria-labelledby="license-guide-title">
+  <section class="exam-panel exam-license-panel" aria-labelledby="license-guide-title" data-exam-reveal>
     <header class="exam-section-head">
       <div class="exam-section-index">01</div>
       <div><span>QUALIFICATION SYSTEM</span><h2 id="license-guide-title">자격제도안내</h2></div>
@@ -101,7 +101,7 @@
     </div>
   </section>
 
-  <section class="exam-panel exam-schedule-panel" aria-labelledby="annual-schedule-title">
+  <section class="exam-panel exam-schedule-panel" aria-labelledby="annual-schedule-title" data-exam-reveal>
     <header class="exam-section-head">
       <div class="exam-section-index">02</div>
       <div><span>ANNUAL SCHEDULE</span><h2 id="annual-schedule-title">연간일정계획</h2></div>
@@ -133,7 +133,7 @@
     </div>
   </section>
 
-  <section class="exam-panel exam-caution-panel" aria-labelledby="disqualification-title">
+  <section class="exam-panel exam-caution-panel" aria-labelledby="disqualification-title" data-exam-reveal>
     <header class="exam-section-head">
       <div class="exam-section-index">!</div>
       <div><span>BEFORE YOU APPLY</span><h2 id="disqualification-title">체육지도자 결격사유</h2></div>
@@ -157,6 +157,7 @@
   <div class="exam-fetch-notice"><strong>↻</strong><p>연간일정계획 마지막 갱신 <b>{{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</b></p></div>
   {% endif %}
 
-  <footer class="exam-page-footer"><span>SPORTS CAREER COMPASS</span><span>PREPARE TODAY · LEAD TOMORROW</span></footer>
+  <aside class="exam-side-note" aria-hidden="true"><strong>SPORTS<br>LICENSE<br>EXAM<br>GUIDE</strong><span></span><p>PREPARE<br>TODAY<br>LEAD<br>TOMORROW</p></aside>
 </div>
 {% endblock %}
+{% block footer %}<footer class="exam-footer"><span>SPORTS CAREER COMPASS</span><i></i><span>PREPARE TODAY · LEAD TOMORROW</span></footer>{% endblock %}
