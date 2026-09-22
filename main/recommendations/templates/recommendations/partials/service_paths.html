@@ -1,3 +1,4 @@
+{% load static %}
 <section class="recommend-split" id="recommend-split" aria-labelledby="split-title">
   <h2 id="split-title" class="sr-only">추천 시작하기</h2>
   <a class="recommend-panel recommend-panel-blue" data-iris-target="unlicensed" href="{% url 'recommendations:unlicensed_recommendation_form' %}">
@@ -46,10 +47,9 @@
   <div class="iris-layer-brand">
     <div class="iris-layer-brand-row">
       <span class="iris-layer-mark-wrap">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="iris-layer-spinner" aria-hidden="true"></span>
+        <span class="iris-layer-logo-wrap"><img class="iris-layer-logo" src="{% static 'analytics/images/nachim-logo.png' %}?v=2" alt="나침"></span>
+        <span class="iris-layer-progress" aria-hidden="true"><span class="iris-layer-progress-fill"></span></span>
       </span>
-      <span class="brand-text"><strong>스포츠 커리어 나침반</strong><small>SPORTS CREATES NEXT CAREERS</small></span>
     </div>
   </div>
 </div>
@@ -59,10 +59,9 @@
   <div class="iris-layer-brand">
     <div class="iris-layer-brand-row">
       <span class="iris-layer-mark-wrap">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="iris-layer-spinner" aria-hidden="true"></span>
+        <span class="iris-layer-logo-wrap"><img class="iris-layer-logo" src="{% static 'analytics/images/nachim-logo.png' %}?v=2" alt="나침"></span>
+        <span class="iris-layer-progress" aria-hidden="true"><span class="iris-layer-progress-fill"></span></span>
       </span>
-      <span class="brand-text"><strong>스포츠 커리어 나침반</strong><small>SPORTS CREATES NEXT CAREERS</small></span>
     </div>
   </div>
 </div>

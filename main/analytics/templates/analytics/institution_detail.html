@@ -1,35 +1,70 @@
 {% extends 'analytics/base.html' %}
 {% load static %}
-{% block title %}{{ institution.name }} | 기관 진단{% endblock %}
-{% block body_class %}recommendation-page{% endblock %}
-{% block main_class %}recommendation-main{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'analytics/recommendation-ui.css' %}">{% endblock %}
+{% block title %}{{ institution.name }} | 기관 상세{% endblock %}
+{% block body_class %}institution-detail-page{% endblock %}
+{% block main_class %}institution-detail-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/institution-detail.css' %}?v=20260922-1">{% endblock %}
 {% block content %}
-<div class="recommend-shell institution-detail-shell">
-<a href="{% url 'analytics:programs' %}" class="text-decoration-none">← 기관·프로그램 목록</a><div class="d-flex justify-content-between align-items-start my-3 institution-title"><div><span class="eyebrow">INSTITUTION PROFILE</span><h1 class="h3">{{ institution.name }}</h1><p class="text-secondary">{{ institution.region }} · {{ institution.institution_type|default:'기관 유형 미상' }}<br>{{ institution.address|default:'등록된 주소 정보가 없습니다.' }}</p></div></div>
-<div class="row g-3 mb-4"><div class="col-md-3"><div class="metric-card"><span>프로그램</span><strong>{{ programs.count }}</strong></div></div><div class="col-md-3"><div class="metric-card"><span>신청 데이터 정원</span><strong>{{ capacity|floatformat:'0g' }}</strong></div></div><div class="col-md-3"><div class="metric-card"><span>신청 인원</span><strong>{{ applicants|floatformat:'0g' }}</strong></div></div><div class="col-md-3"><div class="metric-card"><span>평균 신청률</span><strong>{% if rate is not None %}{{ rate|floatformat:1 }}%{% else %}<small>데이터 부족</small>{% endif %}</strong></div></div></div>
-<div class="card border-0 shadow-sm mb-4">
-  <div class="card-body">
-    <h2 class="h5">기관 위치</h2>
-    <p class="text-secondary mb-3">{{ institution.address|default:'등록된 주소 정보가 없습니다.' }}</p>
+<section class="inst-hero" data-inst-reveal>
+  <p class="inst-kicker">INSTITUTION PROFILE</p>
+  <h1>{{ institution.name }}</h1>
+  <p class="inst-lead">{{ institution.region }} · {{ institution.institution_type|default:'기관 유형 미상' }}<br>{{ institution.address|default:'등록된 주소 정보가 없습니다.' }}</p>
+</section>
+
+<section class="inst-metrics" aria-label="요약 통계" data-inst-reveal>
+  <article class="inst-metric"><span>프로그램</span><strong>{{ programs.count }}</strong></article>
+  <article class="inst-metric"><span>신청 데이터 정원</span><strong>{{ capacity|floatformat:'0g' }}</strong></article>
+  <article class="inst-metric"><span>신청 인원</span><strong>{{ applicants|floatformat:'0g' }}</strong></article>
+  <article class="inst-metric is-rate"><span>평균 신청률</span>{% if rate is not None %}<strong>{{ rate|floatformat:1 }}%</strong>{% else %}<strong class="is-empty">데이터 부족</strong>{% endif %}</article>
+</section>
+
+<section class="inst-panel" data-inst-reveal>
+  <div class="inst-panel-head"><h2>기관 위치</h2></div>
+  <div class="inst-panel-body">
+    <p class="inst-address">{{ institution.address|default:'등록된 주소 정보가 없습니다.' }}</p>
     {% if institution.address %}
       {% if kakao_map_app_key %}
-        <div id="kakao-map" class="kakao-map-box"></div>
+        <div id="kakao-map" class="inst-map"></div>
       {% else %}
-        <div class="map-placeholder">
-          <p class="mb-1">지도를 표시하려면 카카오맵 API 키가 필요합니다.</p>
-          <p class="text-secondary small mb-0">설정(settings.py)의 <code>KAKAO_MAP_APP_KEY</code> 값을 발급받은 JavaScript 키로 채워 주세요.</p>
+        <div class="inst-map-placeholder">
+          <p>지도를 표시하려면 카카오맵 API 키가 필요합니다.</p>
+          <p>설정(settings.py)의 <code>KAKAO_MAP_APP_KEY</code> 값을 발급받은 JavaScript 키로 채워 주세요.</p>
         </div>
       {% endif %}
     {% else %}
-      <div class="map-placeholder"><p class="mb-0 text-secondary">주소 정보가 없어 지도를 표시할 수 없습니다.</p></div>
+      <div class="inst-map-placeholder"><p>주소 정보가 없어 지도를 표시할 수 없습니다.</p></div>
     {% endif %}
   </div>
-</div>
-<div class="card border-0 shadow-sm mb-4"><div class="card-body"><h2 class="h5">프로그램별 신청률</h2><div class="table-responsive"><table class="table"><thead><tr><th>프로그램</th><th>종목</th><th>정원</th><th>신청</th><th>신청률</th><th>판단</th></tr></thead><tbody>{% for item in applications %}<tr><td>{{ item.program.name }}</td><td>{{ item.program.sport }}</td><td>{{ item.capacity }}</td><td>{{ item.applicants }}</td><td>{% if item.application_rate is not None %}{{ item.application_rate|floatformat:1 }}%{% else %}데이터 부족{% endif %}</td><td>{{ item.demand_status }}</td></tr>{% empty %}<tr><td colspan="6">신청 인원 데이터가 없어 프로그램 유지·개선·증설 효과를 판단할 데이터가 부족함</td></tr>{% endfor %}</tbody></table></div></div></div>
-<div class="card border-0 shadow-sm mb-4"><div class="card-body"><h2 class="h5">운영 프로그램</h2><div class="table-responsive"><table class="table"><thead><tr><th>프로그램</th><th>종목</th><th>대상</th><th>요일</th><th>정원</th></tr></thead><tbody>{% for program in programs|slice:':100' %}<tr><td>{{ program.name }}</td><td>{{ program.sport|default:'-' }}</td><td>{{ program.target|default:'-' }}</td><td>{{ program.weekdays|default:'-' }}</td><td>{{ program.capacity|default:'-' }}</td></tr>{% empty %}<tr><td colspan="5">프로그램이 없습니다.</td></tr>{% endfor %}</tbody></table></div>{% if programs.count > 100 %}<p class="small text-secondary">상위 100개 프로그램만 표시합니다.</p>{% endif %}</div></div>
-<div class="card border-0 shadow-sm"><div class="card-body"><h2 class="h5">신규 개설 기회 종목</h2>{% for row in opportunities %}<p><strong>{{ row.sport }}</strong> — {{ row.diagnosis }} (자격 {{ row.instructors }}건, 프로그램 {{ row.programs }}개, 신청률 {{ row.rate|floatformat:1 }}%)</p>{% empty %}<p class="text-secondary">현재 자료만으로 판단할 데이터가 부족함</p>{% endfor %}<p class="small text-secondary mb-0">현재 데이터로 시간대나 대상 변경 효과는 증명할 수 없으므로 추천하지 않습니다.</p></div></div>
-</div>
+</section>
+
+<section class="inst-panel" data-inst-reveal>
+  <div class="inst-panel-head"><h2>프로그램별 신청률</h2></div>
+  <div class="inst-table-scroll">
+    <table>
+      <thead><tr><th>프로그램</th><th>종목</th><th>정원</th><th>신청</th><th>신청률</th><th>판단</th></tr></thead>
+      <tbody>{% for item in applications %}<tr><td>{{ item.program.name }}</td><td>{{ item.program.sport }}</td><td>{{ item.capacity }}</td><td>{{ item.applicants }}</td><td>{% if item.application_rate is not None %}{{ item.application_rate|floatformat:1 }}%{% else %}데이터 부족{% endif %}</td><td>{{ item.demand_status }}</td></tr>{% empty %}<tr><td colspan="6">신청 인원 데이터가 없어 프로그램 유지·개선·증설 효과를 판단할 데이터가 부족함</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+
+<section class="inst-panel" data-inst-reveal>
+  <div class="inst-panel-head"><h2>운영 프로그램</h2></div>
+  <div class="inst-table-scroll">
+    <table>
+      <thead><tr><th>프로그램</th><th>종목</th><th>대상</th><th>요일</th><th>정원</th></tr></thead>
+      <tbody>{% for program in programs|slice:':100' %}<tr><td>{{ program.name }}</td><td>{{ program.sport|default:'-' }}</td><td>{{ program.target|default:'-' }}</td><td>{{ program.weekdays|default:'-' }}</td><td>{{ program.capacity|default:'-' }}</td></tr>{% empty %}<tr><td colspan="5">프로그램이 없습니다.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  {% if programs.count > 100 %}<p class="inst-note-small">상위 100개 프로그램만 표시합니다.</p>{% endif %}
+</section>
+
+<section class="inst-panel" data-inst-reveal>
+  <div class="inst-panel-head"><h2>신규 개설 기회 종목</h2></div>
+  <div class="inst-panel-body">
+    {% for row in opportunities %}<p><strong>{{ row.sport }}</strong> — {{ row.diagnosis }} (자격 {{ row.instructors }}건, 프로그램 {{ row.programs }}개, 신청률 {{ row.rate|floatformat:1 }}%)</p>{% empty %}<p class="inst-muted">현재 자료만으로 판단할 데이터가 부족함</p>{% endfor %}
+    <p class="inst-note-small">현재 데이터로 시간대나 대상 변경 효과는 증명할 수 없으므로 추천하지 않습니다.</p>
+  </div>
+</section>
 {% endblock %}
 {% block scripts %}
 {% if kakao_map_app_key and institution.address %}
