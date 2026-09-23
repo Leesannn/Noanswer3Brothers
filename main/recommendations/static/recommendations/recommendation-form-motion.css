@@ -410,16 +410,123 @@ html:not(.recommend-motion-js) .recommendation-page.recommendation-form-motion .
   animation: motion-chip-pulse .5s var(--motion-ease);
 }
 
-/* 활동 가능한 요일(월~일 7개)은 두 줄로 꺾이지 않고 한 줄에 들어가도록 촘촘하게 */
+/* 요일은 체크 표시 없이 색상으로 선택 상태를 표현한다. */
+.recommendation-page.recommendation-form-motion .weekday-field .field-title {
+  color: #1e293b;
+  font-weight: 800;
+}
 .recommendation-page.recommendation-form-motion #id_weekdays {
-  flex-wrap: nowrap;
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
 }
 .recommendation-page.recommendation-form-motion #id_weekdays label {
-  padding: .55rem .5rem;
-  gap: .35rem;
-  font-size: 12.5px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: .7rem 1rem;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: center;
   white-space: nowrap;
+}
+.recommendation-page.recommendation-form-motion #id_weekdays input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.recommendation-page.recommendation-form-motion #id_weekdays label:has(input:checked) {
+  color: #fff;
+  border-color: var(--motion-blue);
+  background: var(--motion-blue);
+  box-shadow: none;
+}
+.recommendation-page.recommendation-form-motion #id_weekdays label:has(input:focus-visible) {
+  outline: 2px solid var(--motion-blue);
+  outline-offset: 3px;
+}
+
+/* 추가 관심 종목도 요일과 같은 선택 버튼으로 표시한다. */
+.recommendation-page.recommendation-form-motion .additional-sports-field .field-title {
+  color: #1e293b;
+  font-weight: 800;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports > div {
+  display: contents;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  overflow: hidden;
+  border: 2px solid #cbc7bd;
+  border-radius: 10px;
+  text-align: center;
+  background: transparent;
+  transition: border-color .18s ease, border-width .18s ease, transform .18s ease;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports label:hover {
+  border-color: #8b8982;
+  background: transparent;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports label img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports label.is-checked,
+.recommendation-page.recommendation-form-motion #id_additional_sports label:has(input:checked) {
+  color: inherit;
+  border-width: 4px;
+  border-color: var(--motion-blue);
+  background: transparent;
+  box-shadow: none;
+  animation: sports-choice-select .28s ease-out;
+}
+.recommendation-page.recommendation-form-motion #id_additional_sports label:has(input:focus-visible) {
+  outline: 2px solid var(--motion-blue);
+  outline-offset: 3px;
+}
+@keyframes sports-choice-select {
+  0% { transform: scale(1); }
+  38% { transform: scale(.96); }
+  72% { transform: scale(1.025); }
+  100% { transform: scale(1); }
 }
 @keyframes motion-chip-pulse {
   0% { transform: scale(1); }
@@ -527,6 +634,19 @@ html.recommend-motion-js .recommendation-page.recommendation-form-motion .motion
     padding: .6rem .8rem;
     font-size: 13px;
   }
+  .recommendation-page.recommendation-form-motion #id_additional_sports {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .recommendation-page.recommendation-form-motion #id_additional_sports label {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 430px) {
+  .recommendation-page.recommendation-form-motion #id_additional_sports {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ------------------------------ reduced motion ------------------------------ */
@@ -553,7 +673,8 @@ html.recommend-motion-js .recommendation-page.recommendation-form-motion .motion
   .recommendation-page.recommendation-form-motion .hero-texture,
   .recommendation-page.recommendation-form-motion .hero-circle,
   .recommendation-page.recommendation-form-motion .hero-runner-blue,
-  .recommendation-page.recommendation-form-motion .hero-dot {
+  .recommendation-page.recommendation-form-motion .hero-dot,
+  .recommendation-page.recommendation-form-motion #id_additional_sports label {
     animation: none !important;
   }
   .recommendation-page.recommendation-form-motion .hero-dot {

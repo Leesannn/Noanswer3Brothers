@@ -53,7 +53,7 @@
 /* Filter */
 .ds-filter { margin: 36px 0; border: 2px solid var(--ds-ink); background: var(--ds-white); box-shadow: 7px 7px 0 var(--ds-ink); }
 .ds-filter-head { display: flex; align-items: center; min-height: 36px; }
-.ds-filter-head strong { align-self: stretch; min-width: 156px; padding: 6px 41px 5px 20px; color: #fff; background: var(--ds-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
+.ds-filter-head strong { align-self: stretch; min-width: 0px; padding: 6px 41px 5px 25px; color: #fff; background: var(--ds-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
 .ds-filter-head span { margin-left: 9px; color: #706d65; font-size: .72rem; }
 .ds-filter-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)) 104px 76px; gap: 18px; align-items: end; padding: 10px 19px 16px; }
 .ds-field { min-width: 0; }

@@ -5,7 +5,7 @@
 {% block main_class %}recommendation-main{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'recommendations/recommendation-ui.css' %}?v=20260921-1">
-<link rel="stylesheet" href="{% static 'recommendations/institution-results-editorial.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'recommendations/institution-results-editorial.css' %}?v=3">
 {% endblock %}
 {% block content %}
 <div class="recommend-shell result-shell">
@@ -25,7 +25,11 @@
       <article class="recommend-card">
         <div class="rank-column">
           <span class="rank-badge">{{ forloop.counter }}위</span>
-          <div class="score-ring" style="--score: {{ result.total_score }};"><strong>{{ result.total_score }}</strong><span>/ 100점</span></div>
+          <div class="score-ring" style="--score: {{ result.total_score }};" aria-label="추천 점수 {{ result.total_score }}점, 100점 만점">
+            <div class="score-value"><strong>{{ result.total_score }}</strong><span>점</span></div>
+            <span class="score-total">100점 만점</span>
+            <span class="score-meter" aria-hidden="true"><i></i></span>
+          </div>
           {% if result.synthetic_data_used %}<span class="synthetic-badge">합성 데이터 기반</span>{% endif %}
         </div>
         <div class="result-main">

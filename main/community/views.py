@@ -8,6 +8,10 @@ from .forms import CommentForm, PasswordConfirmForm, PostEditForm, PostForm
 from .models import Post
 
 
+def community_home(request):
+    return render(request, 'community/home.html')
+
+
 def job_postings(request):
     return render(request, 'community/coming_soon.html', {
         'page_title': '일자리 공고',

@@ -53,10 +53,10 @@
 /* 프로그램 필터와 같은 자격 등급 선택 박스 */
 .exam-grade-selector { margin: 36px 0; border: 2px solid var(--exam-ink); background: var(--exam-white); box-shadow: 7px 7px 0 var(--exam-ink); }
 .exam-selector-label { display: flex; align-items: center; min-height: 36px; }
-.exam-selector-label span { align-self: stretch; min-width: 156px; padding: 6px 41px 5px 20px; color: #fff; background: var(--exam-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas,monospace; letter-spacing: .1em; }
+.exam-selector-label span { align-self: stretch; min-width: 0px; padding: 6px 41px 5px 25px; color: #fff; background: var(--exam-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas,monospace; letter-spacing: .1em; }
 .exam-selector-label strong { margin-left: 9px; color: #706d65; font-size: .72rem; font-weight: 700; }
 .exam-grade-list { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; padding: 12px 19px 17px; }
-.exam-editorial-page .exam-grade-chip { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 9px 12px; color: var(--exam-blue) !important; border: 1px solid #989895; background: #fff; font-size: .88rem; font-weight: 850; line-height: 1.35; text-align: center; text-decoration: none; transition: border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease; }
+.exam-editorial-page .exam-grade-chip { display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 9px 12px; color: var(--exam-ink) !important; border: 1px solid #989895; background: #fff; font-size: .88rem; font-weight: 850; line-height: 1.35; text-align: center; text-decoration: none; transition: border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease; }
 .exam-editorial-page .exam-grade-chip:hover { color: var(--exam-ink) !important; border-color: var(--exam-blue); background: #edf3ff; transform: translateY(-2px); }
 .exam-editorial-page .exam-grade-chip.is-active,.exam-editorial-page .exam-grade-chip.is-active:visited { color: #fff !important; border-color: var(--exam-blue); background: var(--exam-blue); box-shadow: inset 0 -4px 0 var(--exam-yellow); }
 

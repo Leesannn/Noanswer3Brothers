@@ -1,12 +1,27 @@
+{% load static %}
 {% csrf_token %}
 {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 {% for field in form %}
-  <div class="recommend-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">
+  <div class="recommend-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}{% if field.name == 'weekdays' %} weekday-field{% elif field.name == 'additional_sports' %} additional-sports-field{% endif %}"{% if field.name == 'weekdays' %} role="group" aria-labelledby="weekdays-label"{% elif field.name == 'additional_sports' %} role="group" aria-labelledby="additional-sports-label"{% endif %}>
     <div class="field-label">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% if field.name == 'weekdays' %}<span class="field-title" id="weekdays-label">{{ field.label }}</span>{% elif field.name == 'additional_sports' %}<span class="field-title" id="additional-sports-label">{{ field.label }}</span>{% else %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
       {% if field.field.required %}<span class="required-chip">필수</span>{% else %}<span class="optional-chip">선택</span>{% endif %}
     </div>
-    {{ field }}
+    {% if field.name == 'additional_sports' %}
+      {% static 'recommendations/images/sports/' as sports_icon_base %}
+      <div id="{{ field.auto_id }}" class="sport-icon-grid">
+        {% for choice in field %}
+        <div>
+          <label for="{{ choice.id_for_label }}">
+            {{ choice.tag }}
+            <img src="{{ sports_icon_base }}{{ choice.choice_label }}.png?v=20260923-2" alt="{{ choice.choice_label }}" loading="lazy">
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ field }}
+    {% endif %}
     {% if field.help_text %}<div class="form-help">{{ field.help_text }}</div>{% endif %}
     {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
   </div>

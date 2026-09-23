@@ -49,9 +49,28 @@
   box-shadow: 0 2px 12px rgba(17, 17, 17, .08);
   backdrop-filter: none;
 }
-.app-shell-page:not(.motion-landing-page) .app-nav .nav-link { color: #3a382f !important; }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link {
+  position: relative;
+  color: #3a382f !important;
+  border-radius: 0;
+}
 .app-shell-page:not(.motion-landing-page) .app-nav .nav-link:hover,
-.app-shell-page:not(.motion-landing-page) .app-nav .nav-link:focus { color: #111111 !important; background: rgba(17, 17, 17, .06); }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link:focus { color: #111111 !important; background: rgba(17, 17, 17, .045); }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link.is-active:not(.nav-recommend) {
+  color: #1157f5 !important;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 900;
+}
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-link.is-active:not(.nav-recommend)::after {
+  content: "";
+  position: absolute;
+  right: .72rem;
+  bottom: 3px;
+  left: .72rem;
+  height: 3px;
+  background: #1157f5;
+}
 .app-shell-page:not(.motion-landing-page) .app-nav .navbar-toggler { border-color: rgba(17, 17, 17, .2); }
 .app-shell-page:not(.motion-landing-page) .app-nav .navbar-toggler-icon { filter: invert(1); }
 @media (max-width: 991px) {
@@ -167,8 +186,18 @@
    are dark, it needs its own explicit colors instead of inheriting them. */
 .app-shell-page:not(.motion-landing-page) .app-nav .nav-recommend { color: #ffffff !important; background: var(--service-accent); }
 .app-shell-page:not(.motion-landing-page) .app-nav .nav-recommend:hover { color: #111111 !important; background: #ffffff; }
+.app-shell-page:not(.motion-landing-page) .app-nav .nav-recommend.is-active {
+  color: #ffffff !important;
+  background: #111111;
+  box-shadow: inset 0 -4px #f3d43f;
+}
 .recommendation-page .app-nav .nav-recommend { color: #ffffff !important; background: var(--recipe-accent); }
 .recommendation-page .app-nav .nav-recommend:hover { color: #111111 !important; background: #ffffff; }
+.recommendation-page .app-nav .nav-recommend.is-active {
+  color: #ffffff !important;
+  background: #111111;
+  box-shadow: inset 0 -4px #f3d43f;
+}
 
 /* ------------------------------------------------------------------ */
 /* recommendation-ui.css: patch the hardcoded (non-variable) colors    */

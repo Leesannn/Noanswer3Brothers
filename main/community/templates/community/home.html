@@ -1,0 +1,53 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+{% block title %}커뮤니티 | 스포츠 커리어 나침반{% endblock %}
+{% block body_class %}community-home-page{% endblock %}
+{% block main_class %}community-home-main{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'community/community-home.css' %}?v=20260923-2"><link rel="stylesheet" href="{% static 'analytics/tab-header.css' %}?v=20260923-1">{% endblock %}
+{% block content %}
+<div class="community-home">
+  <header class="analytics-tab-hero" aria-labelledby="analytics-tab-title">
+    {% include 'analytics/partials/tab_header.html' with number='05' label='COMMUNITY' heading='커뮤니티' description='정보를 나누고, 현장의 기회를 찾고, 서로의 성장을 연결하세요.' %}
+  </header>
+
+  <section class="community-menu" aria-labelledby="community-menu-title">
+    <div class="community-menu-heading">
+      <span>CHOOSE A COMMUNITY</span>
+      <h2 id="community-menu-title">어떤 이야기를 찾고 있나요?</h2>
+    </div>
+
+    <div class="community-card-grid">
+      <a class="community-card is-blue" href="{% url 'community:post_list' %}">
+        <span class="community-card-number">01</span>
+        <span class="community-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 10h32v23H20l-9 7v-7H8z"/><path d="M16 18h16M16 24h11"/></svg></span>
+        <div><small>COMMUNITY BOARD</small><h3>자유 게시판</h3><p>스포츠와 지도 활동에 관한 경험과 정보를 자유롭게 나눕니다.</p></div>
+        <strong>게시판 들어가기 <i aria-hidden="true">→</i></strong>
+      </a>
+
+      <a class="community-card is-yellow" href="{% url 'substitutes:posting_list' %}">
+        <span class="community-card-number">02</span>
+        <span class="community-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="19" cy="17" r="7"/><path d="M7 38c1-8 5-12 12-12s11 4 12 12M32 14v14M25 21h14"/></svg></span>
+        <div><small>SHORT TERM SUBSTITUTE</small><h3>단기 대타</h3><p>긴급한 수업 공백과 활동 가능한 지도자를 빠르게 연결합니다.</p></div>
+        <strong>대타 공고 보기 <i aria-hidden="true">→</i></strong>
+      </a>
+
+      <a class="community-card is-red" href="{% url 'community:job_postings' %}">
+        <span class="community-card-number">03</span>
+        <span class="community-card-status">준비 중</span>
+        <span class="community-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="7" y="15" width="34" height="25" rx="2"/><path d="M17 15v-5h14v5M7 25h34M20 25v4h8v-4"/></svg></span>
+        <div><small>CAREER OPPORTUNITIES</small><h3>일자리 공고</h3><p>스포츠 기관과 지도자를 위한 채용 및 활동 기회를 모아봅니다.</p></div>
+        <strong>서비스 안내 보기 <i aria-hidden="true">→</i></strong>
+      </a>
+
+      <a class="community-card is-mint" href="{% url 'community:mentoring' %}">
+        <span class="community-card-number">04</span>
+        <span class="community-card-status">준비 중</span>
+        <span class="community-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="16" cy="17" r="6"/><circle cx="33" cy="17" r="6"/><path d="M5 38c1-7 4-11 11-11s10 4 11 11M24 38c1-7 4-11 9-11s9 4 10 11"/></svg></span>
+        <div><small>MENTOR AND MENTEE</small><h3>멘토·멘티</h3><p>현장 경험과 진로 고민을 나누며 함께 성장할 동료를 찾습니다.</p></div>
+        <strong>서비스 안내 보기 <i aria-hidden="true">→</i></strong>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block footer %}<footer class="community-home-footer"><span>SPORTS CAREER COMPASS</span><i></i><span>TOGETHER THROUGH SPORTS</span></footer>{% endblock %}

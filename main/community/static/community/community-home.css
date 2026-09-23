@@ -1,0 +1,77 @@
+:root {
+  --community-ink: #101010;
+  --community-paper: #f3f0e8;
+  --community-blue: #1157f5;
+  --community-yellow: #f3d43f;
+  --community-red: #f0442e;
+  --community-mint: #98dfca;
+  --community-line: #aaa79f;
+}
+
+.community-home-page { color: var(--community-ink); background: var(--community-paper) !important; }
+.community-home-page::before { display: none; }
+.community-home-page .community-home-main {
+  width: min(100%, 1630px);
+  margin: 0 auto;
+  padding: 18px 36px 70px !important;
+  color: var(--community-ink);
+}
+.community-home { width: 100%; margin: 0 auto; }
+
+.community-menu { padding-top: 36px; }
+.community-menu-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+.community-menu-heading span { color: var(--community-blue); font: 900 .72rem/1 Consolas, monospace; letter-spacing: .2em; }
+.community-home-page .community-menu-heading h2 { margin: 0; color: var(--community-ink); font-size: clamp(1.7rem, 2.5vw, 2.6rem); font-weight: 950; letter-spacing: -.045em; }
+.community-card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.community-card {
+  position: relative;
+  display: flex;
+  min-height: 390px;
+  padding: 25px;
+  overflow: hidden;
+  flex-direction: column;
+  color: var(--community-ink) !important;
+  border: 1px solid var(--community-ink);
+  background: #fffefa;
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.community-card:hover { color: var(--community-ink) !important; transform: translateY(-6px); box-shadow: 8px 8px 0 var(--community-ink); }
+.community-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 8px; background: var(--card-color); }
+.community-card.is-blue { --card-color: var(--community-blue); }
+.community-card.is-yellow { --card-color: var(--community-yellow); }
+.community-card.is-red { --card-color: var(--community-red); }
+.community-card.is-mint { --card-color: var(--community-mint); }
+.community-card-number { font: 900 .8rem/1 Consolas, monospace; letter-spacing: .12em; }
+.community-card-status { position: absolute; top: 24px; right: 22px; padding: 5px 8px; border: 1px solid #aaa; color: #68645c; font-size: .68rem; font-weight: 800; }
+.community-card-icon { display: grid; width: 74px; height: 74px; margin: 42px 0 32px; place-items: center; border-radius: 50%; background: var(--card-color); }
+.community-card-icon svg { width: 39px; height: 39px; fill: none; stroke: var(--community-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.community-card.is-blue .community-card-icon svg,
+.community-card.is-red .community-card-icon svg { stroke: #fff; }
+.community-card small { color: #6d6960; font: 800 .66rem/1.2 Consolas, monospace; letter-spacing: .1em; }
+.community-card h3 { margin: 7px 0 13px; color: var(--community-ink); font-size: 1.65rem; font-weight: 950; letter-spacing: -.045em; }
+.community-card p { margin: 0; color: #5d5951; font-size: .88rem; line-height: 1.65; }
+.community-card > strong { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 22px; border-top: 1px solid #c7c4bc; font-size: .82rem; }
+.community-card > strong i { font-size: 1.25rem; font-style: normal; transition: transform .2s ease; }
+.community-card:hover > strong i { transform: translateX(5px); }
+.community-home-footer { display: flex; align-items: center; gap: 18px; max-width: 1320px; margin: 0 auto; padding: 17px 0 26px; color: #817e76; font: .64rem Consolas, monospace; letter-spacing: .18em; }
+.community-home-footer i { height: 1px; flex: 1; background: #aaa79f; }
+
+@media (max-width: 1100px) {
+  .community-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .community-card { min-height: 340px; }
+}
+@media (max-width: 720px) {
+  .community-home-page .community-home-main { padding: 13px 15px 50px !important; }
+  .community-menu { padding-top: 38px; }
+  .community-menu-heading { display: block; }
+  .community-menu-heading span { display: block; margin-bottom: 9px; }
+  .community-card { min-height: 320px; padding: 22px; }
+  .community-card-icon { width: 62px; height: 62px; margin: 33px 0 25px; }
+  .community-card-icon svg { width: 32px; height: 32px; }
+  .community-home-footer { padding-inline: 16px; font-size: .54rem; }
+}
+@media (max-width: 500px) {
+  .community-card-grid { grid-template-columns: 1fr; }
+  .community-card { min-height: 300px; }
+}

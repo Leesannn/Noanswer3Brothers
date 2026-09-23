@@ -9,7 +9,7 @@
  * already comes from the site-wide editorial-theme.css re-theme of
  * .recommendation-page; this file adds the poster-card layout: conic-
  * gradient score ring, ribbon rank badge, icon metrics grid, and a
- * restyled score-details disclosure.
+ * horizontal score meter, and a restyled score-details disclosure.
  */
 
 .recommendation-page.results-editorial {
@@ -118,33 +118,63 @@
 
 .recommendation-page.results-editorial .score-ring {
   position: relative;
-  width: 112px;
-  height: 112px;
-  border: 0;
-  border-radius: 50%;
-  background: conic-gradient(var(--res-blue) calc(var(--score, 0) * 3.6deg), #e3e6ec 0);
+  display: flex;
+  align-items: flex-start;
+  width: 150px;
+  height: auto;
+  padding: 17px 16px 15px;
+  flex-direction: column;
+  border: 1.5px solid var(--res-ink);
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 4px 4px 0 #dfe4f2;
 }
 .recommendation-page.results-editorial .score-ring::after {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border-radius: 50%;
-  background: #fffdf7;
-  box-shadow: none;
+  display: none;
+  content: none;
+}
+.recommendation-page.results-editorial .score-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  width: 100%;
 }
 .recommendation-page.results-editorial .score-ring strong {
-  position: relative;
-  z-index: 1;
-  font-size: 2.15rem;
-  font-weight: 900;
-  letter-spacing: -.02em;
   color: var(--res-ink);
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: .92;
+  letter-spacing: -.02em;
 }
-.recommendation-page.results-editorial .score-ring span {
-  position: relative;
-  z-index: 1;
+.recommendation-page.results-editorial .score-ring .score-value span {
+  color: var(--res-ink);
+  font-size: .8rem;
+  font-weight: 900;
+}
+.recommendation-page.results-editorial .score-ring .score-total {
+  display: block;
+  margin-top: 7px;
   color: var(--res-muted);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+.recommendation-page.results-editorial .score-meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 7px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfe3eb;
+}
+.recommendation-page.results-editorial .score-meter i {
+  display: block;
+  width: calc(var(--score, 0) * 1%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--res-blue);
 }
 .recommendation-page.results-editorial .synthetic-badge {
   border-radius: 999px;

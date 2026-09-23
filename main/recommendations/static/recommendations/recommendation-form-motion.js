@@ -13,7 +13,6 @@
   var runnerImg = root.querySelector('[data-collage-runner]');
   var circleImg = root.querySelector('[data-collage-circle]');
   var skipBtn = root.querySelector('[data-motion-skip]');
-  var replayBtn = root.querySelector('[data-motion-replay]');
 
   var timers = [];
 
@@ -68,22 +67,13 @@
     ['step', 'heading', 'collage', 'form', 'fields', 'cta', 'settled'].forEach(setStage);
   }
 
-  // ---- skip / replay controls ----
+  // ---- skip control ----
   function initControls() {
     if (skipBtn) {
       skipBtn.addEventListener('click', function () {
         settleInstant();
         try { window.sessionStorage.setItem(SESSION_KEY, 'true'); } catch (error) { /* private mode */ }
         skipBtn.hidden = true;
-        if (replayBtn) replayBtn.hidden = reduceMotionQuery.matches;
-      });
-    }
-    if (replayBtn) {
-      replayBtn.addEventListener('click', function () {
-        if (reduceMotionQuery.matches) return;
-        replayBtn.hidden = true;
-        if (skipBtn) skipBtn.hidden = false;
-        runIntroTimeline();
       });
     }
   }
@@ -145,7 +135,6 @@
   } else if (alreadyPlayed) {
     settleInstant();
     if (skipBtn) skipBtn.hidden = true;
-    if (replayBtn) replayBtn.hidden = false;
   } else {
     runIntroTimeline();
   }

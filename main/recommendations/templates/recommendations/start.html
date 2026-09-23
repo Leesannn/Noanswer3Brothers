@@ -4,7 +4,7 @@
 {% block body_class %}editorial-home motion-landing-page{% endblock %}
 {% block main_class %}editorial-main{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}?v=20260922-15">
+<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}?v=20260923-5">
 <noscript><style>
 .editorial-home .editorial-header,.editorial-home .hero-kicker,.editorial-home .hero-title .title-line>span,
 .editorial-home .hero-subcopy,.editorial-home .hero-actions,.editorial-home .hero-meta,.editorial-home .hero-stats,
@@ -22,8 +22,8 @@
     </a>
   </div>
   <nav class="editorial-nav" aria-label="랜딩 페이지 메뉴">
-    <a href="{% url 'analytics:dashboard' %}">서비스</a>
-    <a href="{% url 'analytics:demand_supply' %}">데이터 이야기</a>
+    <a href="{% url 'analytics:dashboard' %}">데이터 이야기</a>
+    <a href="{% url 'community:home' %}">커뮤니티</a>
     <a class="editorial-nav-cta next" href="#recommend-split">추천 시작 <span aria-hidden="true">→</span></a>
   </nav>
 </header>
@@ -59,11 +59,10 @@
 
   <div class="intro-controls" aria-label="인트로 모션 제어">
     <button type="button" class="intro-control intro-skip" data-intro-skip>모션 건너뛰기</button>
-    <button type="button" class="intro-control intro-replay" data-intro-replay>다시 보기</button>
   </div>
 </section>
 
 {% include 'recommendations/partials/service_paths.html' %}
 {% endblock %}
 {% block footer %}{% endblock %}
-{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}?v=20260922-2" defer></script>{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}?v=20260923-5" defer></script>{% endblock %}

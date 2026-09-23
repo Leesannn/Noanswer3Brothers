@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="{% static 'analytics/app.css' %}?v=20260922-4">
   <link rel="stylesheet" href="{% static 'analytics/service-ui.css' %}">
   {% block extra_css %}{% endblock %}
-  <link rel="stylesheet" href="{% static 'analytics/editorial-theme.css' %}?v=20260922-2">
+  <link rel="stylesheet" href="{% static 'analytics/editorial-theme.css' %}?v=20260923-3">
   {% block page_theme_css %}{% endblock %}
   <link rel="stylesheet" href="{% static 'analytics/page-transitions.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -44,23 +44,16 @@
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="메뉴 열기"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="mainNav">
+      {% with current_view=request.resolver_match.view_name current_namespace=request.resolver_match.namespace %}
       <div class="navbar-nav ms-auto align-items-xl-center">
-        <a class="nav-link" href="{% url 'recommendations:recommendation_start' %}">홈</a>
-        <a class="nav-link" href="{% url 'analytics:dashboard' %}">프로그램 현황</a>
-        <a class="nav-link" href="{% url 'analytics:instructors' %}">지도자 현황</a>
-        <a class="nav-link" href="{% url 'analytics:exam_info' %}">시험정보</a>
-        <a class="nav-link" href="{% url 'analytics:demand_supply' %}">수요·공급 분석</a>
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">커뮤니티</a>
-          <ul class="dropdown-menu dropdown-menu-end app-dropdown">
-            <li><a class="dropdown-item" href="{% url 'community:post_list' %}">게시판</a></li>
-            <li><a class="dropdown-item" href="{% url 'substitutes:posting_list' %}">단기 대타</a></li>
-            <li><a class="dropdown-item" href="{% url 'community:job_postings' %}">일자리 공고</a></li>
-            <li><a class="dropdown-item" href="{% url 'community:mentoring' %}">멘토·멘티</a></li>
-          </ul>
-        </div>
-        <a class="nav-link nav-recommend" href="{% url 'recommendations:recommendation_start' %}">맞춤 추천 시작</a>
+        <a class="nav-link{% if current_namespace == 'recommendations' %} is-active{% endif %}" href="{% url 'recommendations:recommendation_start' %}"{% if current_namespace == 'recommendations' %} aria-current="page"{% endif %}>{% if current_namespace == 'recommendations' %}맞춤 추천{% else %}홈{% endif %}</a>
+        <a class="nav-link{% if current_view == 'analytics:dashboard' or current_view == 'analytics:current_programs' or current_view == 'analytics:applications' or current_view == 'analytics:institution_detail' %} is-active{% endif %}" href="{% url 'analytics:dashboard' %}"{% if current_view == 'analytics:dashboard' or current_view == 'analytics:current_programs' or current_view == 'analytics:applications' or current_view == 'analytics:institution_detail' %} aria-current="page"{% endif %}>프로그램 현황</a>
+        <a class="nav-link{% if current_view == 'analytics:instructors' %} is-active{% endif %}" href="{% url 'analytics:instructors' %}"{% if current_view == 'analytics:instructors' %} aria-current="page"{% endif %}>지도자 현황</a>
+        <a class="nav-link{% if current_view == 'analytics:exam_info' %} is-active{% endif %}" href="{% url 'analytics:exam_info' %}"{% if current_view == 'analytics:exam_info' %} aria-current="page"{% endif %}>시험정보</a>
+        <a class="nav-link{% if current_view == 'analytics:demand_supply' %} is-active{% endif %}" href="{% url 'analytics:demand_supply' %}"{% if current_view == 'analytics:demand_supply' %} aria-current="page"{% endif %}>수요·공급 분석</a>
+        <a class="nav-link{% if current_namespace == 'community' or current_namespace == 'substitutes' %} is-active{% endif %}" href="{% url 'community:home' %}"{% if current_namespace == 'community' or current_namespace == 'substitutes' %} aria-current="page"{% endif %}>커뮤니티</a>
       </div>
+      {% endwith %}
     </div>
   </div>
 </nav>

@@ -78,7 +78,7 @@
   box-shadow: 7px 7px 0 var(--program-ink);
 }
 .program-filter-head { display: flex; align-items: center; min-height: 36px; }
-.program-filter-head strong { align-self: stretch; min-width: 156px; padding: 6px 41px 5px 20px; color: #fff; background: var(--program-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
+.program-filter-head strong { align-self: stretch; min-width: 0px; padding: 6px 41px 5px 25px; color: #fff; background: var(--program-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
 .program-filter-head span { margin-left: 9px; color: #706d65; font-size: .72rem; }
 .program-filter-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)) minmax(190px,1.3fr) 104px 76px; gap: 18px; align-items: end; padding: 10px 19px 16px; }
 .program-field { min-width: 0; }

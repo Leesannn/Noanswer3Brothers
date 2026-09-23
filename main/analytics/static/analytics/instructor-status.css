@@ -57,7 +57,7 @@
 
 .instructor-filter { margin: 36px 0; border: 2px solid var(--instructor-ink); background: var(--instructor-white); box-shadow: 7px 7px 0 var(--instructor-ink); }
 .instructor-filter-head { display: flex; align-items: center; min-height: 36px; }
-.instructor-filter-head strong { align-self: stretch; min-width: 156px; padding: 6px 41px 5px 20px; color: #fff; background: var(--instructor-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
+.instructor-filter-head strong { align-self: stretch; min-width: 0px; padding: 6px 41px 5px 25px; color: #fff; background: var(--instructor-blue); clip-path: polygon(0 0,100% 0,89% 100%,0 100%); font: 900 1rem/1.5 Consolas, monospace; letter-spacing: .1em; }
 .instructor-filter-head span { margin-left: 9px; color: #706d65; font-size: .72rem; }
 .instructor-filter-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)) 104px 76px; gap: 18px; align-items: end; padding: 10px 19px 16px; }
 .instructor-field { min-width: 0; }

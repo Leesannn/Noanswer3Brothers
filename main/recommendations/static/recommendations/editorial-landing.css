@@ -146,9 +146,7 @@ body.is-intro-skipped .hero-highlight { background-size: 100% 100%; }
 
 .intro-controls { position: absolute; z-index: 20; top: 22px; right: clamp(20px, 4vw, 56px); display: flex; gap: 14px; }
 .intro-control { padding: 6px 0; color: var(--editorial-muted); background: transparent; border: 0; border-bottom: 1.5px solid rgba(17,17,17,.28); font: 700 .68rem/1 system-ui, sans-serif; letter-spacing: .06em; cursor: pointer; }
-.intro-replay { display: none; }
 body.is-intro-settled .intro-skip,body.is-intro-skipped .intro-skip,body.is-intro-reduced .intro-skip { display: none; }
-body.is-intro-settled .intro-replay,body.is-intro-skipped .intro-replay { display: block; }
 
 /* Reduced motion: show final state immediately, skip veils/canvas draw-in */
 body.is-intro-reduced .editorial-header,

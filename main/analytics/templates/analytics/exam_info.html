@@ -3,11 +3,11 @@
 {% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}exam-editorial-page{% endblock %}
 {% block main_class %}exam-editorial-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260923-9"><link rel="stylesheet" href="{% static 'analytics/tab-header.css' %}?v=20260923-1">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260923-10"><link rel="stylesheet" href="{% static 'analytics/tab-header.css' %}?v=20260923-1">{% endblock %}
 {% block content %}
 <div class="exam-editorial">
   <section class="analytics-tab-hero" aria-labelledby="analytics-tab-title" data-exam-reveal>
-    {% include 'analytics/partials/tab_header.html' with number='04' label='EXAM GUIDE' heading='자격 시험 정보' description='체육지도자의 시작을 위한 자격제도와 연간 시험 일정을 한눈에 확인하세요.' %}
+    {% include 'analytics/partials/tab_header.html' with number='03' label='EXAM GUIDE' heading='자격 시험 정보' description='체육지도자의 시작을 위한 자격제도와 연간 시험 일정을 한눈에 확인하세요.' %}
   </section>
 
   <nav class="exam-grade-selector" aria-label="자격 등급 선택" data-exam-reveal>
@@ -143,10 +143,7 @@
     <strong>!</strong>
     <p><b>최신 정보를 불러오지 못했습니다.</b><br>{% if fetch_status.last_success_at %}마지막 성공 갱신일 {{ fetch_status.last_success_at|date:'Y-m-d H:i' }} 기준 일정을 표시합니다.{% else %}아직 한 번도 갱신에 성공하지 못했습니다.{% endif %}</p>
   </div>
-  {% elif fetch_status.last_success_at %}
-  <div class="exam-fetch-notice"><strong>↻</strong><p>연간일정계획 마지막 갱신 <b>{{ fetch_status.last_success_at|date:'Y-m-d H:i' }}</b></p></div>
   {% endif %}
-
   <aside class="exam-side-note" aria-hidden="true"><strong>SPORTS<br>LICENSE<br>EXAM<br>GUIDE</strong><span></span><p>PREPARE<br>TODAY<br>LEAD<br>TOMORROW</p></aside>
 </div>
 {% endblock %}
