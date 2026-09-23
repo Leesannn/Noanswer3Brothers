@@ -3,25 +3,15 @@
 {% block title %}지도자 자격 취득 현황 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}instructor-status-page{% endblock %}
 {% block main_class %}instructor-status-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/instructor-status.css' %}?v=20260921-5">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/instructor-status.css' %}?v=20260921-5"><link rel="stylesheet" href="{% static 'analytics/tab-header.css' %}?v=20260923-1">{% endblock %}
 {% block content %}
-<section class="instructor-hero" data-instructor-reveal>
-  <div class="instructor-hero-copy">
-    <div class="instructor-title-lockup">
-      <div>
-        <p class="instructor-kicker">SPORTS CAREER COMPASS</p>
-        <h1>지도자 자격<br>취득 현황</h1>
-      </div>
-      <div class="instructor-index" aria-hidden="true"><strong>03</strong><span>LICENSE<br>DATA</span></div>
-    </div>
-    <p class="instructor-lead">개인 식별자와 시험 점수는 제외하고 종목·지역·연도 단위로 집계한 결과입니다.</p>
-  </div>
-  <div class="instructor-hero-art" aria-hidden="true"></div>
+<section class="analytics-tab-hero" aria-labelledby="analytics-tab-title" data-instructor-reveal>
+  {% include 'analytics/partials/tab_header.html' with number='03' label='LICENSE DATA' heading='지도자 현황' description='개인 식별자와 시험 점수는 제외하고 종목·지역·연도 단위로 집계한 결과입니다.' %}
 </section>
 
 <form method="get" class="instructor-filter" id="instructor-filters" data-instructor-reveal>
   <div class="instructor-filter-head">
-    <strong>FILTER 02</strong>
+    <strong>SEARCH</strong>
     <span>조건을 선택해 지도자 자격 취득 현황을 확인하세요.</span>
   </div>
   <div class="instructor-filter-grid">

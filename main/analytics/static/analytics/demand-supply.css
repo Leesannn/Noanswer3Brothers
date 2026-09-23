@@ -32,7 +32,7 @@
 /* Hero */
 .ds-hero {
   display: grid;
-  grid-template-columns: minmax(560px,.92fr) 1.08fr;
+  grid-template-columns: minmax(900px,.92fr) 1.08fr;
   align-items: center;
   gap: 20px;
   min-height: 190px;
@@ -42,7 +42,7 @@
 .ds-title-lockup { display: flex; align-items: center; }
 .ds-kicker { margin: 0 0 5px; color: var(--ds-blue); font: 800 .69rem/1.1 Consolas, monospace; letter-spacing: .18em; }
 .demand-supply-page .ds-hero h1 { margin: 0; color: var(--ds-ink); font-size: clamp(3.4rem,4.6vw,4.9rem); font-weight: 950; line-height: .91; letter-spacing: -.075em; }
-.ds-lead { margin: 17px 0 0; max-width: 46ch; color: #43413c; font-size: 1.02rem; }
+.ds-lead { margin: 17px 0 0; color: #43413c; font-size: 1.02rem; }
 .ds-index { margin-left: 30px; padding: 4px 0 1px 24px; border-left: 1px solid #999; }
 .ds-index strong { display: block; color: var(--ds-blue); font: 900 4.2rem/.78 Impact, "Arial Black", sans-serif; }
 .ds-index span { display: block; margin-top: 13px; color: var(--ds-blue); font: 900 .78rem/1.05 Consolas, monospace; letter-spacing: .2em; }

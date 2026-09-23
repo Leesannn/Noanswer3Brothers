@@ -4,7 +4,7 @@
 {% block body_class %}editorial-home motion-landing-page{% endblock %}
 {% block main_class %}editorial-main{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}?v=20260922-13">
+<link rel="stylesheet" href="{% static 'recommendations/editorial-landing.css' %}?v=20260922-15">
 <noscript><style>
 .editorial-home .editorial-header,.editorial-home .hero-kicker,.editorial-home .hero-title .title-line>span,
 .editorial-home .hero-subcopy,.editorial-home .hero-actions,.editorial-home .hero-meta,.editorial-home .hero-stats,
@@ -24,7 +24,7 @@
   <nav class="editorial-nav" aria-label="랜딩 페이지 메뉴">
     <a href="{% url 'analytics:dashboard' %}">서비스</a>
     <a href="{% url 'analytics:demand_supply' %}">데이터 이야기</a>
-    <a class="editorial-nav-cta" href="#recommend-split">추천 시작 <span aria-hidden="true">→</span></a>
+    <a class="editorial-nav-cta next" href="#recommend-split">추천 시작 <span aria-hidden="true">→</span></a>
   </nav>
 </header>
 {% endblock %}
@@ -66,4 +66,4 @@
 {% include 'recommendations/partials/service_paths.html' %}
 {% endblock %}
 {% block footer %}{% endblock %}
-{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}?v=20260921-1" defer></script>{% endblock %}
+{% block scripts %}<script src="{% static 'recommendations/editorial-landing.js' %}?v=20260922-2" defer></script>{% endblock %}

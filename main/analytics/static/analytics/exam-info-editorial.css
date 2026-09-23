@@ -33,7 +33,7 @@
 /* 프로그램 현황과 같은 히어로 비율과 타이포 리듬 */
 .exam-hero {
   display: grid;
-  grid-template-columns: minmax(510px,.8fr) 1.2fr;
+  grid-template-columns: minmax(900px,.8fr) 1.2fr;
   align-items: center;
   gap: 24px;
   min-height: 170px;

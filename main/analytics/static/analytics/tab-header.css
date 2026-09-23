@@ -1,0 +1,73 @@
+/* Shared header matching the program status title lockup. */
+.analytics-tab-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 170px;
+  padding-block: 12px;
+  border-bottom: 1px solid #979794;
+  color: #101010;
+}
+
+.analytics-tab-title-lockup { display: flex; align-items: center; }
+.analytics-tab-title { min-width: 0; }
+.analytics-tab-index {
+  flex: 0 0 144px;
+  margin-right: 35px;
+  padding: 4px 25px 1px 0;
+  border-right: 1px solid #999;
+  color: #1157f5;
+}
+.analytics-tab-index strong {
+  display: block;
+  color: inherit;
+  font: 900 4.45rem/.78 Impact, "Arial Black", sans-serif;
+  letter-spacing: .02em;
+}
+.analytics-tab-index span {
+  display: block;
+  margin-top: 17px;
+  color: inherit;
+  font: 900 .82rem/1.05 Consolas, monospace;
+  letter-spacing: .2em;
+  white-space: nowrap;
+}
+.analytics-tab-hero .analytics-tab-title h1 {
+  margin: 0;
+  color: #101010;
+  font-size: clamp(3.8rem, 5vw, 5.2rem);
+  font-weight: 950;
+  line-height: .93;
+  letter-spacing: -.085em;
+  word-break: keep-all;
+}
+.analytics-tab-hero .analytics-tab-kicker {
+  margin: 13px 0 0;
+  color: #56554f;
+  font: 900 .82rem/1.05 Consolas, monospace;
+  letter-spacing: .2em;
+}
+.analytics-tab-hero .analytics-tab-lead {
+  margin: 18px 0 0;
+  color: #43413c;
+  font-size: 1.08rem;
+  word-break: keep-all;
+}
+
+@media (max-width: 720px) {
+  .analytics-tab-hero { min-height: 170px; padding-block: 18px; }
+  .analytics-tab-index { flex-basis: 100px; margin-right: 20px; padding-right: 16px; }
+  .analytics-tab-index strong { font-size: 3.5rem; }
+  .analytics-tab-index span { margin-top: 13px; font-size: .6rem; letter-spacing: .12em; }
+  .analytics-tab-hero .analytics-tab-title h1 { font-size: clamp(2rem, 6.5vw, 3.8rem); line-height: 1.1; }
+  .analytics-tab-hero .analytics-tab-kicker { margin-top: 10px; font-size: .6rem; line-height: 1.4; letter-spacing: .12em; }
+  .analytics-tab-hero .analytics-tab-lead { margin-top: 16px; font-size: .9rem; }
+}
+
+@media (max-width: 430px) {
+  .analytics-tab-index { flex-basis: 82px; margin-right: 14px; padding-right: 12px; }
+  .analytics-tab-index strong { font-size: 3rem; }
+  .analytics-tab-index span { font-size: .5rem; letter-spacing: .08em; }
+  .analytics-tab-hero .analytics-tab-title h1 { font-size: clamp(1.7rem, 7.2vw, 2.1rem); }
+  .analytics-tab-hero .analytics-tab-kicker { font-size: .5rem; letter-spacing: .08em; }
+}

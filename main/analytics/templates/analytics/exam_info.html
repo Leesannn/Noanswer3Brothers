@@ -3,21 +3,11 @@
 {% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}exam-editorial-page{% endblock %}
 {% block main_class %}exam-editorial-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260923-9">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260923-9"><link rel="stylesheet" href="{% static 'analytics/tab-header.css' %}?v=20260923-1">{% endblock %}
 {% block content %}
 <div class="exam-editorial">
-  <section class="exam-hero" aria-labelledby="exam-page-title" data-exam-reveal>
-    <div class="exam-hero-copy">
-      <div class="exam-title-lockup">
-        <div>
-          <p class="exam-kicker">SPORTS CAREER COMPASS</p>
-          <h1 id="exam-page-title">자격 시험 정보</h1>
-        </div>
-        <div class="exam-index" aria-hidden="true"><strong>04</strong><span>EXAM<br>GUIDE</span></div>
-      </div>
-      <p class="exam-lead">체육지도자의 시작을 위한 자격제도와 연간 시험 일정을 한눈에 확인하세요.</p>
-    </div>
-    <div class="exam-hero-art" aria-hidden="true"></div>
+  <section class="analytics-tab-hero" aria-labelledby="analytics-tab-title" data-exam-reveal>
+    {% include 'analytics/partials/tab_header.html' with number='04' label='EXAM GUIDE' heading='자격 시험 정보' description='체육지도자의 시작을 위한 자격제도와 연간 시험 일정을 한눈에 확인하세요.' %}
   </section>
 
   <nav class="exam-grade-selector" aria-label="자격 등급 선택" data-exam-reveal>

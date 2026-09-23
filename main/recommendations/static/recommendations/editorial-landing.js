@@ -95,6 +95,7 @@
     const wrap = stage.querySelector('.athlete-figure-wrap');
 
     let index = Math.max(0, images.findIndex((img) => img.classList.contains('is-active')));
+    let swimmingLayerTimer = 0;
 
     function spawnGhost(sourceImage) {
       if (!wrap) return;
@@ -118,6 +119,17 @@
       index = nextIndex;
 
       const current = images.find((img) => img.classList.contains('is-active'));
+      window.clearTimeout(swimmingLayerTimer);
+      if (wrap && targetImage.dataset.athleteImage === 'swimming') {
+        wrap.classList.add('is-swimming-front');
+      } else if (wrap && current?.dataset.athleteImage === 'swimming') {
+        swimmingLayerTimer = window.setTimeout(() => {
+          wrap.classList.remove('is-swimming-front');
+        }, 800);
+        timeouts.push(swimmingLayerTimer);
+      } else if (wrap) {
+        wrap.classList.remove('is-swimming-front');
+      }
       if (current && current !== targetImage && !reduceMotion.matches) {
         spawnGhost(current);
       }
@@ -132,7 +144,10 @@
       activate((index + 1) % images.length);
     }, cycleMs);
 
-    signal.addEventListener('abort', () => window.clearInterval(autoTimer), { once: true });
+    signal.addEventListener('abort', () => {
+      window.clearInterval(autoTimer);
+      window.clearTimeout(swimmingLayerTimer);
+    }, { once: true });
   }
 
   /* ---------------------------------------------------------------- */
