@@ -3,7 +3,7 @@
 {% block title %}시험정보 | 스포츠 커리어 나침반{% endblock %}
 {% block body_class %}exam-editorial-page{% endblock %}
 {% block main_class %}exam-editorial-main{% endblock %}
-{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260922-11">{% endblock %}
+{% block page_theme_css %}<link rel="stylesheet" href="{% static 'analytics/exam-info-editorial.css' %}?v=20260923-9">{% endblock %}
 {% block content %}
 <div class="exam-editorial">
   <section class="exam-hero" aria-labelledby="exam-page-title" data-exam-reveal>
@@ -28,6 +28,8 @@
       {% endfor %}
     </div>
   </nav>
+
+  {% include 'analytics/partials/ai_book_pick.html' %}
 
   <section class="exam-panel exam-license-panel" aria-labelledby="license-guide-title" data-exam-reveal>
     <header class="exam-section-head">
@@ -159,3 +161,4 @@
 </div>
 {% endblock %}
 {% block footer %}<footer class="exam-footer"><span>SPORTS CAREER COMPASS</span><i></i><span>PREPARE TODAY · LEAD TOMORROW</span></footer>{% endblock %}
+{% block scripts %}<script src="{% static 'analytics/exam-info-ai-book-pick.js' %}?v=4" defer></script>{% endblock %}

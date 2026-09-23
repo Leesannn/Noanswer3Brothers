@@ -1,10 +1,13 @@
 import json
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q, Sum
 from django.db.models.functions import ExtractHour
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
 
 from .models import (
     ApplicationStatus, CanonicalSport, Institution, Program,
@@ -16,11 +19,15 @@ from .services.dummy_dashboard import (
     dummy_application_rows, dummy_dashboard_metrics, dummy_filtered_rows, dummy_grouped_rates,
     dummy_has_data, dummy_latest_period, dummy_ranked_application_rows,
 )
-from .services.kspo_grades import GRADES
+from .services.gemini_book_picks import BookPickError, bookstore_search_url, get_book_picks
+from .services.kspo_grades import GRADE_CODES, GRADE_NAMES, GRADES
 from .services.license_info import get_disqualification_text, get_eligibility_paths, get_license_grades
 from .services.program_catalog import (
     catalog_summary, filtered_cleanups, regional_program_qualification_comparison,
 )
+
+AI_BOOK_PICK_RATE_LIMIT = 6
+AI_BOOK_PICK_RATE_WINDOW_SECONDS = 60
 
 
 def _page(request, queryset, size=30):
@@ -180,6 +187,12 @@ def _label_eligibility_paths(paths):
     return labeled
 
 
+def _written_subjects(license_row):
+    if not license_row or not license_row.get('written_subjects'):
+        return []
+    return [s.strip() for s in license_row['written_subjects'].split(',') if s.strip()]
+
+
 def exam_info(request):
     grade_code = request.GET.get('grade', '').upper()
     valid_codes = {code for code, _ in GRADES}
@@ -187,14 +200,73 @@ def exam_info(request):
         grade_code = GRADES[0][0]
 
     license_grades = get_license_grades()
+    license_row = license_grades.get(grade_code)
     return render(request, 'analytics/exam_info.html', {
         'grades': GRADES,
         'grade_code': grade_code,
-        'license': license_grades.get(grade_code),
+        'license': license_row,
         'eligibility_paths': _label_eligibility_paths(get_eligibility_paths(grade_code)),
         'disqualification_text': get_disqualification_text(),
         'schedule_sections': group_exam_schedule(grade_code),
         'fetch_status': exam_schedule_fetch_status(grade_code),
+        'ai_book_pick_data': {
+            'certificationId': grade_code,
+            'certificationName': GRADE_NAMES.get(grade_code, ''),
+            'writtenSubjects': _written_subjects(license_row),
+        },
+    })
+
+
+def _client_ip(request):
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', 'unknown')
+
+
+def _ai_book_pick_rate_limited(client_ip):
+    key = f'ai-book-pick-rl:{client_ip}'
+    count = cache.get(key)
+    if count is None:
+        cache.set(key, 1, AI_BOOK_PICK_RATE_WINDOW_SECONDS)
+        return False
+    if count >= AI_BOOK_PICK_RATE_LIMIT:
+        return True
+    cache.incr(key)
+    return False
+
+
+@require_POST
+def book_recommendations(request):
+    """시험정보 페이지 "AI 추천 교재" 패널이 호출하는 JSON 엔드포인트."""
+    try:
+        payload = json.loads(request.body or b'{}')
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'error': 'invalid_json'}, status=400)
+
+    grade_code = str(payload.get('certificationId', '')).upper()
+    if grade_code not in GRADE_CODES:
+        return JsonResponse({'error': 'invalid_certification'}, status=400)
+
+    if _ai_book_pick_rate_limited(_client_ip(request)):
+        return JsonResponse({'error': 'rate_limited'}, status=429)
+
+    written_subjects = _written_subjects(get_license_grades().get(grade_code))
+    refresh = bool(payload.get('refresh'))
+
+    try:
+        result = get_book_picks(grade_code, GRADE_NAMES[grade_code], written_subjects, refresh=refresh)
+    except BookPickError as exc:
+        return JsonResponse({'error': str(exc)}, status=502)
+
+    return JsonResponse({
+        **result,
+        'bookstoreUrls': {
+            'bestMatch': bookstore_search_url(result['bestMatch']['title'], result['bestMatch']['author']),
+            'alsoGood': [
+                bookstore_search_url(item['title'], item['author']) for item in result['alsoGood']
+            ],
+        },
     })
 
 

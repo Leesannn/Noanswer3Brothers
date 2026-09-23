@@ -195,6 +195,12 @@ PROGRAM_CLEANUP_REFERENCE_DATE = '2026-07-31'
 # 플랫폼 설정에 등록해야 지도가 표시된다. 환경 변수로 주입하는 것을 권장한다.
 KAKAO_MAP_APP_KEY = os.environ.get('KAKAO_MAP_APP_KEY', '')
 
+# 시험정보 페이지 "AI 추천 교재" 패널이 사용하는 Gemini API 키/모델.
+# https://aistudio.google.com 에서 발급받아 환경 변수로 주입한다. 키가 없으면
+# 패널은 에러 상태를 보여줄 뿐 나머지 페이지 렌더링에는 영향을 주지 않는다.
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-3.6-flash')
+
 
 # Email
 # 로컬에서는 실제 발송 대신 터미널에 내용을 출력한다.

@@ -1,0 +1,29 @@
+{% load static %}
+<section class="exam-ai-pick" data-exam-reveal data-ai-pick>
+  <button type="button" class="exam-ai-pick-bar" id="exam-ai-pick-toggle"
+          aria-expanded="false" aria-controls="exam-ai-pick-panel" data-ai-pick-toggle>
+    <span class="exam-ai-pick-badge" aria-hidden="true">AI</span>
+    <span class="exam-ai-pick-heading">
+      <span class="exam-ai-pick-kicker">BOOK PICK</span>
+      <span class="exam-ai-pick-title">추천 교재</span>
+    </span>
+    <span class="exam-ai-pick-divider" aria-hidden="true"></span>
+    <span class="exam-ai-pick-desc" data-ai-pick-desc>{{ license.grade_name|default:'' }} 필기 과목 구성에 맞춰 골랐어요</span>
+    <span class="exam-ai-pick-spines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="exam-ai-pick-pill">
+      <span data-ai-pick-toggle-label>펼치기</span>
+      <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true" focusable="false" data-ai-pick-caret>
+        <path d="M1 1L6 6L11 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </button>
+
+  <div class="exam-ai-pick-panel" id="exam-ai-pick-panel" data-ai-pick-panel inert>
+    <div class="exam-ai-pick-panel-inner">
+      <div class="exam-ai-pick-body" data-ai-pick-body></div>
+      <p class="exam-ai-pick-disclaimer">AI 추천은 참고용이에요. 최신 개정판과 출제기준은 국민체육진흥공단 공지를 함께 확인하세요.</p>
+    </div>
+  </div>
+</section>
+{{ ai_book_pick_data|json_script:"exam-ai-pick-data" }}
+{% csrf_token %}
